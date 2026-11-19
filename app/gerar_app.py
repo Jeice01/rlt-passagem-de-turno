@@ -126,8 +126,8 @@ def botao(nome, texto, onselect, x, y, w=170, h=40, primario=True, **extra):
     return C(nome, BTN, **props)
 
 
-def rotulo(nome, texto, x, y, w=300):
-    return C(nome, LBL, Text=texto, Color="corMuted", Size="10", FontWeight="FontWeight.Semibold", X=str(x), Y=str(y), Width=str(w), Height="22")
+def rotulo(nome, texto, x, y, w=300, vis="true"):
+    return C(nome, LBL, Text=texto, Color="corMuted", Size="10", FontWeight="FontWeight.Semibold", X=str(x), Y=str(y), Width=str(w), Height="22", Visible=vis)
 
 
 # ================================================================== TELA RELATÓRIO
@@ -249,8 +249,8 @@ def tela_registro():
     ao_abrir = (
         "UpdateContext({locReg: If(IsBlank(locId), Blank(), LookUp(Registros, rlt_registroid = locId))});\n"
         "UpdateContext({locIni: Coalesce(locReg.rlt_inicio, Now()), locFim: locReg.rlt_conclusao, locNI: Coalesce(locReg.rlt_ni, false),\n"
-        f"  locFalso: Coalesce(locReg.rlt_chamadofalso, false), locStatus: Coalesce(locReg.rlt_status, {ST}.'EM ANDAMENTO'),\n"
-        f"  locStatusIos: Coalesce(locReg.rlt_statusios, {SI}.'Em andamento'), locArea: locReg.rlt_local.rlt_area, locErro: \"\"}});\n"
+        f"  locFalso: Coalesce(locReg.rlt_chamadofalso, false), locStatus: If(IsBlank(locReg.rlt_status), \"EM ANDAMENTO\", Text(locReg.rlt_status)),\n"
+        f"  locStatusIos: If(IsBlank(locReg.rlt_statusios), \"Em andamento\", Text(locReg.rlt_statusios)), locArea: locReg.rlt_local.rlt_area, locErro: \"\"}});\n"
         "Reset(regDesc); Reset(regNum); Reset(regMotivo); Reset(regEquipLivre); Reset(regForaLista); Reset(regLimpeza); Reset(regFalso); Reset(regNI);\n"
         "Reset(regArea); Reset(regLocal); Reset(regEquip); Reset(regIniData); Reset(regIniH); Reset(regIniM); Reset(regFimData); Reset(regFimH); Reset(regFimM);\n"
         "Reset(regStatus); Reset(regStatusIos)")
@@ -264,7 +264,7 @@ def tela_registro():
     {{m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")}},
     {{m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")}},
     {{m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\\d{{8}}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")}},
-    {{m: If(vTipo = "ios" && regStatusIos.Selected.Value = {SI}.Cancelado && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")}},
+    {{m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")}},
     {{m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")}},
     {{m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}}
   ), !IsBlank(m)), m, "  ")}});
@@ -283,8 +283,8 @@ def tela_registro():
       rlt_ni: regNI.Value && IsBlank(vFim),
       rlt_chamadofalso: regFalso.Value,
       rlt_limpezatecnica: regLimpeza.Value,
-      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && IsBlank(vFim), {ST}.'EM ANDAMENTO', regStatus.Selected.Value),
-      rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), {SI}.'Não informado (NI)', regStatusIos.Selected.Value),
+      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && IsBlank(vFim), {ST}.'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, {ST}.'EM ANDAMENTO')),
+      rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), {SI}.'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", {SI}.Agendado, "Suspenso", {SI}.Suspenso, "Concluído", {SI}.Concluído, "Cancelado", {SI}.Cancelado, "Não informado (NI)", {SI}.'Não informado (NI)', {SI}.'Em andamento')),
       rlt_motivocancelamento: regMotivo.Text
     }}));
     If(IsBlank(locId),
@@ -308,10 +308,10 @@ def tela_registro():
     Back()
   )
 )"""
-    status_fim = (f"UpdateContext({{locFim: {v_fim}}}); If(!IsBlank(locFim), UpdateContext({{locNI: false, locStatus: {ST}.CONCLUÍDO, locStatusIos: {SI}.Concluído}}))")
-    agora = f"UpdateContext({{locFim: Now(), locNI: false, locStatus: {ST}.CONCLUÍDO, locStatusIos: {SI}.Concluído}})"
-    limpar = (f"UpdateContext({{locFim: Blank(), locStatus: If(locStatus = {ST}.CONCLUÍDO, {ST}.'EM ANDAMENTO', locStatus), "
-              f"locStatusIos: If(locStatusIos = {SI}.Concluído, {SI}.'Em andamento', locStatusIos)}}); Reset(regFimData); Reset(regFimH); Reset(regFimM)")
+    status_fim = (f"UpdateContext({{locFim: {v_fim}}}); If(!IsBlank(locFim), UpdateContext({{locNI: false, locStatus: \"CONCLUÍDO\", locStatusIos: \"Concluído\"}}))")
+    agora = 'UpdateContext({locFim: Now(), locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"})'
+    limpar = (f"UpdateContext({{locFim: Blank(), locStatus: If(locStatus = \"CONCLUÍDO\", \"EM ANDAMENTO\", locStatus), "
+              f"locStatusIos: If(locStatusIos = \"Concluído\", \"Em andamento\", locStatusIos)}}); Reset(regFimData); Reset(regFimH); Reset(regFimM)")
     xl, xr, w = 224, "(224 + (Parent.Width - 248) / 2 + 12)", "((Parent.Width - 248) / 2 - 12)"
 
     def ent(nome, controle, x, y, largura, **kw):
@@ -325,16 +325,16 @@ def tela_registro():
     filhos += [
         C(f"{p}Fundo", RET, Fill="Color.White", BorderColor="corLinha", BorderThickness="1", X="218", Y="146", Width="Parent.Width - 236", Height="Parent.Height - 216"),
         # descrição / assunto
-        rotulo(f"{p}RotDesc", f'If({tipo} = "ios", "ASSUNTO *", "DESCRIÇÃO DA ATIVIDADE *")', xl + 12, 156, 400),
+        rotulo(f"{p}RotDesc", f'If({tipo} = "ios", "ASSUNTO *", "DESCRIÇÃO DA ATIVIDADE *")', xl + 12, 156, 400, f'{tipo} in ["corretiva", "ios"]'),
         ent("regDesc", TXT, xl + 12, 178, "Parent.Width - 272", Mode="TextMode.MultiLine", Height="64", Default="locReg.rlt_descricao",
             Visible=f'{tipo} in ["corretiva", "ios"]'),
         # local (corretivas)
-        rotulo(f"{p}RotArea", '"LOCAL – ÁREA"', xl + 12, 252), rotulo(f"{p}RotLocal", '"LOCAL – ESPECÍFICO *"', f"{xr}", 252),
+        rotulo(f"{p}RotArea", '"LOCAL – ÁREA"', xl + 12, 252, 300, f'{tipo} = "corretiva"'), rotulo(f"{p}RotLocal", '"LOCAL – ESPECÍFICO *"', f"{xr}", 252, 300, f'{tipo} = "corretiva"'),
         ent("regArea", DDL, xl + 12, 274, w, Height="40", Items="Sort(Distinct(Locais, rlt_area), Value)", Default="locArea", Visible=f'{tipo} = "corretiva"'),
         ent("regLocal", CBX, xr, 274, w, Height="40", Items="Filter(Locais, rlt_area = regArea.Selected.Value)", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome"]',
             SelectMultiple="false", DefaultSelectedItems="Filter(Locais, rlt_localid = locReg.rlt_local.rlt_localid)", Visible=f'{tipo} = "corretiva"'),
         # equipamento (Fator Q e Preventiva)
-        rotulo(f"{p}RotEquip", '"EQUIPAMENTO *"', xl + 12, 252, 300),
+        rotulo(f"{p}RotEquip", '"EQUIPAMENTO *"', xl + 12, 252, 300, f'{tipo} in ["fq", "prev"]'),
         ent("regEquip", CBX, xl + 12, 274, w, Height="40", Items="Equipamentos", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome", "rlt_codigosap"]',
             SelectMultiple="false", DefaultSelectedItems="Filter(Equipamentos, rlt_equipamentoid = locReg.rlt_equipamento.rlt_equipamentoid)",
             Visible=f'{tipo} in ["fq", "prev"] && !regForaLista.Value'),
@@ -345,7 +345,7 @@ def tela_registro():
         ent("regEquipSap", LBL, xr, 296, w, Height="24", Text='If(IsBlank(regEquip.Selected), "", "Código SAP " & regEquip.Selected.rlt_codigosap & "  ·  " & Text(regEquip.Selected.rlt_tipo))',
             Color="corMuted", Size="10", Visible=f'{tipo} in ["fq", "prev"] && !regForaLista.Value'),
         # número
-        rotulo(f"{p}RotNum", f'Switch({tipo}, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos)")', xl + 12, 324),
+        rotulo(f"{p}RotNum", f'Switch({tipo}, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos)")', xl + 12, 324, 300, f'{tipo} in ["fq", "prev", "ios"]'),
         ent("regNum", TXT, xl + 12, 346, w, Height="40", Default="locReg.rlt_numero", Visible=f'{tipo} in ["fq", "prev", "ios"]'),
         # início
         rotulo(f"{p}RotIni", '"INÍCIO (DATA E HORA) *"', xl + 12, 396),
@@ -372,20 +372,20 @@ def tela_registro():
         # status
         rotulo(f"{p}RotStatus", f'If({tipo} = "ios", "STATUS DO IOS *", "STATUS *")', xl + 12, 506),
         ent("regStatus", DDL, xl + 12, 528, w, Height="40", Default="locStatus", Visible=f'{tipo} <> "ios"',
-            Items=f"Filter(Choices({ST}), Value <> {ST}.'CHAMADO FALSO' && (!IsBlank(locFim) || Value <> {ST}.CONCLUÍDO))",
+            Items='Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")',
             OnChange="UpdateContext({locStatus: Self.Selected.Value})",
             DisplayMode=f"If({ABERTO_REL} && !regFalso.Value && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
         ent("regStatusIos", DDL, xl + 12, 528, w, Height="40", Default="locStatusIos", Visible=f'{tipo} = "ios"',
-            Items=f"Filter(Choices({SI}), !IsBlank(locFim) || Value <> {SI}.Concluído)",
+            Items='Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !IsBlank(locFim) || Value <> "Concluído")',
             OnChange="UpdateContext({locStatusIos: Self.Selected.Value})",
             DisplayMode=f"If({ABERTO_REL} && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
         C(f"{p}AjudaStatus", LBL, Color="corMuted", Size="10", X=str(xl + 12), Y="572", Width=w, Height="22",
           Text=f'If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", '
-               f'!IsBlank(locFim) && locStatus = {ST}.CONCLUÍDO, "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
+               f'!IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
                f'"Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")'),
-        rotulo(f"{p}RotMotivo", '"MOTIVO DO CANCELAMENTO *"', xr, 506),
+        rotulo(f"{p}RotMotivo", '"MOTIVO DO CANCELAMENTO *"', xr, 506, 300, f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
         ent("regMotivo", TXT, xr, 528, w, Height="40", Default="locReg.rlt_motivocancelamento",
-            Visible=f'{tipo} = "ios" && regStatusIos.Selected.Value = {SI}.Cancelado'),
+            Visible=f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
         ent("regFalso", CHK, xl + 12, 600, "400", Height="30", Text='"Chamado falso"', Default="locFalso", Size="12",
             OnCheck="UpdateContext({locFalso: true})", OnUncheck="UpdateContext({locFalso: false})", Visible=f'{tipo} in ["corretiva", "fq"]'),
         ent("regLimpeza", CHK, xr, 600, w, Height="30", Text='"Limpeza técnica (fora de preventiva x corretiva)"', Default="Coalesce(locReg.rlt_limpezatecnica, false)",

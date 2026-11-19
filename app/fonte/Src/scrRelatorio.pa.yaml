@@ -472,6 +472,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =true
     - relRotData:
         Control: Label@2.5.1
         Properties:
@@ -491,6 +493,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =true
     - relTurno:
         Control: Label@2.5.1
         Properties:
@@ -565,6 +569,8 @@ Screens:
             =400
           Height: |-
             =22
+          Visible: |-
+            =true
     - relGalEquipe:
         Control: Gallery@2.15.0
         Variant: Vertical

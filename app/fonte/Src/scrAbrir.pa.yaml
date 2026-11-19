@@ -375,6 +375,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =true
     - abrRotData:
         Control: Label@2.5.1
         Properties:
@@ -394,6 +396,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =true
     - abrTurno:
         Control: Classic/DropDown@2.3.1
         Properties:

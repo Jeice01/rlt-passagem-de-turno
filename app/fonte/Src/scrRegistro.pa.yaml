@@ -7,8 +7,8 @@ Screens:
       OnVisible: |-
         =UpdateContext({locReg: If(IsBlank(locId), Blank(), LookUp(Registros, rlt_registroid = locId))});
         UpdateContext({locIni: Coalesce(locReg.rlt_inicio, Now()), locFim: locReg.rlt_conclusao, locNI: Coalesce(locReg.rlt_ni, false),
-          locFalso: Coalesce(locReg.rlt_chamadofalso, false), locStatus: Coalesce(locReg.rlt_status, [@'Status da atividade'].'EM ANDAMENTO'),
-          locStatusIos: Coalesce(locReg.rlt_statusios, [@'Status do IOS'].'Em andamento'), locArea: locReg.rlt_local.rlt_area, locErro: ""});
+          locFalso: Coalesce(locReg.rlt_chamadofalso, false), locStatus: If(IsBlank(locReg.rlt_status), "EM ANDAMENTO", Text(locReg.rlt_status)),
+          locStatusIos: If(IsBlank(locReg.rlt_statusios), "Em andamento", Text(locReg.rlt_statusios)), locArea: locReg.rlt_local.rlt_area, locErro: ""});
         Reset(regDesc); Reset(regNum); Reset(regMotivo); Reset(regEquipLivre); Reset(regForaLista); Reset(regLimpeza); Reset(regFalso); Reset(regNI);
         Reset(regArea); Reset(regLocal); Reset(regEquip); Reset(regIniData); Reset(regIniH); Reset(regIniM); Reset(regFimData); Reset(regFimH); Reset(regFimM);
         Reset(regStatus); Reset(regStatusIos)
@@ -394,6 +394,8 @@ Screens:
             =400
           Height: |-
             =22
+          Visible: |-
+            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"]
     - regDesc:
         Control: Classic/TextInput@2.3.2
         Properties:
@@ -432,6 +434,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =LookUp(tabSecoes, Valor = locSecao).Tipo = "corretiva"
     - regRotLocal:
         Control: Label@2.5.1
         Properties:
@@ -451,6 +455,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =LookUp(tabSecoes, Valor = locSecao).Tipo = "corretiva"
     - regArea:
         Control: Classic/DropDown@2.3.1
         Properties:
@@ -514,6 +520,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]
     - regEquip:
         Control: Classic/ComboBox@2.4.0
         Properties:
@@ -619,6 +627,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"]
     - regNum:
         Control: Classic/TextInput@2.3.2
         Properties:
@@ -655,6 +665,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =true
     - regIniData:
         Control: Classic/DatePicker@2.6.0
         Properties:
@@ -748,6 +760,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =true
     - regFimData:
         Control: Classic/DatePicker@2.6.0
         Properties:
@@ -766,7 +780,7 @@ Screens:
           Format: |-
             ="dd/mm/yyyy"
           OnChange: |-
-            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: [@'Status da atividade'].CONCLUÍDO, locStatusIos: [@'Status do IOS'].Concluído}))
+            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
     - regFimH:
         Control: Classic/DropDown@2.3.1
         Properties:
@@ -787,7 +801,7 @@ Screens:
           AllowEmptySelection: |-
             =true
           OnChange: |-
-            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: [@'Status da atividade'].CONCLUÍDO, locStatusIos: [@'Status do IOS'].Concluído}))
+            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
     - regFimM:
         Control: Classic/DropDown@2.3.1
         Properties:
@@ -808,14 +822,14 @@ Screens:
           AllowEmptySelection: |-
             =true
           OnChange: |-
-            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: [@'Status da atividade'].CONCLUÍDO, locStatusIos: [@'Status do IOS'].Concluído}))
+            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
     - regAgora:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
             ="Agora"
           OnSelect: |-
-            =UpdateContext({locFim: Now(), locNI: false, locStatus: [@'Status da atividade'].CONCLUÍDO, locStatusIos: [@'Status do IOS'].Concluído})
+            =UpdateContext({locFim: Now(), locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"})
           X: |-
             =(224 + (Parent.Width - 248) / 2 + 12) + 382
           Y: |-
@@ -856,7 +870,7 @@ Screens:
           Text: |-
             ="Limpar"
           OnSelect: |-
-            =UpdateContext({locFim: Blank(), locStatus: If(locStatus = [@'Status da atividade'].CONCLUÍDO, [@'Status da atividade'].'EM ANDAMENTO', locStatus), locStatusIos: If(locStatusIos = [@'Status do IOS'].Concluído, [@'Status do IOS'].'Em andamento', locStatusIos)}); Reset(regFimData); Reset(regFimH); Reset(regFimM)
+            =UpdateContext({locFim: Blank(), locStatus: If(locStatus = "CONCLUÍDO", "EM ANDAMENTO", locStatus), locStatusIos: If(locStatusIos = "Concluído", "Em andamento", locStatusIos)}); Reset(regFimData); Reset(regFimH); Reset(regFimM)
           X: |-
             =(224 + (Parent.Width - 248) / 2 + 12) + 468
           Y: |-
@@ -927,6 +941,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =true
     - regStatus:
         Control: Classic/DropDown@2.3.1
         Properties:
@@ -945,7 +961,7 @@ Screens:
           Visible: |-
             =LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios"
           Items: |-
-            =Filter(Choices([@'Status da atividade']), Value <> [@'Status da atividade'].'CHAMADO FALSO' && (!IsBlank(locFim) || Value <> [@'Status da atividade'].CONCLUÍDO))
+            =Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")
           OnChange: |-
             =UpdateContext({locStatus: Self.Selected.Value})
     - regStatusIos:
@@ -966,7 +982,7 @@ Screens:
           Visible: |-
             =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios"
           Items: |-
-            =Filter(Choices([@'Status do IOS']), !IsBlank(locFim) || Value <> [@'Status do IOS'].Concluído)
+            =Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !IsBlank(locFim) || Value <> "Concluído")
           OnChange: |-
             =UpdateContext({locStatusIos: Self.Selected.Value})
     - regAjudaStatus:
@@ -985,7 +1001,7 @@ Screens:
           Height: |-
             =22
           Text: |-
-            =If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", !IsBlank(locFim) && locStatus = [@'Status da atividade'].CONCLUÍDO, "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
+            =If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", !IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
     - regRotMotivo:
         Control: Label@2.5.1
         Properties:
@@ -1005,6 +1021,8 @@ Screens:
             =300
           Height: |-
             =22
+          Visible: |-
+            =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
     - regMotivo:
         Control: Classic/TextInput@2.3.2
         Properties:
@@ -1021,7 +1039,7 @@ Screens:
           Default: |-
             =locReg.rlt_motivocancelamento
           Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = [@'Status do IOS'].Cancelado
+            =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
     - regFalso:
         Control: Classic/CheckBox@2.1.0
         Properties:
@@ -1145,7 +1163,7 @@ Screens:
                 {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
                 {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
                 {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
-                {m: If(vTipo = "ios" && regStatusIos.Selected.Value = [@'Status do IOS'].Cancelado && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
+                {m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
                 {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},
                 {m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}
               ), !IsBlank(m)), m, "  ")});
@@ -1164,8 +1182,8 @@ Screens:
                   rlt_ni: regNI.Value && IsBlank(vFim),
                   rlt_chamadofalso: regFalso.Value,
                   rlt_limpezatecnica: regLimpeza.Value,
-                  rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', regStatus.Selected.Value),
-                  rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', regStatusIos.Selected.Value),
+                  rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, [@'Status da atividade'].'EM ANDAMENTO')),
+                  rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
                   rlt_motivocancelamento: regMotivo.Text
                 }));
                 If(IsBlank(locId),
