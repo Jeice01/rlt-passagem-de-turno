@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="rlt_turno" localizedName="Turno" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <displaynames>
+    <displayname description="Turno" languagecode="1046" />
+  </displaynames>
+  <options>
+    <option value="448170000" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="ALFA" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170001" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="BRAVO" languagecode="1046" />
+      </labels>
+    </option>
+  </options>
+</optionset>

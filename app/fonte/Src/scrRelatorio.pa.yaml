@@ -1,0 +1,981 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+Screens:
+  scrRelatorio:
+    Properties:
+      Fill: |-
+        =corFundo
+      OnVisible: |-
+        =If(!IsBlank(gblRel), Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid)));
+        ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+        ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)))
+    Children:
+    - relTopo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =56
+    - relFaixa:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =56
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =5
+    - relMarca:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RLT · CCM   Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =15
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =20
+          Y: |-
+            =0
+          Width: |-
+            =500
+          Height: |-
+            =56
+    - relUsuario:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+          Color: |-
+            =Color.White
+          Size: |-
+            =13
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 620
+          Y: |-
+            =0
+          Width: |-
+            =600
+          Height: |-
+            =56
+    - relMenuFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =0
+          Y: |-
+            =61
+          Width: |-
+            =200
+          Height: |-
+            =Parent.Height - 61
+    - relMenu0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Relatório"
+          OnSelect: |-
+            =Navigate(scrRelatorio, ScreenTransition.None)
+          Fill: |-
+            =corAzul10
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Semibold
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - relMenuMarca:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =5
+          Height: |-
+            =46
+    - relMenu1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Chamados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - relMenu2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Histórico"
+          OnSelect: |-
+            =Navigate(scrHistorico, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =176
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - relMenu3:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Painel geral"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - relMenu4:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Fechar"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - relTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblRel), "NENHUM RELATÓRIO ABERTO", "RELATÓRIO " & Text(gblRel.rlt_turno) & " " & Text(gblRel.rlt_data, "dd.mm.yyyy"))
+          Color: |-
+            =corAzul
+          Size: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =78
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =36
+    - relSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblRel), "Abra o plantão para começar.", gblRel.rlt_nome & ".pdf  ·  " & Text(gblRel.rlt_situacao))
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =224
+          Y: |-
+            =112
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =26
+    - relBtnAbrir:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Abrir plantão"
+          OnSelect: |-
+            =Navigate(scrAbrir, ScreenTransition.None)
+          X: |-
+            =Parent.Width - 210
+          Y: |-
+            =84
+          Width: |-
+            =170
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =corAzul
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =Not(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto)
+    - relBtnFechar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Fechar relatório"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          X: |-
+            =Parent.Width - 210
+          Y: |-
+            =84
+          Width: |-
+            =170
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =corAzul
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+    - relCartao:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =224
+          Y: |-
+            =146
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =150
+    - relRotTurno:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="TURNO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =244
+          Y: |-
+            =158
+          Width: |-
+            =300
+          Height: |-
+            =22
+    - relRotData:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="DATA"
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =404
+          Y: |-
+            =158
+          Width: |-
+            =300
+          Height: |-
+            =22
+    - relTurno:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =Text(gblRel.rlt_turno)
+          Color: |-
+            =corAzul
+          Size: |-
+            =17
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =244
+          Y: |-
+            =178
+          Width: |-
+            =150
+          Height: |-
+            =30
+    - relData:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =Text(gblRel.rlt_data, "dd/mm/yyyy")
+          Color: |-
+            =corAzul
+          Size: |-
+            =17
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =404
+          Y: |-
+            =178
+          Width: |-
+            =200
+          Height: |-
+            =30
+    - relJanela:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblRel), "", Text(gblRel.rlt_inicio, "dd/mm hh:mm") & " → " & Text(gblRel.rlt_fim, "dd/mm hh:mm"))
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =404
+          Y: |-
+            =206
+          Width: |-
+            =300
+          Height: |-
+            =22
+    - relRotEquipe:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="EQUIPE DO PLANTÃO (" & CountRows(colEquipe) & ")"
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =244
+          Y: |-
+            =232
+          Width: |-
+            =400
+          Height: |-
+            =22
+    - relGalEquipe:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =Sort(colEquipe, rlt_nome)
+          WrapCount: |-
+            =4
+          TemplateSize: |-
+            =40
+          TemplatePadding: |-
+            =2
+          X: |-
+            =240
+          Y: |-
+            =254
+          Width: |-
+            =Parent.Width - 280
+          Height: |-
+            =40
+          ShowScrollbar: |-
+            =false
+        Children:
+          - relEqNome:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_nome & "  ·  " & Text(ThisItem.rlt_perfil)
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                X: |-
+                  =4
+                Y: |-
+                  =4
+                Width: |-
+                  =Parent.TemplateWidth - 44
+                Height: |-
+                  =30
+                Fill: |-
+                  =corAzul10
+                PaddingLeft: |-
+                  =10
+          - relEqSair:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="×"
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                X: |-
+                  =Parent.TemplateWidth - 40
+                Y: |-
+                  =4
+                Width: |-
+                  =32
+                Height: |-
+                  =30
+                Fill: |-
+                  =corAzul10
+                Color: |-
+                  =corMuted
+                BorderThickness: |-
+                  =0
+                HoverFill: |-
+                  =corLinha
+                HoverColor: |-
+                  =corVerm
+                Size: |-
+                  =13
+                OnSelect: |-
+                  =Patch('Equipe do plantão', LookUp('Equipe do plantão', rlt_equipeid = ThisItem.rlt_equipeid), {rlt_retiradoem: Now(), rlt_retiradopor: gblUsuario});
+                  Patch(Histórico, Defaults(Histórico), {rlt_campo: "Tirou " & ThisItem.rlt_nome & " da equipe do plantão", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                  ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+                  ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)))
+    - relKpi0:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))) & Char(10) & "Em aberto"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: true, locSecaoFiltro: Blank()})
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLaranja
+          BorderThickness: |-
+            =1
+          Color: |-
+            =corAzul
+          Size: |-
+            =13
+          FontWeight: |-
+            =FontWeight.Semibold
+          PaddingLeft: |-
+            =16
+          X: |-
+            =224 + 0 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =(Parent.Width - 248 - 36) / 4
+          Height: |-
+            =70
+    - relKpiBarra0:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corLaranja
+          X: |-
+            =224 + 0 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =5
+          Height: |-
+            =70
+    - relKpi1:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, Not(If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')))) & Char(10) & "Concluídos ou encerrados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: false, locSecaoFiltro: Blank()})
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corVerde
+          BorderThickness: |-
+            =1
+          Color: |-
+            =corAzul
+          Size: |-
+            =13
+          FontWeight: |-
+            =FontWeight.Semibold
+          PaddingLeft: |-
+            =16
+          X: |-
+            =224 + 1 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =(Parent.Width - 248 - 36) / 4
+          Height: |-
+            =70
+    - relKpiBarra1:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =224 + 1 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =5
+          Height: |-
+            =70
+    - relKpi2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, rlt_herdado && If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))) & Char(10) & "Herdados ainda abertos"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: true, locSecaoFiltro: Blank()})
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          Color: |-
+            =corAzul
+          Size: |-
+            =13
+          FontWeight: |-
+            =FontWeight.Semibold
+          PaddingLeft: |-
+            =16
+          X: |-
+            =224 + 2 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =(Parent.Width - 248 - 36) / 4
+          Height: |-
+            =70
+    - relKpiBarra2:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =224 + 2 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =5
+          Height: |-
+            =70
+    - relKpi3:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) & Char(10) & "Fator Q sem código SAP"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corVerm
+          BorderThickness: |-
+            =1
+          Color: |-
+            =corAzul
+          Size: |-
+            =13
+          FontWeight: |-
+            =FontWeight.Semibold
+          PaddingLeft: |-
+            =16
+          X: |-
+            =224 + 3 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =(Parent.Width - 248 - 36) / 4
+          Height: |-
+            =70
+    - relKpiBarra3:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerm
+          X: |-
+            =224 + 3 * (Parent.Width - 248 + 12) / 4
+          Y: |-
+            =308
+          Width: |-
+            =5
+          Height: |-
+            =70
+    - relSecTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="SEÇÕES"
+          Color: |-
+            =corAzul
+          Size: |-
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =390
+          Width: |-
+            =300
+          Height: |-
+            =30
+    - relGalSecoes:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =tabSecoes
+          WrapCount: |-
+            =4
+          TemplateSize: |-
+            =150
+          TemplatePadding: |-
+            =6
+          X: |-
+            =218
+          Y: |-
+            =420
+          Width: |-
+            =Parent.Width - 236
+          Height: |-
+            =Parent.Height - 428
+        Children:
+          - relSecFundo:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =Parent.TemplateHeight
+          - relSecCor:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =ThisItem.Cor
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =4
+          - relSecNome:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Upper(ThisItem.Nome)
+                Color: |-
+                  =corAzul
+                Size: |-
+                  =11
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =14
+                Y: |-
+                  =12
+                Width: |-
+                  =Parent.TemplateWidth - 28
+                Height: |-
+                  =24
+                OnSelect: |-
+                  =Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: false, locSecaoFiltro: ThisItem.Valor})
+          - relSecTotal:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))
+                Color: |-
+                  =corAzul
+                Size: |-
+                  =24
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =14
+                Y: |-
+                  =38
+                Width: |-
+                  =120
+                Height: |-
+                  =40
+                OnSelect: |-
+                  =Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: false, locSecaoFiltro: ThisItem.Valor})
+          - relSecResumo:
+              Control: Label@2.5.1
+              Properties:
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =10
+                X: |-
+                  =14
+                Y: |-
+                  =78
+                Width: |-
+                  =Parent.TemplateWidth - 28
+                Height: |-
+                  =22
+                Text: |-
+                  =With({a: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))), t: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))}, If(t = 0, "Sem registros", If(a > 0, a & " em aberto  ·  ", "") & (t - a) & " concluído" & If(t - a = 1, "", "s")))
+          - relSecAdd:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="+ Registrar"
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                X: |-
+                  =0
+                Y: |-
+                  =Parent.TemplateHeight - 40
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =40
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul
+                HoverColor: |-
+                  =Color.White
+                Size: |-
+                  =12
+                FontWeight: |-
+                  =FontWeight.Semibold
+                RadiusTopLeft: |-
+                  =0
+                RadiusTopRight: |-
+                  =0
+                RadiusBottomLeft: |-
+                  =0
+                RadiusBottomRight: |-
+                  =0
+                OnSelect: |-
+                  =Navigate(scrRegistro, ScreenTransition.None, {locId: Blank(), locSecao: ThisItem.Valor})

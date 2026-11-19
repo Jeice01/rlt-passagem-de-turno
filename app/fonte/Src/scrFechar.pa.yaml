@@ -1,0 +1,510 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+Screens:
+  scrFechar:
+    Properties:
+      Fill: |-
+        =corFundo
+      OnVisible: |-
+        =ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+        ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)))
+    Children:
+    - fecTopo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =56
+    - fecFaixa:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =56
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =5
+    - fecMarca:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RLT · CCM   Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =15
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =20
+          Y: |-
+            =0
+          Width: |-
+            =500
+          Height: |-
+            =56
+    - fecUsuario:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+          Color: |-
+            =Color.White
+          Size: |-
+            =13
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 620
+          Y: |-
+            =0
+          Width: |-
+            =600
+          Height: |-
+            =56
+    - fecMenuFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =0
+          Y: |-
+            =61
+          Width: |-
+            =200
+          Height: |-
+            =Parent.Height - 61
+    - fecMenu0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Relatório"
+          OnSelect: |-
+            =Navigate(scrRelatorio, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - fecMenu1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Chamados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - fecMenu2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Histórico"
+          OnSelect: |-
+            =Navigate(scrHistorico, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =176
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - fecMenu3:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Painel geral"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - fecMenu4:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Fechar"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          Fill: |-
+            =corAzul10
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Semibold
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - fecMenuMarca:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =5
+          Height: |-
+            =46
+    - fecTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="FECHAR RELATÓRIO"
+          Color: |-
+            =corAzul
+          Size: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =78
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =36
+    - fecSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Qualquer usuário pode fechar e enviar (RN-007). O envio fica registrado com o nome de quem enviou."
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =224
+          Y: |-
+            =112
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =26
+    - fecResumo:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corTexto
+          Size: |-
+            =12
+          Fill: |-
+            =Color.White
+          PaddingLeft: |-
+            =16
+          PaddingTop: |-
+            =12
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          X: |-
+            =224
+          Y: |-
+            =146
+          Width: |-
+            =(Parent.Width - 248) / 2 - 8
+          Height: |-
+            =300
+          Text: |-
+            ="RESUMO" & Char(10) & Char(10) & Concat(tabSecoes, Nome & ": " & CountRows(Filter(colRegs, rlt_secao = Valor)), Char(10)) & Char(10) & Char(10) & "Passam ao próximo turno: " & CountRows(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')))
+    - fecAvisos:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corLaranjaTxt
+          Size: |-
+            =12
+          Fill: |-
+            =corLaranja20
+          PaddingLeft: |-
+            =16
+          PaddingTop: |-
+            =12
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          X: |-
+            =224 + (Parent.Width - 248) / 2 + 8
+          Y: |-
+            =146
+          Width: |-
+            =(Parent.Width - 248) / 2 - 8
+          Height: |-
+            =300
+          Text: |-
+            =If(IsBlank(Concat(Filter(Table({m: If(CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Técnico(a)')) = 0, "Nenhum técnico fez login neste plantão.", "")},{m: If(CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Operador(a)')) = 0, "Nenhum operador fez login neste plantão.", "")},{m: If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, "Há chamados do Fator Q sem código SAP.", "")}), !IsBlank(m)), "•  " & m, Char(10))), "Nenhum ponto a conferir.", "A CONFERIR (não impedem o fechamento)" & Char(10) & Char(10) & Concat(Filter(Table({m: If(CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Técnico(a)')) = 0, "Nenhum técnico fez login neste plantão.", "")},{m: If(CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Operador(a)')) = 0, "Nenhum operador fez login neste plantão.", "")},{m: If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, "Há chamados do Fator Q sem código SAP.", "")}), !IsBlank(m)), "•  " & m, Char(10)))
+    - fecEquipe:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corTexto
+          Size: |-
+            =12
+          X: |-
+            =224
+          Y: |-
+            =456
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =60
+          Text: |-
+            ="Equipe que vai no PDF: " & Concat(colEquipe, rlt_nome & " (" & Text(rlt_perfil) & ")", ", ")
+    - fecConf:
+        Control: Classic/CheckBox@2.1.0
+        Properties:
+          Text: |-
+            ="Eu, " & Coalesce(gblUsuario.rlt_nome, User().FullName) & ", confirmo que revisei o relatório e quero fechar e enviar."
+          X: |-
+            =224
+          Y: |-
+            =524
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =40
+          Size: |-
+            =12
+          Visible: |-
+            =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+    - fecBtn:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Fechar e enviar"
+          OnSelect: |-
+            =Patch(Relatórios, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid), {rlt_situacao: [@'Situação do relatório'].Fechado, rlt_fechadoem: Now(), rlt_fechadopor: gblUsuario});
+            Patch(Histórico, Defaults(Histórico), {rlt_campo: "Relatório fechado e enviado", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+            Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid));
+            Reset(fecConf);
+            Notify("Relatório fechado. O PDF e o e-mail entram com o fluxo Fechar e enviar (próxima etapa).", NotificationType.Success);
+            Navigate(scrRelatorio, ScreenTransition.None)
+          X: |-
+            =Parent.Width - 210
+          Y: |-
+            =Parent.Height - 70
+          Width: |-
+            =190
+          Height: |-
+            =48
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =corAzul
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+          DisplayMode: |-
+            =If(fecConf.Value, DisplayMode.Edit, DisplayMode.Disabled)
+    - fecFechado:
+        Control: Label@2.5.1
+        Properties:
+          Visible: |-
+            =Not(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto)
+          Color: |-
+            =corAzul
+          Fill: |-
+            =corAzul10
+          Size: |-
+            =12
+          PaddingLeft: |-
+            =16
+          X: |-
+            =224
+          Y: |-
+            =524
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =48
+          Text: |-
+            =If(IsBlank(gblRel), "Nenhum relatório.", "Relatório fechado em " & Text(gblRel.rlt_fechadoem, "dd/mm/yyyy hh:mm") & " por " & Coalesce(gblRel.rlt_fechadopor.rlt_nome, "—") & ". Abra o próximo plantão na tela Relatório.")

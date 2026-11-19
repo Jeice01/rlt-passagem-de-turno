@@ -1,0 +1,10 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+EditorState:
+  ScreensOrder:
+    - scrRelatorio
+    - scrChamados
+    - scrRegistro
+    - scrHistorico
+    - scrPainel
+    - scrFechar
+    - scrAbrir

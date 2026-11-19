@@ -1,0 +1,586 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+Screens:
+  scrAbrir:
+    Properties:
+      Fill: |-
+        =corFundo
+      OnVisible: |-
+        =UpdateContext({locProxTurno: If(IsBlank(gblRel), If(Hour(Now()) >= 7 && Hour(Now()) < 19, "ALFA", "BRAVO"), If(Text(gblRel.rlt_turno) = "ALFA", "BRAVO", "ALFA"))});
+        UpdateContext({locProxData: If(IsBlank(gblRel), If(Hour(Now()) >= 19, DateAdd(Today(), 1, TimeUnit.Days), Today()), If(Text(gblRel.rlt_turno) = "ALFA", DateAdd(gblRel.rlt_data, 1, TimeUnit.Days), gblRel.rlt_data))});
+        ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+        ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)));
+        Reset(abrTurno); Reset(abrData)
+    Children:
+    - abrTopo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =56
+    - abrFaixa:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =56
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =5
+    - abrMarca:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RLT · CCM   Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =15
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =20
+          Y: |-
+            =0
+          Width: |-
+            =500
+          Height: |-
+            =56
+    - abrUsuario:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+          Color: |-
+            =Color.White
+          Size: |-
+            =13
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 620
+          Y: |-
+            =0
+          Width: |-
+            =600
+          Height: |-
+            =56
+    - abrMenuFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =0
+          Y: |-
+            =61
+          Width: |-
+            =200
+          Height: |-
+            =Parent.Height - 61
+    - abrMenu0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Relatório"
+          OnSelect: |-
+            =Navigate(scrRelatorio, ScreenTransition.None)
+          Fill: |-
+            =corAzul10
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Semibold
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - abrMenuMarca:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =5
+          Height: |-
+            =46
+    - abrMenu1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Chamados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - abrMenu2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Histórico"
+          OnSelect: |-
+            =Navigate(scrHistorico, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =176
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - abrMenu3:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Painel geral"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - abrMenu4:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Fechar"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - abrTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="ABRIR PLANTÃO"
+          Color: |-
+            =corAzul
+          Size: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =78
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =36
+    - abrSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="O relatório é criado no início do plantão (RF-001). A equipe entra pelo login de cada pessoa."
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =224
+          Y: |-
+            =112
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =26
+    - abrRotTurno:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="TURNO *"
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =224
+          Y: |-
+            =156
+          Width: |-
+            =300
+          Height: |-
+            =22
+    - abrRotData:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="DATA DO RELATÓRIO *"
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =424
+          Y: |-
+            =156
+          Width: |-
+            =300
+          Height: |-
+            =22
+    - abrTurno:
+        Control: Classic/DropDown@2.3.1
+        Properties:
+          Items: |-
+            =["ALFA", "BRAVO"]
+          Default: |-
+            =locProxTurno
+          X: |-
+            =224
+          Y: |-
+            =178
+          Width: |-
+            =180
+          Height: |-
+            =40
+    - abrData:
+        Control: Classic/DatePicker@2.6.0
+        Properties:
+          DefaultDate: |-
+            =locProxData
+          Format: |-
+            ="dd/mm/yyyy"
+          X: |-
+            =424
+          Y: |-
+            =178
+          Width: |-
+            =220
+          Height: |-
+            =40
+    - abrAjuda:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =224
+          Y: |-
+            =226
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =44
+          Text: |-
+            =If(abrTurno.Selected.Value = "ALFA", "ALFA: 07:00 às 19:00 do mesmo dia.", "BRAVO: 19:00 do dia anterior às 07:00 desta data. O Bravo usa a data em que o plantão termina (RN-003).")
+    - abrHerd:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corTexto
+          Size: |-
+            =12
+          Fill: |-
+            =Color.White
+          PaddingLeft: |-
+            =16
+          X: |-
+            =224
+          Y: |-
+            =280
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =56
+          Text: |-
+            ="Pendências herdadas: " & CountRows(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))) & ". Entram com a data de início original (RN-009)."
+    - abrAviso:
+        Control: Label@2.5.1
+        Properties:
+          Visible: |-
+            =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+          Color: |-
+            =corLaranjaTxt
+          Fill: |-
+            =corLaranja20
+          Size: |-
+            =12
+          PaddingLeft: |-
+            =16
+          X: |-
+            =224
+          Y: |-
+            =346
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =48
+          Text: |-
+            ="O relatório " & gblRel.rlt_nome & " ainda está aberto. Feche-o antes de abrir o próximo."
+    - abrBtn:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Abrir relatório"
+          OnSelect: |-
+            =With({vT: If(abrTurno.Selected.Value = "ALFA", [@Turno].ALFA, [@Turno].BRAVO), vD: abrData.SelectedDate},
+              With({vIni: If(abrTurno.Selected.Value = "ALFA", DateAdd(vD, 7, TimeUnit.Hours), DateAdd(DateAdd(vD, -1, TimeUnit.Days), 19, TimeUnit.Hours)),
+                     vFim: If(abrTurno.Selected.Value = "ALFA", DateAdd(vD, 19, TimeUnit.Hours), DateAdd(vD, 7, TimeUnit.Hours))},
+                ClearCollect(colHerdar, Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')));
+                Set(gblRel, Patch(Relatórios, Defaults(Relatórios), {rlt_nome: "RLT-PASSAGEM DE TURNO " & abrTurno.Selected.Value & " " & Text(vD, "dd.mm.yyyy"),
+                  rlt_turno: vT, rlt_data: vD, rlt_inicio: vIni, rlt_fim: vFim, rlt_situacao: [@'Situação do relatório'].Aberto}));
+                ForAll(colHerdar As r,
+                  Patch(Registros, Defaults(Registros), {rlt_titulo: r.rlt_titulo, rlt_secao: r.rlt_secao, rlt_relatorio: gblRel, rlt_descricao: r.rlt_descricao,
+                    rlt_local: r.rlt_local, rlt_equipamento: r.rlt_equipamento, rlt_equipamentolivre: r.rlt_equipamentolivre, rlt_numero: r.rlt_numero,
+                    rlt_inicio: r.rlt_inicio, rlt_ni: r.rlt_ni, rlt_status: r.rlt_status, rlt_statusios: r.rlt_statusios, rlt_chamadofalso: r.rlt_chamadofalso,
+                    rlt_limpezatecnica: r.rlt_limpezatecnica, rlt_motivocancelamento: r.rlt_motivocancelamento, rlt_herdado: true,
+                    rlt_origem: LookUp(Registros, rlt_registroid = r.rlt_registroid)}));
+                If(!IsBlank(gblUsuario),
+                  Patch('Equipe do plantão', Defaults('Equipe do plantão'), {rlt_nome: gblUsuario.rlt_nome, rlt_pessoa: gblUsuario, rlt_relatorio: gblRel,
+                    rlt_perfil: gblUsuario.rlt_perfil, rlt_entrouem: Now()}));
+                Patch(Histórico, Defaults(Histórico), {rlt_campo: "Relatório aberto com " & CountRows(colHerdar) & " pendência(s) herdada(s)", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                Notify("Relatório " & abrTurno.Selected.Value & " " & Text(vD, "dd.mm.yyyy") & " aberto com " & CountRows(colHerdar) & " pendência(s) herdada(s).", NotificationType.Success);
+                Navigate(scrRelatorio, ScreenTransition.None)
+              )
+            )
+          X: |-
+            =Parent.Width - 210
+          Y: |-
+            =Parent.Height - 70
+          Width: |-
+            =190
+          Height: |-
+            =48
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =corAzul
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          DisplayMode: |-
+            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto || IsBlank(abrData.SelectedDate), DisplayMode.Disabled, DisplayMode.Edit)
+    - abrVoltar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Voltar"
+          OnSelect: |-
+            =Back()
+          X: |-
+            =Parent.Width - 410
+          Y: |-
+            =Parent.Height - 70
+          Width: |-
+            =180
+          Height: |-
+            =48
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8

@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{2f978ae0-b5c7-48c3-9520-e8fac9de9fb2}</savedqueryid>
+    <layoutxml>
+      <grid name="rlt_equipamentos" jump="rlt_nome" select="1" icon="1" preview="1">
+        <row name="rlt_equipamento" id="rlt_equipamentoid">
+          <cell name="rlt_nome" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="rlt_equipamento">
+          <attribute name="rlt_equipamentoid" />
+          <attribute name="rlt_nome" />
+          <attribute name="createdon" />
+          <order attribute="rlt_nome" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Exibição Associada de Equipamento" languagecode="1046" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

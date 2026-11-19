@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="rlt_perfil" localizedName="Perfil" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <displaynames>
+    <displayname description="Perfil" languagecode="1046" />
+  </displaynames>
+  <options>
+    <option value="448170000" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Líder" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170001" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Técnico(a)" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170002" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Operador(a)" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170003" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Gestão" languagecode="1046" />
+      </labels>
+    </option>
+  </options>
+</optionset>

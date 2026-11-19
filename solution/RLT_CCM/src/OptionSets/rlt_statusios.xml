@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="rlt_statusios" localizedName="Status do IOS" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <displaynames>
+    <displayname description="Status do IOS" languagecode="1046" />
+  </displaynames>
+  <options>
+    <option value="448170000" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Agendado" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170001" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Em andamento" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170002" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Suspenso" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170003" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Concluído" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170004" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Cancelado" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170005" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Não informado (NI)" languagecode="1046" />
+      </labels>
+    </option>
+  </options>
+</optionset>

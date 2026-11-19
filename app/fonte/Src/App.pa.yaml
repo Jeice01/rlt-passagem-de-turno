@@ -1,0 +1,41 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+App:
+  Properties:
+    Theme: =PowerAppsTheme
+    StartScreen: =scrRelatorio
+    Formulas: |-
+      =corAzul = RGBA(0, 56, 99, 1);
+      corAzul80 = RGBA(51, 95, 130, 1);
+      corAzul10 = RGBA(232, 237, 242, 1);
+      corVerde = RGBA(114, 191, 68, 1);
+      corLaranja = RGBA(243, 139, 0, 1);
+      corLaranja20 = RGBA(253, 232, 204, 1);
+      corLaranjaTxt = RGBA(122, 70, 0, 1);
+      corVerm = RGBA(195, 0, 47, 1);
+      corVerm20 = RGBA(243, 204, 213, 1);
+      corFundo = RGBA(242, 244, 246, 1);
+      corLinha = RGBA(221, 227, 233, 1);
+      corTexto = RGBA(28, 39, 51, 1);
+      corMuted = RGBA(91, 104, 118, 1);
+      tabHoras = ForAll(Sequence(24, 0), Text(Value, "00"));
+      tabMinutos = ForAll(Sequence(60, 0), Text(Value, "00"));
+      tabSecoes = Table(
+        {Ordem: 1, Nome: "Eletromecânica", Valor: [@'Seção'].Eletromecânica, Tipo: "corretiva", Cor: corAzul},
+        {Ordem: 2, Nome: "Eletroeletrônica", Valor: [@'Seção'].Eletroeletrônica, Tipo: "corretiva", Cor: corAzul},
+        {Ordem: 3, Nome: "BHS", Valor: [@'Seção'].BHS, Tipo: "corretiva", Cor: corAzul},
+        {Ordem: 4, Nome: "Civil", Valor: [@'Seção'].Civil, Tipo: "corretiva", Cor: corAzul},
+        {Ordem: 5, Nome: "Outros", Valor: [@'Seção'].Outros, Tipo: "corretiva", Cor: corAzul},
+        {Ordem: 6, Nome: "Fator Q (Z9)", Valor: [@'Seção'].'Fator Q (Z9)', Tipo: "fq", Cor: corLaranja},
+        {Ordem: 7, Nome: "Preventiva (ZM02)", Valor: [@'Seção'].'Preventiva (ZM02)', Tipo: "prev", Cor: corVerde},
+        {Ordem: 8, Nome: "IOS informados", Valor: [@'Seção'].'IOS informados', Tipo: "ios", Cor: RGBA(153, 175, 193, 1)}
+      );
+    OnStart: |-
+      =Set(gblUsuario, LookUp(Pessoas, Lower(rlt_email) = Lower(User().Email)));
+      Set(gblRel, First(Sort(Filter(Relatórios, rlt_situacao = [@'Situação do relatório'].Aberto), createdon, SortOrder.Descending)));
+      If(IsBlank(gblRel), Set(gblRel, First(Sort(Relatórios, createdon, SortOrder.Descending))));
+      If(!IsBlank(gblUsuario) && !IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto &&
+         IsBlank(LookUp('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && rlt_pessoa.rlt_pessoaid = gblUsuario.rlt_pessoaid && IsBlank(rlt_retiradoem))),
+        Patch('Equipe do plantão', Defaults('Equipe do plantão'), {rlt_nome: gblUsuario.rlt_nome, rlt_pessoa: gblUsuario, rlt_relatorio: gblRel,
+          rlt_perfil: gblUsuario.rlt_perfil, rlt_entrouem: Now()});
+        Patch(Histórico, Defaults(Histórico), {rlt_campo: "Entrou no plantão (login)", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()})
+      )

@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{e2c88d30-daed-47c2-899d-5e5937d47a6c}</savedqueryid>
+    <layoutxml>
+      <grid name="rlt_registros" jump="rlt_titulo" select="1" icon="1" preview="1">
+        <row name="rlt_registro" id="rlt_registroid">
+          <cell name="rlt_titulo" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="rlt_registro">
+          <attribute name="rlt_registroid" />
+          <attribute name="rlt_titulo" />
+          <attribute name="createdon" />
+          <order attribute="rlt_titulo" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Exibição Associada de Registro" languagecode="1046" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="rlt_secao" localizedName="Seção" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <displaynames>
+    <displayname description="Seção" languagecode="1046" />
+  </displaynames>
+  <options>
+    <option value="448170000" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Eletromecânica" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170001" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Eletroeletrônica" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170002" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="BHS" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170003" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Civil" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170004" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Outros" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170005" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Fator Q (Z9)" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170006" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="Preventiva (ZM02)" languagecode="1046" />
+      </labels>
+    </option>
+    <option value="448170007" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="IOS informados" languagecode="1046" />
+      </labels>
+    </option>
+  </options>
+</optionset>

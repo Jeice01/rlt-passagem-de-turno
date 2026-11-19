@@ -1,0 +1,724 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+Screens:
+  scrChamados:
+    Properties:
+      Fill: |-
+        =corFundo
+      OnVisible: |-
+        =ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+        ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)))
+    Children:
+    - chaTopo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =56
+    - chaFaixa:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =56
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =5
+    - chaMarca:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RLT · CCM   Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =15
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =20
+          Y: |-
+            =0
+          Width: |-
+            =500
+          Height: |-
+            =56
+    - chaUsuario:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+          Color: |-
+            =Color.White
+          Size: |-
+            =13
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 620
+          Y: |-
+            =0
+          Width: |-
+            =600
+          Height: |-
+            =56
+    - chaMenuFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =0
+          Y: |-
+            =61
+          Width: |-
+            =200
+          Height: |-
+            =Parent.Height - 61
+    - chaMenu0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Relatório"
+          OnSelect: |-
+            =Navigate(scrRelatorio, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - chaMenu1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Chamados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None)
+          Fill: |-
+            =corAzul10
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Semibold
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - chaMenuMarca:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =5
+          Height: |-
+            =46
+    - chaMenu2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Histórico"
+          OnSelect: |-
+            =Navigate(scrHistorico, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =176
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - chaMenu3:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Painel geral"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - chaMenu4:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Fechar"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - chaTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="CHAMADOS DO PLANTÃO"
+          Color: |-
+            =corAzul
+          Size: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =78
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =36
+    - chaSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Todos os registros do turno, por seção e hora de início. Os que ficarem em aberto passam para o próximo turno (RN-009)."
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =224
+          Y: |-
+            =112
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =26
+    - chaTodos:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Todos (" & CountRows(colRegs) & ")"
+          OnSelect: |-
+            =UpdateContext({locSoAbertos: false})
+          X: |-
+            =224
+          Y: |-
+            =146
+          Width: |-
+            =150
+          Height: |-
+            =36
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =If(locSoAbertos, Color.White, corAzul)
+          Color: |-
+            =If(locSoAbertos, corAzul, Color.White)
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+    - chaAbertos:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Só em aberto (" & CountRows(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))) & ")"
+          OnSelect: |-
+            =UpdateContext({locSoAbertos: true})
+          X: |-
+            =382
+          Y: |-
+            =146
+          Width: |-
+            =170
+          Height: |-
+            =36
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =If(locSoAbertos, corAzul, Color.White)
+          Color: |-
+            =If(locSoAbertos, Color.White, corAzul)
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+    - chaLimpaSec:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Seção: " & LookUp(tabSecoes, Valor = locSecaoFiltro).Nome & "  ×"
+          OnSelect: |-
+            =UpdateContext({locSecaoFiltro: Blank()})
+          X: |-
+            =560
+          Y: |-
+            =146
+          Width: |-
+            =260
+          Height: |-
+            =36
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =!IsBlank(locSecaoFiltro)
+    - chaGal:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =Sort(AddColumns(Filter(colRegs, (!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(locSecaoFiltro) || rlt_secao = locSecaoFiltro)), Ordem, Switch(rlt_secao, [@'Seção'].Eletromecânica, 1, [@'Seção'].Eletroeletrônica, 2, [@'Seção'].BHS, 3, [@'Seção'].Civil, 4, [@'Seção'].Outros, 5, [@'Seção'].'Fator Q (Z9)', 6, [@'Seção'].'Preventiva (ZM02)', 7, 8) * 10000000000000 + Value(rlt_inicio)), Ordem)
+          TemplateSize: |-
+            =104
+          TemplatePadding: |-
+            =6
+          X: |-
+            =218
+          Y: |-
+            =190
+          Width: |-
+            =Parent.Width - 236
+          Height: |-
+            =Parent.Height - 198
+        Children:
+          - chaFundo:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =Parent.TemplateHeight
+          - chaBarra:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =If(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Not(ThisItem.rlt_statusios = [@'Status do IOS'].Concluído || ThisItem.rlt_statusios = [@'Status do IOS'].Cancelado), ThisItem.rlt_status = [@'Status da atividade'].PENDENTE || ThisItem.rlt_status = [@'Status da atividade'].'EM ANDAMENTO'), corLaranja, corVerde)
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =5
+                Height: |-
+                  =Parent.TemplateHeight
+          - chaSecao:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Upper(LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome)
+                Color: |-
+                  =corAzul
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =6
+                Width: |-
+                  =220
+                Height: |-
+                  =20
+          - chaStatus:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status)) & If(ThisItem.rlt_herdado, "  ·  HERDADA", "")
+                Color: |-
+                  =corLaranjaTxt
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =240
+                Y: |-
+                  =6
+                Width: |-
+                  =300
+                Height: |-
+                  =20
+          - chaTitulo:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_titulo
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =12
+                FontWeight: |-
+                  =FontWeight.Semibold
+                X: |-
+                  =18
+                Y: |-
+                  =26
+                Width: |-
+                  =Parent.TemplateWidth - 420
+                Height: |-
+                  =40
+          - chaMeta:
+              Control: Label@2.5.1
+              Properties:
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =10
+                X: |-
+                  =18
+                Y: |-
+                  =68
+                Width: |-
+                  =Parent.TemplateWidth - 420
+                Height: |-
+                  =24
+                Text: |-
+                  ="Início " & Text(ThisItem.rlt_inicio, "dd/mm hh:mm") & If(IsBlank(ThisItem.rlt_local), "", "  ·  " & ThisItem.rlt_local.rlt_nome) & If(IsBlank(ThisItem.rlt_numero), "", "  ·  Nº " & ThisItem.rlt_numero) & If(ThisItem.rlt_ni && IsBlank(ThisItem.rlt_conclusao), "  ·  Conclusão N/I", "")
+          - chaConcl:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(IsBlank(ThisItem.rlt_conclusao), If(ThisItem.rlt_ni, "Conclusão: N/I", "Conclusão: em aberto"), "Conclusão: " & Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"))
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                Align: |-
+                  =Align.Right
+                X: |-
+                  =Parent.TemplateWidth - 400
+                Y: |-
+                  =10
+                Width: |-
+                  =380
+                Height: |-
+                  =26
+          - chaAgora:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="Concluir agora"
+                OnSelect: |-
+                  =With({r: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)},
+                    If(ThisItem.rlt_secao = [@'Seção'].'IOS informados',
+                      Patch(Registros, r, {rlt_conclusao: Now(), rlt_ni: false, rlt_statusios: [@'Status do IOS'].Concluído}),
+                      Patch(Registros, r, {rlt_conclusao: Now(), rlt_ni: false, rlt_status: [@'Status da atividade'].CONCLUÍDO})));
+                  Patch(Histórico, Defaults(Histórico), {rlt_campo: "Hora de conclusão e status", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)});
+                  ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+                  ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)));
+                  Notify("Concluído: " & Left(ThisItem.rlt_titulo, 50), NotificationType.Success)
+                X: |-
+                  =Parent.TemplateWidth - 330
+                Y: |-
+                  =50
+                Width: |-
+                  =150
+                Height: |-
+                  =36
+                Size: |-
+                  =12
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =corAzul
+                Color: |-
+                  =Color.White
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul80
+                HoverColor: |-
+                  =Color.White
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && IsBlank(ThisItem.rlt_conclusao) && !ThisItem.rlt_chamadofalso
+          - chaEditar:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, "Editar", "Ver")
+                OnSelect: |-
+                  =Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})
+                X: |-
+                  =Parent.TemplateWidth - 170
+                Y: |-
+                  =50
+                Width: |-
+                  =150
+                Height: |-
+                  =36
+                Size: |-
+                  =12
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul10
+                HoverColor: |-
+                  =corAzul
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+    - chaVazio:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Nenhum chamado " & If(locSoAbertos, "em aberto.", "neste plantão.")
+          Visible: |-
+            =CountRows(chaGal.AllItems) = 0
+          Color: |-
+            =corMuted
+          Size: |-
+            =13
+          Align: |-
+            =Align.Center
+          X: |-
+            =224
+          Y: |-
+            =260
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =40

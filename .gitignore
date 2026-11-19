@@ -1,0 +1,15 @@
+# Arquivos temporários do Office (planilha aberta)
+~$*
+
+# Pacotes gerados pelo pac solution pack (são recriados a partir de solution/RLT_CCM/src)
+solution/**/out/
+solution/**/bin/
+solution/**/obj/
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Pacotes de carga gerados (contêm e-mails da equipe)
+ferramentas/dataverse/saida/

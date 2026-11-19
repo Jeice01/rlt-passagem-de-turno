@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Role id="{6a1f3c52-8d4e-4b7a-9e21-3c5d7f9a0b14}" name="RLT - Usuário" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <IsCustomizable>1</IsCustomizable>
+  <IsAutoAssigned>0</IsAutoAssigned>
+  <AppliesTo>Users</AppliesTo>
+  <Description>App RLT do CCM: acesso igual para todos. Cria, lê e altera relatórios, registros, equipe, anexos e listas; histórico só criar e ler; sem exclusão.</Description>
+  <RolePrivileges>
+    <RolePrivilege name="prvAppendrlt_anexo" level="Global" />
+    <RolePrivilege name="prvAppendrlt_equipamento" level="Global" />
+    <RolePrivilege name="prvAppendrlt_equipe" level="Global" />
+    <RolePrivilege name="prvAppendrlt_historico" level="Global" />
+    <RolePrivilege name="prvAppendrlt_local" level="Global" />
+    <RolePrivilege name="prvAppendrlt_pessoa" level="Global" />
+    <RolePrivilege name="prvAppendrlt_registro" level="Global" />
+    <RolePrivilege name="prvAppendrlt_relatorio" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_anexo" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_equipamento" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_equipe" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_historico" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_local" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_pessoa" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_registro" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_relatorio" level="Global" />
+    <RolePrivilege name="prvCreaterlt_anexo" level="Global" />
+    <RolePrivilege name="prvCreaterlt_equipamento" level="Global" />
+    <RolePrivilege name="prvCreaterlt_equipe" level="Global" />
+    <RolePrivilege name="prvCreaterlt_historico" level="Global" />
+    <RolePrivilege name="prvCreaterlt_local" level="Global" />
+    <RolePrivilege name="prvCreaterlt_pessoa" level="Global" />
+    <RolePrivilege name="prvCreaterlt_registro" level="Global" />
+    <RolePrivilege name="prvCreaterlt_relatorio" level="Global" />
+    <RolePrivilege name="prvCreateSharePointData" level="Global" />
+    <RolePrivilege name="prvReadrlt_anexo" level="Global" />
+    <RolePrivilege name="prvReadrlt_equipamento" level="Global" />
+    <RolePrivilege name="prvReadrlt_equipe" level="Global" />
+    <RolePrivilege name="prvReadrlt_historico" level="Global" />
+    <RolePrivilege name="prvReadrlt_local" level="Global" />
+    <RolePrivilege name="prvReadrlt_pessoa" level="Global" />
+    <RolePrivilege name="prvReadrlt_registro" level="Global" />
+    <RolePrivilege name="prvReadrlt_relatorio" level="Global" />
+    <RolePrivilege name="prvReadSharePointData" level="Global" />
+    <RolePrivilege name="prvReadSharePointDocument" level="Global" />
+    <RolePrivilege name="prvWriterlt_anexo" level="Global" />
+    <RolePrivilege name="prvWriterlt_equipamento" level="Global" />
+    <RolePrivilege name="prvWriterlt_equipe" level="Global" />
+    <RolePrivilege name="prvWriterlt_local" level="Global" />
+    <RolePrivilege name="prvWriterlt_pessoa" level="Global" />
+    <RolePrivilege name="prvWriterlt_registro" level="Global" />
+    <RolePrivilege name="prvWriterlt_relatorio" level="Global" />
+    <RolePrivilege name="prvWriteSharePointData" level="Global" />
+  </RolePrivileges>
+</Role>

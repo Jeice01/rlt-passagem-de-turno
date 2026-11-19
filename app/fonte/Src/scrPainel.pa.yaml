@@ -1,0 +1,572 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+Screens:
+  scrPainel:
+    Properties:
+      Fill: |-
+        =corFundo
+      OnVisible: |-
+        =ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+        ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)))
+    Children:
+    - paiTopo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =56
+    - paiFaixa:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =56
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =5
+    - paiMarca:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RLT · CCM   Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =15
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =20
+          Y: |-
+            =0
+          Width: |-
+            =500
+          Height: |-
+            =56
+    - paiUsuario:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+          Color: |-
+            =Color.White
+          Size: |-
+            =13
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 620
+          Y: |-
+            =0
+          Width: |-
+            =600
+          Height: |-
+            =56
+    - paiMenuFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =0
+          Y: |-
+            =61
+          Width: |-
+            =200
+          Height: |-
+            =Parent.Height - 61
+    - paiMenu0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Relatório"
+          OnSelect: |-
+            =Navigate(scrRelatorio, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - paiMenu1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Chamados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - paiMenu2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Histórico"
+          OnSelect: |-
+            =Navigate(scrHistorico, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =176
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - paiMenu3:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Painel geral"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =corAzul10
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Semibold
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - paiMenuMarca:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =5
+          Height: |-
+            =46
+    - paiMenu4:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Fechar"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =13
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+    - paiTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="PAINEL GERAL DE INFORMAÇÕES"
+          Color: |-
+            =corAzul
+          Size: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =78
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =36
+    - paiSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Correções, pendências antigas e listas do app. Todos os usuários podem ver."
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =224
+          Y: |-
+            =112
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =26
+    - paiT1:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="FATOR Q SEM CÓDIGO SAP (" & CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) & ")"
+          Color: |-
+            =corAzul
+          Size: |-
+            =13
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =146
+          Width: |-
+            =600
+          Height: |-
+            =28
+    - paiGal1:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))
+          TemplateSize: |-
+            =64
+          TemplatePadding: |-
+            =4
+          X: |-
+            =218
+          Y: |-
+            =176
+          Width: |-
+            =Parent.Width - 236
+          Height: |-
+            =210
+        Children:
+          - paiFundo:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corVerm
+                BorderThickness: |-
+                  =1
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =Parent.TemplateHeight
+          - paiNome:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Coalesce(ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo) & "  ·  Chamado " & ThisItem.rlt_numero
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                FontWeight: |-
+                  =FontWeight.Semibold
+                X: |-
+                  =14
+                Y: |-
+                  =16
+                Width: |-
+                  =Parent.TemplateWidth - 560
+                Height: |-
+                  =28
+          - paiCbx:
+              Control: Classic/ComboBox@2.4.0
+              Properties:
+                Items: |-
+                  =Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem)
+                DisplayFields: |-
+                  =["rlt_nome"]
+                SearchFields: |-
+                  =["rlt_nome", "rlt_codigosap"]
+                SelectMultiple: |-
+                  =false
+                X: |-
+                  =Parent.TemplateWidth - 540
+                Y: |-
+                  =12
+                Width: |-
+                  =380
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+          - paiCorrigir:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="Corrigir"
+                OnSelect: |-
+                  =If(IsBlank(paiCbx.Selected), Notify("Escolha o equipamento na lista.", NotificationType.Warning),
+                    Patch(Registros, LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid), {rlt_equipamento: paiCbx.Selected, rlt_equipamentolivre: ""});
+                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Código SAP corrigido: " & paiCbx.Selected.rlt_codigosap, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)});
+                    ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+                    ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)));
+                    Notify("Corrigido.", NotificationType.Success))
+                X: |-
+                  =Parent.TemplateWidth - 150
+                Y: |-
+                  =12
+                Width: |-
+                  =130
+                Height: |-
+                  =40
+                Size: |-
+                  =12
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =corAzul
+                Color: |-
+                  =Color.White
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul80
+                HoverColor: |-
+                  =Color.White
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+    - paiT2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="PENDÊNCIAS ABERTAS HÁ MAIS DE 7 DIAS"
+          Color: |-
+            =corAzul
+          Size: |-
+            =13
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224
+          Y: |-
+            =396
+          Width: |-
+            =600
+          Height: |-
+            =28
+    - paiGal2:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7)
+          TemplateSize: |-
+            =44
+          TemplatePadding: |-
+            =2
+          X: |-
+            =218
+          Y: |-
+            =426
+          Width: |-
+            =Parent.Width - 236
+          Height: |-
+            =Parent.Height - 520
+        Children:
+          - paiVelha:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Upper(LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome) & "  ·  " & ThisItem.rlt_titulo & "  ·  desde " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy")
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                Fill: |-
+                  =Color.White
+                PaddingLeft: |-
+                  =12
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =40
+    - paiListas:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          X: |-
+            =224
+          Y: |-
+            =Parent.Height - 84
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =60
+          Text: |-
+            ="Listas usadas pelo app:  " & CountRows(Equipamentos) & " equipamentos  ·  " & CountRows(Locais) & " locais  ·  " & CountRows(Pessoas) & " pessoas e perfis"

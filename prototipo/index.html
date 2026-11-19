@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RLT Passagem de Turno</title>
+<!-- Protótipo navegável do app RLT do CCM (PRD 1.1/1.2). Sem backend: os dados ficam só na memória da página. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Brandbook Aeroporto de Brasília vr 1.0 (abr/2014) */
+  --azul:#003863; --azul80:#335f82; --azul40:#99afc1; --azul20:#ccd7e0; --azul10:#e8edf2;
+  --verde:#72BF44; --verde20:#e3f2da; --verde-txt:#2f6214;
+  --laranja:#F38B00; --laranja20:#fde8cc; --laranja-txt:#7a4600;
+  --verm:#C3002F; --verm20:#f3ccd5; --verm-txt:#8a0021;
+  --verde01:#B5BD00; /* amostra do brandbook; código oficial a confirmar (Lacuna) */
+  --bg:#f2f4f6; --card:#fff; --txt:#1c2733; --muted:#5b6876; --line:#dde3e9;
+  --titulo:'Borba','Saira Semi Condensed','Arial Narrow',Arial,sans-serif;
+  --texto:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.45 var(--texto)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,.cap{font-family:var(--titulo);text-transform:uppercase;letter-spacing:.04em;margin:0;font-weight:600}
+h1{font-size:22px;color:var(--azul)} h2{font-size:17px;color:var(--azul)} h3{font-size:14px;color:var(--azul)}
+a{color:var(--azul)}
+.muted{color:var(--muted)} .small{font-size:13px}
+
+/* Barra superior */
+.top{position:sticky;top:0;z-index:20;background:var(--azul);color:#fff}
+.top-in{display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:56px}
+.top .marca{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+.top .marca svg{width:30px;height:30px}
+.top .marca b{font-family:var(--titulo);text-transform:uppercase;letter-spacing:.05em;font-size:16px;font-weight:600;line-height:1.1}
+.top .marca span{display:block;font-size:11px;opacity:.85;font-family:var(--texto);text-transform:none;letter-spacing:0}
+.top .esp{flex:1}
+.faixa{height:5px;background:linear-gradient(90deg,#9bc53d,var(--verde) 45%,#2e9a4c)}
+/* Conta logada (no app real vem do login Microsoft/Entra ID) */
+.conta{position:relative}
+.conta summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 6px;border-radius:8px}
+.conta summary::-webkit-details-marker{display:none}
+.conta summary:hover{background:var(--azul80)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--verde);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.conta .nome{display:flex;flex-direction:column;line-height:1.2;font-size:13px;text-align:right}
+.conta .nome b{font-size:14px}
+.conta .nome span{font-size:11px;opacity:.85}
+.conta .menu{position:absolute;right:0;top:calc(100% + 6px);background:#fff;color:var(--txt);border:1px solid var(--line);border-radius:var(--r);padding:12px;width:290px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:30}
+.conta .menu select{width:100%;min-height:40px;border:1px solid #c5ced7;border-radius:8px;padding:6px 8px;margin-top:6px}
+@media(max-width:560px){.conta .nome span{display:none}.conta .nome b{font-size:13px}}
+.equipe{display:flex;flex-wrap:wrap;gap:8px}
+.pessoa{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:4px 12px 4px 4px;background:#fff;font-size:13px}
+.pessoa .avatar{width:28px;height:28px;font-size:11px}
+.pessoa small{display:block;color:var(--muted);font-size:11px}
+.pessoa button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;margin-left:2px}
+.anexos{display:flex;flex-wrap:wrap;gap:8px}
+.anexo{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;font-size:12.5px;max-width:100%}
+.anexo img{width:48px;height:48px;object-fit:cover;border-radius:6px}
+.anexo button{border:0;background:none;color:var(--verm-txt);cursor:pointer;font-weight:700}
+.grupo h2{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
+.chamado{display:grid;grid-template-columns:1fr;gap:10px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--azul20);border-radius:var(--r);padding:12px 14px}
+.chamado.aberto{border-left-color:var(--laranja)} .chamado.ok{border-left-color:var(--verde)}
+.chamado .t{font-weight:600;margin:4px 0 4px}
+.chamado .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted)}
+.chamado .concl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chamado .concl input{min-height:40px;border:1px solid #c5ced7;border-radius:8px;padding:6px 8px}
+@media(min-width:760px){.chamado{grid-template-columns:1fr auto;align-items:center}}
+.filtro{display:flex;gap:6px;flex-wrap:wrap}
+.filtro a{border:1px solid #c5ced7;border-radius:999px;padding:6px 14px;text-decoration:none;color:var(--txt);font-size:13.5px;font-weight:600;background:#fff}
+.filtro a.on{border-color:var(--azul);background:var(--azul);color:#fff}
+/* Tela Relatório */
+.tag.ok{background:var(--verde20);color:var(--verde-txt)}
+.rot{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:2px}
+.plantao{display:grid;gap:14px}
+.plantao-info{display:grid;grid-template-columns:auto auto 1fr;gap:12px 28px;align-items:start}
+.plantao-info b{font-size:18px;color:var(--azul);display:block;line-height:1.2}
+.plantao-info small{color:var(--muted);font-size:12px}
+.plantao-and{min-width:180px}
+.turno-barra{height:8px;border-radius:4px;background:var(--azul10);overflow:hidden;margin-bottom:4px}
+.turno-barra span{display:block;height:100%;background:var(--verde)}
+.plantao-equipe{border-top:1px solid var(--line);padding-top:12px}
+@media(max-width:600px){.plantao-info{grid-template-columns:1fr 1fr}.plantao-and{grid-column:1/-1}}
+.kpis.kpis4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:700px){.kpis.kpis4{grid-template-columns:repeat(2,1fr)}}
+.kpi-l{text-decoration:none;color:inherit;border-left:4px solid var(--azul20);transition:box-shadow .15s}
+.kpi-l:hover{box-shadow:0 2px 10px rgba(0,56,99,.12)}
+.kpi-l.k-lar{border-left-color:var(--laranja)} .kpi-l.k-ver{border-left-color:var(--verde)} .kpi-l.k-azul{border-left-color:var(--azul)} .kpi-l.k-verm{border-left-color:var(--verm)}
+.kpi-l.k-verm b{color:var(--verm-txt)}
+.rel-grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:1180px){.rel-grid{grid-template-columns:1fr 300px;align-items:start}}
+.sec-grade{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+@media(max-width:480px){.sec-grade{grid-template-columns:1fr 1fr}}
+.sec-tile{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-top:4px solid var(--azul);border-radius:var(--r);overflow:hidden}
+.sec-tile.fq{border-top-color:var(--laranja)} .sec-tile.prev{border-top-color:var(--verde)} .sec-tile.ios{border-top-color:var(--azul40)}
+.sec-main{display:flex;flex-direction:column;gap:6px;padding:12px 14px 10px;text-decoration:none;color:inherit;flex:1}
+.sec-main:hover{background:var(--azul10)}
+.sec-nome{font-size:13.5px;color:var(--azul)}
+.sec-num{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.sec-num b{font-size:28px;line-height:1;color:var(--azul)}
+.sec-barra{display:flex;height:6px;border-radius:3px;background:var(--azul10);overflow:hidden}
+.sec-barra i{display:block;height:100%} .sec-barra i.ok{background:var(--verde)} .sec-barra i.ab{background:var(--laranja)}
+.sec-sub{font-size:12px;color:var(--muted)} .sec-sub em{font-style:normal;color:var(--laranja-txt);font-weight:700}
+.sec-add{display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;border-top:1px solid var(--line);text-decoration:none;color:var(--azul);font-weight:700;font-size:13px}
+.sec-add svg{width:16px;height:16px}
+.sec-add:hover{background:var(--azul);color:#fff}
+.recentes ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.recentes li{display:flex;gap:10px;font-size:13px;line-height:1.35}
+.recentes .avatar{width:28px;height:28px;font-size:11px;background:var(--azul40)}
+.recentes small{display:block;color:var(--muted);font-size:11.5px}
+
+/* Layout */
+.app{display:flex;min-height:calc(100vh - 61px)}
+nav.lado{display:none}
+main{flex:1;min-width:0;padding:16px 16px 96px;max-width:1100px;margin:0 auto;width:100%}
+.baixo{position:fixed;bottom:0;left:0;right:0;z-index:20;background:#fff;border-top:1px solid var(--line);display:flex}
+.baixo a,.lado a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 10px;text-decoration:none;color:var(--muted);font-size:11px;min-height:56px;position:relative}
+.baixo a svg,.lado a svg{width:22px;height:22px}
+.baixo a.on,.lado a.on{color:var(--azul);font-weight:700}
+.baixo a.on::before{content:"";position:absolute;top:0;left:20%;right:20%;height:3px;background:var(--verde);border-radius:0 0 3px 3px}
+.bolha{position:absolute;top:4px;right:calc(50% - 22px);background:var(--verm);color:#fff;border-radius:9px;font-size:10px;padding:0 5px;line-height:16px;font-weight:700}
+@media (min-width:960px){
+  .baixo{display:none}
+  nav.lado{display:block;width:220px;flex:none;background:#fff;border-right:1px solid var(--line);padding:12px 0}
+  .lado a{flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 20px;font-size:14px;min-height:46px}
+  .lado a.on{background:var(--azul10);box-shadow:inset 4px 0 0 var(--verde)}
+  .lado .bolha{position:static;margin-left:auto}
+  main{padding:24px 28px 48px}
+}
+
+/* Componentes */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.pilha{display:flex;flex-direction:column;gap:12px}
+.linha{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grade{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.titulo-pag{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 14px}
+.titulo-pag h1::before{content:"";display:block;width:36px;height:4px;background:var(--verde);border-radius:2px;margin-bottom:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid var(--azul);background:var(--azul);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:14px}
+.btn.sec{background:#fff;color:var(--azul)}
+.btn.verm{background:var(--verm);border-color:var(--verm)}
+.btn.peq{min-height:36px;padding:0 12px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:18px;height:18px}
+
+.cab{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 18px}
+.cab dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.cab dd{margin:2px 0 0;font-weight:600}
+.cab dd small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.kpi b{display:block;font-size:26px;line-height:1.1;color:var(--azul)}
+.kpi span{font-size:12px;color:var(--muted)}
+
+.sec-card{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 14px 12px;border-top:4px solid var(--azul);min-height:118px}
+.sec-card:hover{box-shadow:0 2px 10px rgba(0,56,99,.12)}
+.sec-card .n{font-size:30px;font-weight:700;color:var(--azul);line-height:1}
+.sec-card .sub{font-size:12px;color:var(--muted)}
+.sec-card.fq{border-top-color:var(--laranja)} .sec-card.prev{border-top-color:var(--verde)} .sec-card.ios{border-top-color:var(--azul40)}
+
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+.chip::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.st-CONCLUIDO{background:var(--verde20);color:var(--verde-txt);border-color:#bfe2a8}
+.st-EM_ANDAMENTO{background:var(--laranja20);color:var(--laranja-txt);border-color:#f7c98c}
+.st-PENDENTE{background:#fff;color:var(--laranja-txt);border-color:var(--laranja)}
+.st-CHAMADO_FALSO{background:#eceff2;color:#47525e;border-color:#cfd6dd}
+.st-AGENDADO{background:var(--azul10);color:var(--azul);border-color:var(--azul20)}
+.st-SUSPENSO{background:#eceff2;color:#47525e;border-color:#cfd6dd}
+.st-CANCELADO{background:var(--verm20);color:var(--verm-txt);border-color:#e7a3b3}
+.st-NAO_INFORMADO{background:#fff;color:#47525e;border:1px dashed #8e99a4}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:4px;padding:1px 6px;background:var(--azul10);color:var(--azul)}
+.tag.alerta{background:var(--verm20);color:var(--verm-txt)}
+.tag.herd{background:#fff3e0;color:var(--laranja-txt)}
+
+.lista{display:flex;flex-direction:column;gap:10px}
+.item{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-left:4px solid var(--azul20);border-radius:var(--r);padding:12px 14px}
+.item.aberto{border-left-color:var(--laranja)} .item.ok{border-left-color:var(--verde)} .item.erro{border-left-color:var(--verm)}
+.item .t{font-weight:600;margin:4px 0 6px}
+.item .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted)}
+
+.aviso{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--r);border:1px solid;font-size:14px}
+.aviso svg{width:20px;height:20px;flex:none;margin-top:1px}
+.aviso.alerta{background:var(--verm20);border-color:#e7a3b3;color:var(--verm-txt)}
+.aviso.atencao{background:#fff6e8;border-color:#f7c98c;color:var(--laranja-txt)}
+.aviso.info{background:var(--azul10);border-color:var(--azul20);color:var(--azul)}
+.aviso.ok{background:var(--verde20);border-color:#bfe2a8;color:var(--verde-txt)}
+
+/* Formulário */
+.campo{display:flex;flex-direction:column;gap:5px}
+.campo label,.campo .lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.campo label .ob{color:var(--verm)}
+.campo label.btn{font-size:13px;text-transform:none;letter-spacing:0;color:var(--azul)}
+.campo input[type=text],.campo input[type=datetime-local],.campo select,.campo textarea{width:100%;min-height:44px;border:1px solid #c5ced7;border-radius:8px;padding:9px 11px;background:#fff}
+.campo textarea{min-height:88px;resize:vertical}
+.campo input:focus,.campo select:focus,.campo textarea:focus,.btn:focus-visible,a:focus-visible{outline:3px solid var(--verde);outline-offset:1px}
+.campo .ajuda{font-size:12px;color:var(--muted)}
+.campo .erro-msg{font-size:12px;color:var(--verm-txt);font-weight:700}
+.duas{display:grid;gap:12px;grid-template-columns:1fr} @media(min-width:640px){.duas{grid-template-columns:1fr 1fr}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{display:flex;align-items:center;gap:6px;border:1px solid #c5ced7;border-radius:8px;padding:8px 12px;min-height:40px;cursor:pointer;font-size:13.5px;text-transform:none;letter-spacing:0;color:var(--txt);font-weight:600}
+.seg input{accent-color:var(--azul)}
+.seg label:has(input:checked){border-color:var(--azul);background:var(--azul10);color:var(--azul)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--azul);margin-top:1px}
+.busca-res{border:1px solid var(--line);border-radius:8px;max-height:220px;overflow:auto;background:#fff}
+.busca-res button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:10px 12px;cursor:pointer;font-size:13.5px}
+.busca-res button:hover{background:var(--azul10)}
+.busca-res code,.cod{font-family:Consolas,Menlo,monospace;font-size:12px;color:var(--muted)}
+.sel-equip{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--azul20);background:var(--azul10);border-radius:8px;padding:10px 12px}
+.acoes{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;position:sticky;bottom:64px;background:linear-gradient(transparent,var(--bg) 30%);padding-top:14px}
+@media(min-width:960px){.acoes{bottom:0}}
+
+table.tab{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+.tab th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--line);padding:8px 10px}
+.tab td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:top}
+.rolar{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+
+.passos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.passos li{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted)}
+.passos li .b{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center}
+.passos li.feito{color:var(--txt)} .passos li.feito .b{background:var(--verde);border-color:var(--verde)}
+.passos li.feito .b::after{content:"";width:8px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.passos li.rodando .b{border-color:var(--azul);border-top-color:transparent;animation:gira 1s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.email{border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13.5px}
+.email div{padding:8px 12px;border-bottom:1px solid var(--line)} .email div:last-child{border:0;white-space:pre-line}
+.email b{display:inline-block;min-width:64px;color:var(--muted);font-weight:700}
+
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--azul);color:#fff;padding:12px 18px;border-radius:8px;font-size:14px;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:calc(100% - 32px)}
+.vazio{text-align:center;padding:28px 12px;color:var(--muted)}
+
+/* Pré-visualização do PDF */
+.folha{background:#fff;max-width:820px;margin:0 auto;padding:28px 30px;box-shadow:0 2px 14px rgba(0,0,0,.12);font-family:var(--texto);font-size:11.5px;color:#111}
+.folha .ph{display:flex;gap:16px;align-items:center;border-bottom:3px solid var(--verde);padding-bottom:10px}
+.folha .ph svg{width:150px;flex:none}
+.folha .ph div{flex:1;text-align:right;font-size:10.5px;line-height:1.5;color:var(--azul)}
+.folha h4{font-family:var(--titulo);text-transform:uppercase;letter-spacing:.04em;font-size:13px;color:#fff;background:var(--azul);padding:5px 8px;margin:14px 0 0}
+.folha .tit{text-align:center;font-family:var(--titulo);text-transform:uppercase;font-size:15px;color:var(--azul);margin:12px 0 8px;letter-spacing:.05em}
+.folha table{width:100%;border-collapse:collapse}
+.folha td,.folha th{border:1px solid #c9d2db;padding:4px 6px;text-align:left;vertical-align:top}
+.folha th{background:var(--azul10);font-size:10px;text-transform:uppercase}
+.folha .qtd{text-align:right;font-weight:700;padding:3px 6px;background:#f5f7f9;border:1px solid #c9d2db;border-top:0}
+.folha .rod{display:flex;justify-content:space-between;margin-top:18px;border-top:1px solid #c9d2db;padding-top:6px;font-size:10px;color:var(--muted)}
+.marca-agua{font-size:11px;color:var(--muted);text-align:center;margin:10px 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="marca" href="#/relatorio" aria-label="Início">
+      <span id="simbolo-top"></span>
+      <b>RLT · CCM<span>Passagem de Turno</span></b>
+    </a>
+    <div class="esp"></div>
+    <details class="conta" id="conta"></details>
+  </div>
+  <div class="faixa"></div>
+</header>
+<div class="app">
+  <nav class="lado" id="nav-lado" aria-label="Menu"></nav>
+  <main id="tela" tabindex="-1"></main>
+</div>
+<nav class="baixo" id="nav-baixo" aria-label="Menu"></nav>
+
+<script src="dados-referencia.js"></script>
+<script>
+"use strict";
+/* ========= Utilidades ========= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2, "0");
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const parse = s => s ? new Date(s.length === 10 ? s + "T00:00" : s) : null;
+const fmtData = s => { const d = parse(s); return d ? `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}` : ""; };
+const fmtDH = s => { const d = parse(s); return d ? `${fmtData(s)} ${pad(d.getHours())}:${pad(d.getMinutes())}` : ""; };
+const fmtPonto = s => fmtData(s).replace(/\//g, ".");
+const addDias = (iso, n) => { const d = parse(iso); d.setDate(d.getDate() + n); return toISO(d).slice(0, 10); };
+const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/\s+/g, " ").trim();
+const agoraISO = () => toISO(new Date());
+let seq = 100;
+const novoId = () => "r" + (++seq);
+
+function simbolo(mono) {
+  // Símbolo redesenhado de forma aproximada para o protótipo — substituir pelo arquivo oficial da marca.
+  const c = mono ? ["#fff","#fff","#fff","#fff"] : ["#003863", "#B5BD00", "#F38B00", "#C3002F"];
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="46,2 2,98 17,89" fill="${c[0]}"/><polygon points="46,2 17,89 37,76" fill="${c[1]}" ${mono?'opacity=".9"':''}/><polygon points="54,2 63,76 83,89" fill="${c[2]}" ${mono?'opacity=".9"':''}/><polygon points="54,2 83,89 98,98" fill="${c[3]}"/></svg>`;
+}
+function marcaCompleta() {
+  return `<svg viewBox="0 0 330 70" role="img" aria-label="Aeroporto de Brasília">${simbolo(false).replace('<svg viewBox="0 0 100 100" aria-hidden="true">','<g transform="translate(0,2) scale(.66)">').replace('</svg>','</g>')}<text x="76" y="30" font-family="Helvetica Neue,Helvetica,Arial" font-size="22" font-weight="300" fill="#003863">Aeroporto de</text><text x="76" y="60" font-family="Helvetica Neue,Helvetica,Arial" font-size="30" font-weight="700" fill="#003863">Brasília</text></svg>`;
+}
+const ICO = {
+  rel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+  pend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 3"/></svg>',
+  lider:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg>',
+  fechar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l16-8-6 16-2-7z"/></svg>',
+  pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg>',
+  mais:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>',
+  alerta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>',
+  voltar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>'
+};
+
+/* ========= Domínio (regras do PRD) ========= */
+const SECOES = [
+  { id:"elm",  nome:"Eletromecânica",   tipo:"corretiva", titulo:"MANUT. CORRETIVA NÃO PROGRAMADA – ELETROMECÂNICA" },
+  { id:"ele",  nome:"Eletroeletrônica", tipo:"corretiva", titulo:"MANUT. CORRETIVA NÃO PROGRAMADA – ELETROELETRÔNICA" },
+  { id:"bhs",  nome:"BHS",              tipo:"corretiva", titulo:"MANUT. CORRETIVA NÃO PROGRAMADA – BHS" },
+  { id:"civ",  nome:"Civil",            tipo:"corretiva", titulo:"MANUT. CORRETIVA NÃO PROGRAMADA – CIVIL" },
+  { id:"out",  nome:"Outros",           tipo:"corretiva", titulo:"OUTROS" },
+  { id:"fq",   nome:"Fator Q (Z9)",     tipo:"fq",        titulo:"MANUT. CORRETIVA NÃO PROGRAMADA – FATOR Q (Z9)" },
+  { id:"prev", nome:"Preventiva (ZM02)",tipo:"prev",      titulo:"MANUT. PREVENTIVA – (ZM02)" },
+  { id:"ios",  nome:"IOS informados",   tipo:"ios",       titulo:"IOS INFORMADOS AO CCM" }
+];
+const SEC = Object.fromEntries(SECOES.map(s => [s.id, s]));
+const ST_ATIV = ["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"];                       // RN-023
+const ST_IOS = ["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"]; // RN-012
+const ABERTOS = ["PENDENTE", "EM ANDAMENTO"];                                      // RN-009
+const DESTINATARIOS = ["Manutencao_Civil_SBBR","SupervisoresBHS","eletroeletronica","Eletromecanica","WCirilo","JValadao","admcomercial","NCampos","LideresVip_SBBR","LideresAtendimento_SBBR"].map(x => x + "@inframerica.aero"); // RN-005
+const TIPO_SAP = { ELEV:"Elevador", ESCR:"Escada/esteira", ESRO:"Escada/esteira", BHSI:"Bagagem", PEBD:"Ponte de embarque" }; // RN-018
+const tipoEquip = cod => cod ? (TIPO_SAP[cod.slice(0, 4)] || "Outro") : "Sem tipo";
+const stClass = s => "st-" + norm(s).replace(/\s*\(NI\)/, "").replace(/ /g, "_").replace("NAO_INFORMADO", "NAO_INFORMADO");
+const chip = s => s ? `<span class="chip ${stClass(s)}">${esc(s)}</span>` : `<span class="chip st-NAO_INFORMADO">Sem status</span>`;
+const cargo = nome => (PESSOAS.find(p => p[0] === nome) || [])[1] || "";
+// Perfil no plantão, tirado do cargo da lista de pessoas (tbl_rh)
+function perfil(nome) {
+  const c = norm(cargo(nome));
+  if (c.includes("LIDER")) return "Líder";
+  if (/TECN/.test(c)) return "Técnico(a)";
+  if (c.includes("OPERAD")) return "Operador(a)";
+  return "Gestão";
+}
+const entraNoPlantao = nome => !!nome; // decisão de 19/11: acesso igual para todos, gestão inclusive (tudo vai ao histórico)
+const iniciais = nome => nome.split(" ").filter(Boolean).map(p => p[0]).slice(0, 2).join("").toUpperCase();
+const achaEquip = desc => EQUIP.find(e => norm(e[1]) === norm(desc));
+
+// RN-001/RN-003: janela do turno e data do relatório (Bravo = data em que o plantão termina)
+function janela(turno, data) {
+  return turno === "ALFA"
+    ? { ini: data + "T07:00", fim: data + "T19:00" }
+    : { ini: addDias(data, -1) + "T19:00", fim: data + "T07:00" };
+}
+function proximoTurno(turno, data) { return turno === "ALFA" ? { turno:"BRAVO", data: addDias(data, 1) } : { turno:"ALFA", data }; }
+const nomePDF = r => `RLT-PASSAGEM DE TURNO ${r.turno} ${fmtPonto(r.data)}`; // RN-004
+
+// RN-010 (alteração de 19/11): preencher a hora de conclusão muda o status para concluído
+const stConcluido = sec => SEC[sec].tipo === "ios" ? "Concluído" : "CONCLUÍDO";
+const stAberto = sec => SEC[sec].tipo === "ios" ? "Em andamento" : "EM ANDAMENTO";
+function aplicaConclusao(it, fim) {
+  it.fim = fim || "";
+  it.fimTipo = fim ? "data" : "";
+  if (it.falso) return;
+  if (fim) { if (it.status !== stConcluido(it.sec)) it.statusAntes = it.status; it.status = stConcluido(it.sec); }
+  else if (it.status === stConcluido(it.sec)) it.status = it.statusAntes || stAberto(it.sec); // volta ao status de antes
+}
+function textoFim(it) {
+  if (it.fim) return fmtDH(it.fim);
+  if (it.fimTipo === "ni") return "N/I";
+  if (it.status === "PENDENTE") return "–";
+  return "";
+}
+const ehAberto = it => ["corretiva", "fq", "prev"].includes(SEC[it.sec].tipo) && ABERTOS.includes(it.status);
+
+/* ========= Estado (dados de exemplo baseados nas planilhas de outubro/2026) ========= */
+const S = {
+  usuario: "Deanne Cristina",
+  // Equipe do plantão: quem fez login durante o turno (só perfis Líder, Técnico e Operador)
+  relatorio: { id:"R1", turno:"BRAVO", data:"2026-11-18", status:"aberto", equipe:[
+    { nome:"Valério Melo", desde:"2026-11-17T18:52" }, { nome:"Deanne Cristina", desde:"2026-11-17T18:55" },
+    { nome:"Pedro Henrique", desde:"2026-11-17T18:58" }, { nome:"Lídia Souza", desde:"2026-11-17T19:01" } ] },
+  itens: [],
+  historico: [],
+  fechados: []
+};
+function semente() {
+  const e = d => { const x = achaEquip(d); return x ? x[0] : ""; };
+  const L = [
+    { sec:"elm", desc:"Filtro caindo na PF, embarque armado. MQ1 comunicou que a demanda será tratada no próximo turno.", local:"PIER SUL - 1º PAV - EMB. DOMÉSTICO", ini:"2026-11-14T11:08", fimTipo:"traco", status:"PENDENTE", herdada:true },
+    { sec:"elm", desc:"Fancoil com conexão do dreno solta, causando pequeno vazamento.", local:"PORTÃO 39", ini:"2026-11-17T21:26", fimTipo:"data", fim:"2026-11-17T23:03", status:"CONCLUÍDO" },
+    { sec:"ele", desc:"Lâmpada inoperante na sala de reuniões da Sala VIP Expansão.", local:"SALA VIP EXPANSÃO - SAGUÃO", ini:"2026-11-17T19:16", fimTipo:"data", fim:"2026-11-18T04:47", status:"CONCLUÍDO" },
+    { sec:"ele", desc:"Apoio para instalação de quadro de força móvel na praça.", local:"PRAÇA PICK-UP", ini:"2026-11-17T21:12", fimTipo:"data", fim:"2026-11-17T21:38", status:"CONCLUÍDO" },
+    { sec:"bhs", desc:"Raio-X 07 do Embarque Doméstico com pórtico desregulado.", local:"CORPO CENTRAL - 1º PAV - RAIO X DOM", ini:"2026-11-17T20:12", fimTipo:"data", fim:"2026-11-17T20:43", status:"CONCLUÍDO" },
+    { sec:"civ", desc:"Bebedouros com baixa vazão nos novos banheiros do mezanino, Píer Norte.", local:"PIER NORTE - 1º PAV - EMB. DOMÉSTICO", ini:"2026-11-16T18:50", fimTipo:"traco", status:"PENDENTE", herdada:true },
+    { sec:"civ", desc:"Reparo em maçaneta de porta na Sala de Operações do CCO.", local:"CCO - 2º ANDAR", ini:"2026-11-17T22:05", fimTipo:"data", fim:"2026-11-17T23:24", status:"CONCLUÍDO" },
+    { sec:"civ", desc:"WC feminino da Rampa A com vazamento no 5º box. Registro fechado, aguardando equipe.", local:"1º PAV RAMPA A - WC  FEMININO", ini:"2026-11-18T03:55", fimTipo:"traco", status:"PENDENTE" },
+    { sec:"out", desc:"Vazamentos na cobertura da praça de serviço (Polícia Civil e drogaria), aguardando correção da cobertura.", local:"COBERTURA PRAÇA DE SERVIÇO", ini:"2026-11-03T07:00", fimTipo:"traco", status:"PENDENTE", herdada:true },
+    { sec:"out", desc:"Limpeza técnica no Box 12.", local:"PAVIMENTO DOS PÁTIOS DE AERONAVES", ini:"2026-11-17T20:28", fimTipo:"data", fim:"2026-11-17T20:28", status:"CONCLUÍDO" },
+    { sec:"out", desc:"Forced Door na porta da escada de serviços da ponte PEBD 26.", local:"PORTÃO 48 (REMOTO) / 49 (DOM)", ini:"2026-11-17T21:19", fimTipo:"data", fim:"2026-11-17T23:25", status:"CONCLUÍDO" },
+    { sec:"fq", equip:"ESR-14 ESTEIRA ROLANTE PIER NORTE", cod:e("ESR-14 ESTEIRA ROLANTE PIER NORTE"), num:"90050981", ini:"2026-11-08T09:39", fimTipo:"traco", status:"PENDENTE", herdada:true },
+    { sec:"fq", equip:"E14 - DESEMBARQUE INTERNACIONAL", cod:e("E14 - DESEMBARQUE INTERNACIONAL"), num:"90051210", ini:"2026-11-17T21:40", fimTipo:"data", fim:"2026-11-17T22:15", status:"CONCLUÍDO" },
+    { sec:"fq", equip:"ELEVADOR DO ANEXO ADMINISTRATIVO", cod:"", num:"90051233", ini:"2026-11-17T23:05", fimTipo:"vazio", status:"EM ANDAMENTO" },
+    { sec:"fq", equip:"ER01 - SATÉLITE NORTE", cod:e("ER01 - SATÉLITE NORTE"), num:"90051240", ini:"2026-11-18T00:12", fimTipo:"data", fim:"2026-11-18T00:20", status:"CHAMADO FALSO", falso:true },
+    { sec:"prev", equip:"ESR-04 ESTEIRA ROLANTE PIER SUL", cod:e("ESR-04 ESTEIRA ROLANTE PIER SUL"), num:"20418785", ini:"2026-11-17T22:00", fimTipo:"data", fim:"2026-11-18T04:00", status:"CONCLUÍDO" },
+    { sec:"prev", equip:"PONTE DE EMBARQUE /DESEMBARQUE 26", cod:e("PONTE DE EMBARQUE /DESEMBARQUE 26"), num:"20418790", ini:"2026-11-18T01:00", fimTipo:"ni", status:"EM ANDAMENTO" },
+    { sec:"ios", desc:"Implementação do sistema 5G – Highline.", num:"20260927", ini:"2026-11-17T22:17", fimTipo:"vazio", status:"Em andamento" },
+    { sec:"ios", desc:"Manutenção corretiva e preventiva de circuitos de iluminação e tomadas.", num:"20261204", ini:"2026-11-18T03:13", fimTipo:"data", fim:"2026-11-18T04:04", status:"Concluído" },
+    { sec:"ios", desc:"Pintura em corrimãos, guarda-corpos e estruturas metálicas.", num:"20260681", ini:"2026-11-17T23:13", fimTipo:"ni", status:"Não informado (NI)" }
+  ];
+  S.itens = L.map(x => ({ id:novoId(), rel:"R1", anexos:[], ...x }));
+  const h = (q, w, it, c) => S.historico.push({ quem:q, quando:w, item:it, campo:c, rel:"R1" });
+  S.relatorio.equipe.forEach(p => h(p.nome, p.desde, null, "Entrou no plantão (login)"));
+  h("Lídia Souza", "2026-11-17T21:27", S.itens[1].id, "Registro criado");
+  h("Deanne Cristina", "2026-11-17T23:04", S.itens[1].id, "Hora de conclusão");
+  h("Deanne Cristina", "2026-11-17T23:04", S.itens[1].id, "Status");
+  h("Lídia Souza", "2026-11-17T23:06", S.itens[13].id, "Registro criado");
+  h("Pedro Henrique", "2026-11-18T00:21", S.itens[14].id, "Chamado falso");
+  h("Deanne Cristina", "2026-11-18T02:10", S.itens[0].id, "Descrição");
+}
+semente();
+
+const relAtual = () => S.relatorio;
+const itensRel = () => S.itens.filter(i => i.rel === relAtual().id);
+const itensSec = id => itensRel().filter(i => i.sec === id);
+const fqSemSap = () => itensRel().filter(i => i.sec === "fq" && !i.cod);
+const fechado = () => relAtual().status !== "aberto";
+const rotuloItem = it => it ? (it.desc || it.equip || "(sem descrição)") : "(registro)";
+function registrar(item, campo) { S.historico.push({ quem:S.usuario, quando:agoraISO(), item:item.id, campo, rel:item.rel }); }
+function toast(msg) {
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; t.setAttribute("role", "status");
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+
+/* ========= Navegação ========= */
+const NAV = [
+  { r:"relatorio", t:"Relatório", i:"rel" },
+  { r:"pendencias", t:"Chamados", i:"pend", n:() => itensRel().filter(ehAberto).length },
+  { r:"historico", t:"Histórico", i:"hist" },
+  { r:"lider", t:"Painel geral", i:"lider", n:() => fqSemSap().length, alerta:true },
+  { r:"fechar", t:"Fechar", i:"fechar" }
+];
+function desenhaNav(atual) {
+  const html = NAV.map(n => {
+    const c = n.n ? n.n() : 0;
+    return `<a href="#/${n.r}" class="${atual === n.r ? "on" : ""}" ${atual === n.r ? 'aria-current="page"' : ""}>${ICO[n.i]}<span>${n.t}</span>${c && n.alerta ? `<span class="bolha">${c}</span>` : ""}</a>`;
+  }).join("");
+  $("#nav-lado").innerHTML = html; $("#nav-baixo").innerHTML = html;
+}
+// Conta logada. No app real o nome vem do login Microsoft (Entra ID) e o perfil da lista de pessoas.
+function desenhaUsuario() {
+  const u = S.usuario, primeiro = u.split(" ")[0];
+  $("#conta").innerHTML = `<summary aria-label="Conta: ${esc(u)}"><span class="nome"><b>${esc(u)}</b><span>${esc(perfil(u))} · ${esc(cargo(u).toLowerCase())}</span></span><span class="avatar">${esc(iniciais(u))}</span></summary>
+    <div class="menu pilha">
+      <div><b>${esc(u)}</b><div class="small muted">${esc(perfil(u))} – ${esc(cargo(u))}</div></div>
+      <div class="small">${noPlantao(u) ? `Você está na equipe do plantão ${relAtual().turno} ${fmtPonto(relAtual().data)} e seu nome vai no PDF.` : "Você não está na equipe deste plantão."} Todas as suas alterações ficam no histórico.</div>
+      <label class="small muted" style="font-weight:700">Simular login de outra pessoa
+      <select id="troca-conta">${PESSOAS.map(p => `<option ${p[0] === u ? "selected" : ""} value="${esc(p[0])}">${esc(p[0])} – ${esc(perfil(p[0]))}</option>`).join("")}</select></label>
+      <span class="small muted">Só no protótipo. No app, cada pessoa entra com a própria conta.</span>
+    </div>`;
+  $("#troca-conta").addEventListener("change", e => login(e.target.value));
+}
+const noPlantao = nome => relAtual().equipe.some(p => p.nome === nome);
+function login(nome) {
+  S.usuario = nome; $("#conta").open = false;
+  const r = relAtual();
+  if (!fechado() && entraNoPlantao(nome) && !noPlantao(nome)) {
+    r.equipe.push({ nome, desde:agoraISO() });
+    S.historico.push({ quem:nome, quando:agoraISO(), item:null, campo:"Entrou no plantão (login)", rel:r.id });
+    toast(`${nome} entrou na equipe do plantão como ${perfil(nome)}.`);
+  } else toast(`Conectado como ${nome}.`);
+  rota();
+}
+document.addEventListener("click", e => { if (!e.target.closest("#conta")) $("#conta").open = false; });
+$("#simbolo-top").innerHTML = simbolo(true);
+
+function rota() {
+  const [, r = "relatorio", a, b, c] = location.hash.split("/");
+  const telas = { relatorio:telaRelatorio, secao:telaSecao, item:telaItem, pendencias:telaPendencias, historico:telaHistorico, lider:telaLider, fechar:telaFechar, pdf:telaPDF, inicio:telaInicio };
+  const f = telas[r] || telaRelatorio;
+  desenhaNav(r === "item" && c === "c" ? "pendencias" : ["secao", "item", "pdf", "inicio"].includes(r) ? "relatorio" : r);
+  desenhaUsuario();
+  $("#tela").innerHTML = f(a, b, c);
+  if (f.depois) f.depois(a, b, c);
+  $("#tela").focus({ preventScroll:true }); window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", rota);
+
+/* ========= Telas ========= */
+function bannerFechado() {
+  return fechado() ? `<div class="aviso info">${ICO.info}<div><b>Relatório fechado e enviado.</b> Somente leitura: o PDF enviado não muda nem ganha nova versão (RNF-005). <a href="#/inicio">Abrir o próximo plantão</a></div></div>` : "";
+}
+const ORDEM_PERFIL = ["Líder", "Técnico(a)", "Operador(a)", "Gestão"];
+const equipeOrdenada = r => r.equipe.slice().sort((a, b) => ORDEM_PERFIL.indexOf(perfil(a.nome)) - ORDEM_PERFIL.indexOf(perfil(b.nome)) || a.nome.localeCompare(b.nome));
+// Em aberto para a tela: atividades PENDENTE/EM ANDAMENTO e IOS ainda não concluídos nem cancelados
+const emAberto = i => ehAberto(i) || (SEC[i.sec].tipo === "ios" && !["Concluído", "Cancelado"].includes(i.status));
+const plural = (n, s, p) => `${n} ${n === 1 ? s : (p || s + "s")}`;
+function equipeChips(r, pode) {
+  return equipeOrdenada(r).map(p => `<span class="pessoa"><span class="avatar">${esc(iniciais(p.nome))}</span><span><b>${esc(p.nome)}</b><small>${esc(perfil(p.nome))} · login ${fmtDH(p.desde).slice(11)}</small></span>${pode ? `<button type="button" data-sai="${esc(p.nome)}" title="Tirar da equipe" aria-label="Tirar ${esc(p.nome)} da equipe">×</button>` : ""}</span>`).join("") || `<span class="muted">Ninguém da equipe fez login ainda.</span>`;
+}
+// Barra de andamento do turno: só aparece enquanto o turno está em curso
+function andamentoTurno(r) {
+  const j = janela(r.turno, r.data), ini = parse(j.ini), fim = parse(j.fim), agora = new Date();
+  if (fechado() || agora < ini || agora > fim) return "";
+  const pct = Math.round((agora - ini) / (fim - ini) * 100), min = Math.round((fim - agora) / 6e4);
+  return `<div class="turno-barra" title="${pct}% do turno"><span style="width:${pct}%"></span></div><div class="small muted">Faltam ${Math.floor(min / 60)}h${pad(min % 60)} para o fim do turno</div>`;
+}
+function telaRelatorio() {
+  const r = relAtual(), its = itensRel(), j = janela(r.turno, r.data), ro = fechado();
+  const abertos = its.filter(emAberto).length;
+  const concl = its.filter(i => !emAberto(i)).length;
+  const herd = its.filter(i => i.herdada && emAberto(i)).length;
+  const conferir = pendenciasDeFechamento().length;
+  const sem = fqSemSap();
+  const recentes = S.historico.filter(h => h.rel === r.id).slice().sort((a, b) => b.quando.localeCompare(a.quando)).slice(0, 6);
+  const kpi = (n, rot, href, cls) => `<a class="kpi kpi-l ${cls}" href="${href}"><b>${n}</b><span>${rot}</span></a>`;
+  return `
+  <div class="titulo-pag"><div><h1>Relatório ${r.turno} ${fmtPonto(r.data)}</h1><div class="linha small muted" style="gap:8px"><span class="tag ${ro ? "" : "ok"}">${ro ? "Fechado" : "Aberto"}</span>${nomePDF(r)}.pdf</div></div>
+  <div class="linha"><a class="btn sec peq" href="#/pdf">${ICO.pdf}Pré-visualizar PDF</a>${ro ? "" : `<a class="btn peq" href="#/fechar">${ICO.fechar}Fechar relatório</a>`}</div></div>
+  <div class="pilha">
+    ${bannerFechado()}
+    ${sem.length ? `<div class="aviso alerta">${ICO.alerta}<div><b>${plural(sem.length, "chamado")} do Fator Q sem código SAP.</b> Corrija no <a href="#/lider">Painel Geral de informações</a>.</div></div>` : ""}
+    <section class="card plantao">
+      <div class="plantao-info">
+        <div><span class="rot">Turno</span><b>${r.turno}</b><small>${r.turno === "ALFA" ? "07:00 às 19:00" : "19:00 às 07:00"}</small></div>
+        <div><span class="rot">Data</span><b>${fmtData(r.data)}</b><small>${fmtDH(j.ini)} → ${fmtDH(j.fim)}</small></div>
+        <div class="plantao-and">${andamentoTurno(r)}</div>
+      </div>
+      <div class="plantao-equipe"><span class="rot">Equipe do plantão (${r.equipe.length})</span><div class="equipe">${equipeChips(r, !ro)}</div></div>
+    </section>
+    <div class="kpis kpis4">
+      ${kpi(abertos, "Em aberto", "#/pendencias/abertos", "k-lar")}
+      ${kpi(concl, "Concluídos ou encerrados", "#/pendencias", "k-ver")}
+      ${kpi(herd, "Herdados ainda abertos", "#/pendencias/abertos", "k-azul")}
+      ${kpi(conferir, "A conferir antes de fechar", "#/fechar", conferir ? "k-verm" : "k-ver")}
+    </div>
+    <div class="rel-grid">
+      <section>
+        <div class="linha" style="justify-content:space-between;margin:2px 0 10px"><h2>Seções</h2><a class="small" href="#/pendencias">Ver todos os chamados</a></div>
+        <div class="sec-grade">
+        ${SECOES.map(s => {
+          const l = itensSec(s.id), ab = l.filter(emAberto).length, ok = l.length - ab;
+          const semSap = s.id === "fq" ? sem.length : 0;
+          return `<div class="sec-tile ${s.tipo === "corretiva" ? "" : s.id}">
+            <a class="sec-main" href="#/secao/${s.id}" aria-label="${esc(s.nome)}: ${plural(l.length, "registro")}">
+              <span class="cap sec-nome">${esc(s.nome)}</span>
+              <span class="sec-num"><b>${l.length}</b>${semSap ? `<span class="tag alerta">${semSap} sem SAP</span>` : ""}</span>
+              <span class="sec-barra" aria-hidden="true">${l.length ? `<i class="ok" style="width:${ok / l.length * 100}%"></i><i class="ab" style="width:${ab / l.length * 100}%"></i>` : ""}</span>
+              <span class="sec-sub">${l.length ? `${ab ? `<em>${ab} em aberto</em> · ` : ""}${ok} concluído${ok === 1 ? "" : "s"}` : "Sem registros"}</span>
+            </a>
+            ${ro ? "" : `<a class="sec-add" href="#/item/${s.id}/novo" aria-label="Novo registro em ${esc(s.nome)}">${ICO.mais}Registrar</a>`}
+          </div>`;
+        }).join("")}
+        </div>
+      </section>
+      <aside class="card recentes">
+        <div class="linha" style="justify-content:space-between"><h3>Últimas alterações</h3><a class="small" href="#/historico">Histórico</a></div>
+        <ul>${recentes.map(h => { const i = S.itens.find(x => x.id === h.item); return `<li><span class="avatar">${esc(iniciais(h.quem))}</span><div><b>${esc(h.quem.split(" ")[0])}</b> · ${esc(h.campo)}${i ? `<br><a href="#/item/${i.sec}/${i.id}">${esc(rotuloItem(i).slice(0, 48))}${rotuloItem(i).length > 48 ? "…" : ""}</a>` : ""}<small>${fmtDH(h.quando)}</small></div></li>`; }).join("") || `<li class="muted">Nada registrado ainda.</li>`}</ul>
+      </aside>
+    </div>
+  </div>`;
+}
+telaRelatorio.depois = () => {
+  document.querySelectorAll("[data-sai]").forEach(b => b.addEventListener("click", () => {
+    const n = b.dataset.sai, r = relAtual();
+    r.equipe = r.equipe.filter(p => p.nome !== n);
+    S.historico.push({ quem:S.usuario, quando:agoraISO(), item:null, campo:`Tirou ${n} da equipe do plantão`, rel:r.id });
+    toast(`${n} saiu da equipe do plantão.`); rota();
+  }));
+};
+function linhaItem(it) {
+  const s = SEC[it.sec], ab = ehAberto(it), erro = it.sec === "fq" && !it.cod;
+  const titulo = s.tipo === "fq" || s.tipo === "prev" ? it.equip : it.desc;
+  const meta = [];
+  if (s.tipo === "corretiva") meta.push(`Local: ${esc(it.local || "—")}`);
+  if (s.tipo === "fq") meta.push(it.cod ? `SAP <span class="cod">${esc(it.cod)}</span> · ${tipoEquip(it.cod)}` : `<b style="color:var(--verm-txt)">Sem código SAP</b>`, `Chamado ${esc(it.num || "—")}`);
+  if (s.tipo === "prev") meta.push(`OS ${esc(it.num || "—")}`);
+  if (s.tipo === "ios") meta.push(`Nº IOS ${esc(it.num || "—")}`);
+  meta.push(`Início ${fmtDH(it.ini)}`);
+  meta.push(`Conclusão ${textoFim(it) || "em aberto"}`);
+  if (it.anexos?.length) meta.push(`${it.anexos.length} anexo${it.anexos.length > 1 ? "s" : ""}`);
+  return `<a class="item ${erro ? "erro" : ab ? "aberto" : "ok"}" href="#/item/${it.sec}/${it.id}">
+    <div class="linha" style="gap:6px">${chip(it.status)}${it.herdada ? `<span class="tag herd">Herdada</span>` : ""}${erro ? `<span class="tag alerta">Sem SAP</span>` : ""}${it.status === "Cancelado" ? `<span class="tag alerta">Motivo: ${esc(it.motivo || "—")}</span>` : ""}</div>
+    <div class="t">${esc(titulo || "(sem descrição)")}</div>
+    <div class="meta">${meta.map(m => `<span>${m}</span>`).join("")}</div>
+  </a>`;
+}
+function telaSecao(id) {
+  const s = SEC[id]; if (!s) return telaRelatorio();
+  const l = itensSec(id).sort((a, b) => (b.herdada - a.herdada) || a.ini.localeCompare(b.ini));
+  return `<div class="titulo-pag"><div><a href="#/relatorio" class="small">${ICO.voltar.replace('<svg','<svg style="width:14px;height:14px;vertical-align:-2px"')} Relatório</a><h1 style="margin-top:6px">${esc(s.nome)}</h1><div class="muted small">Quantidade: <b>${l.length}</b> (RF-008)</div></div>
+    ${fechado() ? "" : `<a class="btn" href="#/item/${id}/novo">${ICO.mais}Novo registro</a>`}</div>
+    <div class="pilha">${bannerFechado()}
+    ${s.tipo === "ios" ? `<div class="aviso info">${ICO.info}<div>Preenchimento manual, a partir do que o responsável informa ao CCM. Mostrar só IOS vigentes (RN-013) depende da decisão sobre IOS concluídos e cancelados no PDF (Lacuna).</div></div>` : ""}
+    <div class="lista">${l.length ? l.map(linhaItem).join("") : `<div class="card vazio">Nenhum registro nesta seção.${fechado() ? "" : ` <a href="#/item/${id}/novo">Registrar o primeiro</a>`}</div>`}</div></div>`;
+}
+
+/* ----- Formulário de registro ----- */
+let F = null; // estado do formulário aberto
+function telaItem(secId, itemId, origem) {
+  const s = SEC[secId]; if (!s) return telaRelatorio();
+  const orig = itemId === "novo" ? null : S.itens.find(i => i.id === itemId);
+  const j = janela(relAtual().turno, relAtual().data);
+  // Novo registro: início sugerido 1 h depois do começo do turno (o usuário ajusta)
+  const base = orig ? { ...orig, anexos:[...(orig.anexos || [])] } : { id:null, sec:secId, rel:relAtual().id, ini:j.ini.slice(0, 11) + (relAtual().turno === "ALFA" ? "08:00" : "20:00"), fim:"", fimTipo:"", status:stAberto(secId), cod:"", anexos:[] };
+  const volta = origem === "c" ? { href:"#/pendencias", nome:"Chamados do plantão" } : { href:`#/secao/${secId}`, nome:s.nome };
+  F = { s, orig, d:base, volta, fimAntes:base.fim || "", fora: !!(orig && s.tipo === "fq" && !orig.cod && orig.equip) };
+  const ro = fechado();
+  const herdTxt = orig && orig.herdada ? `<div class="aviso atencao">${ICO.info}<div><b>Pendência herdada.</b> A data de início original (${fmtDH(orig.ini)}) é mantida (RN-009). Atualize o status e a descrição (RF-011).</div></div>` : "";
+  return `<div class="titulo-pag"><div><a href="${volta.href}" class="small">${ICO.voltar.replace('<svg','<svg style="width:14px;height:14px;vertical-align:-2px"')} ${esc(volta.nome)}</a><h1 style="margin-top:6px">${orig ? "Registro" : "Novo registro"}</h1><div class="muted small">${esc(s.nome)}</div></div>
+    ${orig ? `<a class="btn sec peq" href="#/historico/${orig.id}">${ICO.hist}Histórico deste registro</a>` : ""}</div>
+  <form id="form" class="pilha" novalidate>
+    ${bannerFechado()}${herdTxt}
+    <fieldset class="card pilha" style="border:1px solid var(--line)" ${ro ? "disabled" : ""}>
+      ${camposPorTipo(s, base, orig)}
+      ${campoAnexos(base)}
+    </fieldset>
+    <div id="avisos" class="pilha"></div>
+    ${ro ? "" : `<div class="acoes"><a class="btn sec" href="${volta.href}">Cancelar</a><button class="btn" type="submit">Salvar</button></div>`}
+  </form>`;
+}
+function campoDesc(rotulo, v, req = true) {
+  return `<div class="campo"><label for="f-desc">${rotulo} ${req ? '<span class="ob">*</span>' : ""}</label><textarea id="f-desc" name="desc" maxlength="600">${esc(v || "")}</textarea></div>`;
+}
+function campoIni(v, travado) {
+  return `<div class="campo"><label for="f-ini">Início (data e hora) <span class="ob">*</span></label><input type="datetime-local" id="f-ini" name="ini" value="${esc(v || "")}" ${travado ? "readonly" : ""}>${travado ? `<span class="ajuda">Data de início original da pendência, não editável.</span>` : ""}</div>`;
+}
+// Hora de conclusão: é o campo principal do chamado. Preencher muda o status para concluído.
+function campoConclusao(d) {
+  return `<div class="campo"><label for="f-fim">Hora de conclusão</label>
+    <div class="linha"><input type="datetime-local" id="f-fim" name="fim" value="${esc(d.fim || "")}" style="flex:1;min-width:210px;min-height:44px;border:1px solid #c5ced7;border-radius:8px;padding:9px 11px">
+    <button type="button" class="btn sec peq" id="f-agora">Agora</button><button type="button" class="btn sec peq" id="f-limpa">Limpar</button></div>
+    <span class="ajuda" id="ajuda-fim"></span></div>`;
+}
+// N/I (RN-015): fica embaixo do Início
+const campoNI = d => `<label class="check" id="bloco-ni" style="margin-top:8px"><input type="checkbox" id="f-ni" ${d.fimTipo === "ni" && !d.fim ? "checked" : ""}><span><b>N/I – não informado</b></span></label>`;
+const opcoesStatus = (s, d) => {
+  if (d.falso) return ["CHAMADO FALSO"];
+  if (!d.fim && d.fimTipo === "ni") return [s.tipo === "ios" ? "Não informado (NI)" : "EM ANDAMENTO"];
+  const base = s.tipo === "ios" ? ST_IOS : ST_ATIV;
+  // Concluído só com hora de conclusão; sem hora, ficam os status de aberto
+  // Com hora de conclusão a lista fica completa (CONCLUÍDO vem marcado, mas pode ser trocado)
+  return d.fim ? base : base.filter(o => o !== stConcluido(s.id));
+};
+function campoStatus(s, d) {
+  const ios = s.tipo === "ios";
+  const falso = s.tipo === "corretiva" || s.tipo === "fq";
+  return `<div class="duas"><div class="campo"><label for="f-status">${ios ? "Status do IOS" : "Status"} <span class="ob">*</span></label>
+    <select id="f-status" name="status">${opcoesStatus(s, d).map(o => `<option ${d.status === o ? "selected" : ""}>${o}</option>`).join("")}</select>
+    <span class="ajuda" id="ajuda-status"></span></div>
+    ${ios ? `<div class="campo" id="bloco-motivo" style="${d.status === "Cancelado" ? "" : "display:none"}"><label for="f-motivo">Motivo do cancelamento <span class="ob">*</span></label><input type="text" id="f-motivo" name="motivo" value="${esc(d.motivo || "")}"><span class="ajuda">Obrigatório para IOS cancelado (RN-014).</span></div>` : "<div></div>"}</div>
+    ${falso ? `<label class="check"><input type="checkbox" name="falso" id="f-falso" ${d.falso ? "checked" : ""}><span><b>Chamado falso</b><br><span class="muted small">Status CHAMADO FALSO: conta como encerrado, não vira pendência e fica fora de preventiva x corretiva (RN-011${s.tipo === "fq" ? "" : "; nesta seção, conforme a proposta do PRD 1.2"}).</span></span></label>` : ""}`;
+}
+// Anexos (substitui a seção Apêndice): fotos ou arquivos ligados ao próprio chamado
+function campoAnexos(d) {
+  return `<div class="campo"><span class="lbl">Fotos e arquivos <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">(opcional)</span></span>
+    <div class="anexos" id="lista-anexos">${listaAnexos(d.anexos, true)}</div>
+    <div class="linha">
+      <label class="btn sec peq" style="cursor:pointer">Tirar foto<input type="file" id="f-foto" accept="image/*" capture="environment" style="display:none"></label>
+      <label class="btn sec peq" style="cursor:pointer">Anexar arquivo<input type="file" id="f-arq" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" style="display:none"></label>
+    </div>
+    <span class="ajuda">Fotos aparecem no PDF, no fim do relatório. Outros arquivos ficam guardados com o chamado e são listados no PDF.</span></div>`;
+}
+function listaAnexos(l, editavel) {
+  return (l || []).map((a, k) => `<span class="anexo">${a.url ? `<img src="${esc(a.url)}" alt="">` : `${ICO.pdf.replace('<svg', '<svg style="width:22px;height:22px"')}`}<span>${esc(a.nome)}<br><span class="muted">${(a.tam / 1024).toFixed(0)} KB</span></span>${editavel ? `<button type="button" data-tira="${k}" aria-label="Remover ${esc(a.nome)}">×</button>` : ""}</span>`).join("");
+}
+function camposLocal(d) {
+  const amplos = [...new Set(LOCAIS.map(l => l[2]))];
+  const atual = LOCAIS.find(l => norm(l[3]) === norm(d.local));
+  const amplo = atual ? atual[2] : "";
+  return `<div class="duas">
+    <div class="campo"><label for="f-amplo">Local – área</label><select id="f-amplo"><option value="">Selecione…</option>${amplos.map(a => `<option ${a === amplo ? "selected" : ""}>${esc(a)}</option>`).join("")}</select></div>
+    <div class="campo"><label for="f-local">Local – específico <span class="ob">*</span></label><select id="f-local" name="local">${opcoesLocal(amplo, d.local)}</select><span class="ajuda">Lista de 324 locais (código SAP), escolhida em dois passos.</span></div></div>`;
+}
+function opcoesLocal(amplo, sel) {
+  const l = LOCAIS.filter(x => !amplo || x[2] === amplo);
+  const tem = l.some(x => norm(x[3]) === norm(sel));
+  return `<option value="">${amplo ? "Selecione…" : "Escolha a área primeiro"}</option>` + (sel && !tem ? `<option selected>${esc(sel)}</option>` : "") + (amplo ? l.map(x => `<option ${norm(x[3]) === norm(sel) ? "selected" : ""}>${esc(x[3])}</option>`).join("") : "");
+}
+function camposEquip(s, d) {
+  const sel = d.cod ? achaPorCod(d.cod) : null;
+  return `<div class="campo"><span class="lbl">Equipamento <span class="ob">*</span></span>
+    <div id="equip-sel">${blocoEquipSel(sel, d)}</div>
+    <input type="text" id="f-busca" placeholder="Buscar por nome ou código (ex.: ESR-14, E14, PEBD 26)" aria-label="Buscar equipamento" style="${sel || F.fora || d.equip ? "display:none" : ""};min-height:44px;border:1px solid #c5ced7;border-radius:8px;padding:9px 11px">
+    <div class="busca-res" id="f-res" style="display:none"></div>
+    ${s.tipo === "fq" ? `<label class="check" style="margin-top:6px"><input type="checkbox" id="f-fora" ${F.fora ? "checked" : ""}><span>Equipamento fora da lista <span class="muted small">(não bloqueia; vai para o Painel Geral de informações – RN-017)</span></span></label>
+    <input type="text" id="f-equip-livre" placeholder="Descreva o equipamento" value="${esc(F.fora ? d.equip : "")}" style="${F.fora ? "" : "display:none"};min-height:44px;border:1px solid #c5ced7;border-radius:8px;padding:9px 11px" aria-label="Equipamento fora da lista">` : ""}
+  </div>`;
+}
+const achaPorCod = c => EQUIP.find(e => e[0] === c);
+function blocoEquipSel(sel, d) {
+  if (!sel && d && d.equip && !F.fora) return `<div class="sel-equip"><div><b>${esc(d.equip)}</b><div class="small" style="color:var(--verm-txt)">Sem código SAP na lista de equipamentos</div></div><button type="button" class="btn sec peq" id="f-trocar">Trocar</button></div>`;
+  if (!sel) return "";
+  return `<div class="sel-equip"><div><b>${esc(sel[1])}</b><div class="small muted">SAP <span class="cod">${esc(sel[0])}</span> · ${tipoEquip(sel[0])} <span class="muted">(o código aparece no app, não no PDF – RF-018)</span></div></div><button type="button" class="btn sec peq" id="f-trocar">Trocar</button></div>`;
+}
+function camposPorTipo(s, d, orig) {
+  const herd = !!(orig && orig.herdada);
+  const tempo = `<div class="duas"><div>${campoIni(d.ini, herd && s.tipo !== "ios")}${campoNI(d)}</div>${campoConclusao(d)}</div>`;
+  if (s.tipo === "corretiva") return campoDesc("Descrição da atividade", d.desc) + camposLocal(d) + tempo + campoStatus(s, d);
+  if (s.tipo === "fq") return camposEquip(s, d) + `<div class="duas"><div class="campo"><label for="f-num">Nº do chamado <span class="ob">*</span></label><input type="text" id="f-num" name="num" inputmode="numeric" value="${esc(d.num || "")}"></div><div></div></div>` + tempo + campoStatus(s, d);
+  if (s.tipo === "prev") return camposEquip(s, d) + `<div class="duas"><div class="campo"><label for="f-num">Nº da ordem de serviço <span class="ob">*</span></label><input type="text" id="f-num" name="num" inputmode="numeric" value="${esc(d.num || "")}"></div><div></div></div>` + tempo + campoStatus(s, d);
+  return campoDesc("Assunto", d.desc) + `<div class="duas"><div class="campo"><label for="f-num">Nº IOS <span class="ob">*</span></label><input type="text" id="f-num" name="num" inputmode="numeric" maxlength="8" placeholder="20261377" value="${esc(d.num || "")}"><span class="ajuda">Ano + número, 8 dígitos sem barra (RN-016).</span></div><div></div></div>` + tempo + campoStatus(s, d);
+}
+telaItem.depois = () => {
+  const f = $("#form"); if (!f) return;
+  const s = F.s;
+  // A hora de conclusão manda no status: preenchida = concluído; vazia = aberto (o usuário escolhe qual)
+  let ultimoAberto = F.d.fim ? (F.d.statusAntes || stAberto(s.id)) : F.d.status;
+  const atualizaFim = () => {
+    const fim = $("#f-fim").value, st = $("#f-status");
+    const antes = st.value;
+    if (!fim && !F.niAntes && antes && antes !== stConcluido(s.id) && antes !== "CHAMADO FALSO") ultimoAberto = antes;
+    F.d.fim = fim;
+    const ni = !fim && $("#f-ni").checked;
+    $("#bloco-ni").style.display = fim ? "none" : "";
+    if (fim) $("#f-ni").checked = false;
+    F.d.fimTipo = fim ? "data" : ni ? "ni" : "";
+    const stNI = s.tipo === "ios" ? "Não informado (NI)" : "EM ANDAMENTO";
+    if (!ni && antes === "Não informado (NI)" && F.niAntes) ultimoAberto = stAberto(s.id);
+    const fimNovo = fim && !F.fimAntes; // hora acabou de ser preenchida (digitada ou botão Agora)
+    F.d.status = F.d.falso ? "CHAMADO FALSO" : fim ? (fimNovo ? stConcluido(s.id) : antes) : ni ? stNI : (antes === stConcluido(s.id) || F.niAntes ? ultimoAberto : antes);
+    F.niAntes = ni; F.fimAntes = fim;
+    st.innerHTML = opcoesStatus(s, F.d).map(o => `<option ${F.d.status === o ? "selected" : ""}>${o}</option>`).join("");
+    st.disabled = !!(F.d.falso || ni);
+    $("#ajuda-status").innerHTML = F.d.falso ? "Chamado falso não vira pendência."
+      : fim && F.d.status === stConcluido(s.id) ? `<b>${stConcluido(s.id)}</b> porque a hora de conclusão foi preenchida. Você pode trocar o status na lista.`
+      : fim ? `Status escolhido manualmente; a hora de conclusão continua registrada.`
+      : ni ? `<b>${stNI}</b> porque está marcado N/I. Continua aberto e passa para o próximo turno.`
+      : "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.";
+    $("#ajuda-fim").textContent = fim ? "" : "Preencha quando o chamado for concluído. O status muda sozinho.";
+    const m = $("#bloco-motivo"); if (m) m.style.display = st.value === "Cancelado" ? "" : "none";
+    validaAoVivo();
+  };
+  $("#f-fim")?.addEventListener("input", atualizaFim);
+  $("#f-agora")?.addEventListener("click", () => { $("#f-fim").value = agoraISO(); F.fimAntes = ""; atualizaFim(); }); // Agora sempre marca CONCLUÍDO
+  $("#f-limpa")?.addEventListener("click", () => { $("#f-fim").value = ""; atualizaFim(); });
+  $("#f-ni")?.addEventListener("change", atualizaFim);
+  $("#f-ini")?.addEventListener("input", validaAoVivo);
+  $("#f-status")?.addEventListener("change", e => {
+    F.d.status = e.target.value; if (e.target.value !== stConcluido(s.id)) ultimoAberto = e.target.value;
+    atualizaFim();
+  });
+  $("#f-falso")?.addEventListener("change", e => {
+    F.d.falso = e.target.checked;
+    if (!F.d.falso) F.d.status = ultimoAberto;
+    atualizaFim();
+  });
+  // Anexos
+  const leAnexos = files => [...files].forEach(file => {
+    const a = { nome:file.name, tipo:file.type, tam:file.size };
+    const fim = () => { F.d.anexos.push(a); $("#lista-anexos").innerHTML = listaAnexos(F.d.anexos, true); };
+    if (file.type.startsWith("image/")) { const rd = new FileReader(); rd.onload = () => { a.url = rd.result; fim(); }; rd.readAsDataURL(file); }
+    else fim();
+  });
+  $("#f-foto")?.addEventListener("change", e => { leAnexos(e.target.files); e.target.value = ""; });
+  $("#f-arq")?.addEventListener("change", e => { leAnexos(e.target.files); e.target.value = ""; });
+  $("#lista-anexos")?.addEventListener("click", e => {
+    const b = e.target.closest("[data-tira]"); if (!b || fechado()) return;
+    F.d.anexos.splice(+b.dataset.tira, 1); $("#lista-anexos").innerHTML = listaAnexos(F.d.anexos, true);
+  });
+  $("#f-amplo")?.addEventListener("change", e => { $("#f-local").innerHTML = opcoesLocal(e.target.value, ""); });
+  // Equipamento
+  const busca = $("#f-busca"), res = $("#f-res");
+  if (busca) {
+    busca.addEventListener("input", () => {
+      const q = norm(busca.value); if (q.length < 2) { res.style.display = "none"; return; }
+      const prefer = F.s.tipo === "fq" ? e => !e[0].startsWith("BHSI") : () => true;
+      const l = EQUIP.filter(e => norm(e[1]).includes(q) || norm(e[0]).includes(q)).sort((a, b) => prefer(b) - prefer(a)).slice(0, 30);
+      res.innerHTML = l.length ? l.map(e => `<button type="button" data-cod="${esc(e[0])}"><span>${esc(e[1])}</span><code>${esc(e[0])}</code></button>`).join("") : `<div class="vazio small">Nada encontrado. ${F.s.tipo === "fq" ? "Marque “Equipamento fora da lista”." : ""}</div>`;
+      res.style.display = "";
+    });
+    res.addEventListener("click", e => {
+      const b = e.target.closest("button[data-cod]"); if (!b) return;
+      const eq = achaPorCod(b.dataset.cod); F.d.cod = eq[0]; F.d.equip = eq[1];
+      $("#equip-sel").innerHTML = blocoEquipSel(eq); busca.style.display = "none"; res.style.display = "none"; busca.value = "";
+    });
+  }
+  $("#equip-sel")?.addEventListener("click", e => {
+    if (e.target.id !== "f-trocar") return;
+    F.d.cod = ""; F.d.equip = ""; $("#equip-sel").innerHTML = ""; busca.style.display = ""; busca.focus();
+  });
+  $("#f-fora")?.addEventListener("change", e => {
+    F.fora = e.target.checked;
+    $("#f-equip-livre").style.display = F.fora ? "" : "none";
+    if (F.fora) { F.d.cod = ""; $("#equip-sel").innerHTML = ""; busca.style.display = "none"; res.style.display = "none"; $("#f-equip-livre").focus(); }
+    else busca.style.display = "";
+  });
+  atualizaFim();
+  f.addEventListener("submit", salvar);
+};
+function avisosTurno(ini, fim) {
+  const r = relAtual(), j = janela(r.turno, r.data), out = [];
+  if (fim && ini && fim < ini) out.push(["alerta", "A hora de conclusão está antes da hora de início."]);
+  if (fim && fim > j.fim) out.push(["atencao", `A hora de conclusão (${fmtDH(fim)}) passa do fim do turno (${fmtDH(j.fim)}). Confira antes de salvar (RN-002).`]);
+  if (ini && ini > j.fim) out.push(["atencao", `O início (${fmtDH(ini)}) é depois do fim deste turno.`]);
+  return out;
+}
+function validaAoVivo() {
+  const a = avisosTurno($("#f-ini")?.value, $("#f-fim")?.value);
+  $("#avisos").innerHTML = a.map(([t, m]) => `<div class="aviso ${t}">${ICO.alerta}<div>${m}</div></div>`).join("");
+}
+const CAMPOS = { desc:"Descrição", local:"Local", ini:"Início", fim:"Hora de conclusão", fimTipo:"N/I", status:"Status", falso:"Chamado falso", equip:"Equipamento", cod:"Código SAP", num:"Número", motivo:"Motivo do cancelamento", anexos:"Anexos" };
+const valCampo = (x, k) => k === "anexos" ? (x.anexos || []).map(a => a.nome).join("|") : k === "fimTipo" ? String(x.fimTipo === "ni") : String(x[k] ?? "");
+function salvar(ev) {
+  ev.preventDefault();
+  const s = F.s, d = { ...F.d }, g = id => $(id)?.value?.trim() ?? "";
+  if ($("#f-desc")) d.desc = g("#f-desc");
+  if ($("#f-local")) d.local = g("#f-local");
+  if ($("#f-ini")) d.ini = g("#f-ini");
+  d.fim = g("#f-fim");
+  d.fimTipo = d.fim ? "data" : ($("#f-ni")?.checked ? "ni" : "");
+  if ($("#f-num")) d.num = g("#f-num");
+  if ($("#f-motivo")) d.motivo = g("#f-motivo");
+  if (F.fora) { d.equip = g("#f-equip-livre"); d.cod = ""; }
+  d.status = d.falso ? "CHAMADO FALSO" : d.fimTipo === "ni" ? (s.tipo === "ios" ? "Não informado (NI)" : "EM ANDAMENTO") : g("#f-status");
+  const erros = [];
+  if ((s.tipo === "corretiva" || s.tipo === "ios") && !d.desc) erros.push(s.tipo === "ios" ? "Informe o assunto." : "Informe a descrição.");
+  if (s.tipo === "corretiva" && !d.local) erros.push("Escolha o local.");
+  if ((s.tipo === "fq" || s.tipo === "prev") && !d.equip) erros.push("Escolha o equipamento.");
+  if ((s.tipo === "fq" || s.tipo === "prev") && !d.num) erros.push(s.tipo === "fq" ? "Informe o nº do chamado." : "Informe o nº da ordem de serviço.");
+  if (s.tipo === "ios" && !/^\d{8}$/.test(d.num)) erros.push("Nº IOS deve ter 8 dígitos: ano + número, ex.: 20261377.");
+  if (s.tipo === "ios" && d.status === "Cancelado" && !d.motivo) erros.push("Informe o motivo do cancelamento.");
+  if (!d.ini) erros.push("Informe o início.");
+  if (d.fim && d.ini && d.fim < d.ini) erros.push("A hora de conclusão está antes da hora de início.");
+  if (erros.length) {
+    $("#avisos").innerHTML = `<div class="aviso alerta" role="alert">${ICO.alerta}<div><b>Corrija para salvar:</b><br>${erros.map(esc).join("<br>")}</div></div>`;
+    $("#avisos").scrollIntoView({ behavior:"smooth", block:"center" }); return;
+  }
+  if (F.orig) {
+    const mud = Object.keys(CAMPOS).filter(k => valCampo(F.orig, k) !== valCampo(d, k));
+    Object.assign(F.orig, d);
+    [...new Set(mud.map(k => CAMPOS[k]))].forEach(c => registrar(F.orig, c));
+    toast(mud.length ? `Salvo. ${mud.length} alteração(ões) registrada(s) no histórico.` : "Nada mudou.");
+  } else {
+    d.id = novoId(); d.rel = relAtual().id; S.itens.push(d); registrar(d, "Registro criado");
+    toast(s.tipo === "fq" && !d.cod ? "Salvo sem código SAP: enviado ao Painel Geral de informações." : "Registro salvo.");
+  }
+  location.hash = F.volta.href;
+}
+
+/* ----- Chamados do plantão: todos os registros do turno, por seção e hora de início ----- */
+function telaPendencias(filtro) {
+  const so = filtro === "abertos";
+  const todos = itensRel(), abertos = todos.filter(ehAberto);
+  const hoje = parse(janela(relAtual().turno, relAtual().data).fim);
+  const ro = fechado();
+  const grupos = SECOES.map(s => ({ s, l: todos.filter(i => i.sec === s.id && (!so || ehAberto(i))).sort((a, b) => a.ini.localeCompare(b.ini)) })).filter(g => g.l.length);
+  const linha = i => {
+    const s = SEC[i.sec], ab = ehAberto(i) || (s.tipo === "ios" && i.status !== "Concluído" && i.status !== "Cancelado");
+    const dias = Math.floor((hoje - parse(i.ini)) / 864e5);
+    const meta = [`Início ${fmtDH(i.ini)}`];
+    if (s.tipo === "corretiva" && i.local) meta.push(esc(i.local));
+    if (i.num) meta.push(`${s.tipo === "fq" ? "Chamado" : s.tipo === "prev" ? "OS" : "IOS"} ${esc(i.num)}`);
+    if (!i.fim && i.fimTipo === "ni") meta.push(`<b>Conclusão N/I</b> (responsável não informou o CCM)`);
+    if (ab && dias >= 1) meta.push(`aberto há ${dias} dia${dias > 1 ? "s" : ""}`);
+    if (i.anexos?.length) meta.push(`${i.anexos.length} anexo${i.anexos.length > 1 ? "s" : ""}`);
+    return `<div class="chamado ${ab ? "aberto" : "ok"}">
+      <div><div class="linha" style="gap:6px">${chip(i.status)}${i.herdada ? `<span class="tag herd">Herdada</span>` : ""}</div>
+        <div class="t">${esc(rotuloItem(i))}</div><div class="meta">${meta.map(m => `<span>${m}</span>`).join("")}</div></div>
+      <div class="pilha" style="gap:6px">
+        <div class="concl"><label class="small muted" for="c-${i.id}" style="font-weight:700">Conclusão</label>
+          <input type="datetime-local" id="c-${i.id}" data-concl="${i.id}" value="${esc(i.fim || "")}" ${ro || i.falso ? "disabled" : ""} aria-label="Hora de conclusão">
+          ${ro || i.falso ? "" : (i.fim ? `<button type="button" class="btn sec peq" data-reabre="${i.id}">Limpar</button>` : `<button type="button" class="btn peq" data-agora="${i.id}">Concluir agora</button>`)}</div>
+        <div style="text-align:right"><a class="btn sec peq" href="#/item/${i.sec}/${i.id}/c">${ro ? "Ver" : "Editar"}</a></div>
+      </div></div>`;
+  };
+  return `<div class="titulo-pag"><div><h1>Chamados do plantão</h1><div class="muted small">Todos os registros do turno ${relAtual().turno} ${fmtPonto(relAtual().data)}, incluindo os concluídos. Os que ficarem em aberto passam para o próximo turno com a data de início original (RN-009).</div></div></div>
+  <div class="pilha">${bannerFechado()}
+  <div class="filtro"><a href="#/pendencias" class="${so ? "" : "on"}">Todos (${todos.length})</a><a href="#/pendencias/abertos" class="${so ? "on" : ""}">Só em aberto (${abertos.length})</a></div>
+  ${grupos.length ? grupos.map(g => `<section class="grupo"><h2>${esc(g.s.nome)} <span class="tag">${g.l.length}</span></h2><div class="lista">${g.l.map(linha).join("")}</div></section>`).join("") : `<div class="card vazio">Nenhum chamado ${so ? "em aberto" : "neste plantão"}.</div>`}
+  </div>`;
+}
+telaPendencias.depois = () => {
+  const muda = (id, fim) => {
+    const it = S.itens.find(i => i.id === id), antes = it.status;
+    aplicaConclusao(it, fim);
+    registrar(it, "Hora de conclusão"); if (it.status !== antes) registrar(it, "Status");
+    toast(fim ? `Concluído às ${fmtDH(fim).slice(11)}: ${rotuloItem(it).slice(0, 40)}` : `Reaberto: ${rotuloItem(it).slice(0, 40)}`);
+    rota();
+  };
+  document.querySelectorAll("[data-concl]").forEach(inp => inp.addEventListener("change", () => muda(inp.dataset.concl, inp.value)));
+  document.querySelectorAll("[data-agora]").forEach(b => b.addEventListener("click", () => muda(b.dataset.agora, agoraISO())));
+  document.querySelectorAll("[data-reabre]").forEach(b => b.addEventListener("click", () => muda(b.dataset.reabre, "")));
+};
+function telaHistorico(itemId) {
+  const it = itemId ? S.itens.find(i => i.id === itemId) : null;
+  const l = S.historico.filter(h => !itemId || h.item === itemId).slice().sort((a, b) => b.quando.localeCompare(a.quando));
+  return `<div class="titulo-pag"><div>${it ? `<a href="#/item/${it.sec}/${it.id}" class="small">${ICO.voltar.replace('<svg','<svg style="width:14px;height:14px;vertical-align:-2px"')} Voltar ao registro</a>` : ""}<h1 style="margin-top:6px">Histórico de alterações</h1>
+  <div class="muted small">${it ? esc(rotuloItem(it)) : "Todas as alterações"}. Guarda quem alterou, quando e o campo. Não pode ser alterado (RN-021, RNF-003).</div></div></div>
+  ${l.length ? `<div class="rolar"><table class="tab"><thead><tr><th>Quando</th><th>Quem</th><th>Registro</th><th>Campo</th></tr></thead><tbody>
+  ${l.map(h => { const i = S.itens.find(x => x.id === h.item); return `<tr><td style="white-space:nowrap">${fmtDH(h.quando)}</td><td>${esc(h.quem)}<div class="small muted">${esc(perfil(h.quem))}</div></td><td>${i ? `<a href="#/item/${i.sec}/${i.id}">${esc(rotuloItem(i).slice(0, 70))}</a><div class="small muted">${esc(SEC[i.sec].nome)}</div>` : "—"}</td><td><b>${esc(h.campo)}</b></td></tr>`; }).join("")}
+  </tbody></table></div>` : `<div class="card vazio">Nenhuma alteração registrada.</div>`}`;
+}
+function telaLider() {
+  const sem = fqSemSap();
+  const hoje = parse(janela(relAtual().turno, relAtual().data).fim);
+  const velhas = itensRel().filter(i => ehAberto(i) && (hoje - parse(i.ini)) / 864e5 > 7);
+  return `<div class="titulo-pag"><div><h1>Painel Geral de informações</h1><div class="muted small">Correções, pendências antigas e listas do app. Todos os usuários podem ver.</div></div></div>
+  <div class="pilha">
+  <div class="card pilha"><div class="linha" style="justify-content:space-between"><h2>Fator Q sem código SAP</h2>${sem.length ? `<span class="tag alerta">${sem.length} para corrigir</span>` : `<span class="tag">Tudo certo</span>`}</div>
+  <p class="muted small" style="margin:0">Chamados registrados com equipamento fora da lista. Ficam sem tipo e fora da Tela 3 do dashboard até a correção (RN-017, RN-018).</p>
+  ${sem.length ? sem.map(i => `<div class="item erro"><div class="linha" style="gap:6px">${chip(i.status)}<span class="tag alerta">Sem SAP</span></div><div class="t">${esc(i.equip)}</div><div class="meta"><span>Chamado ${esc(i.num)}</span><span>Início ${fmtDH(i.ini)}</span></div>
+    <div class="linha" style="margin-top:10px"><select data-corrige="${i.id}" aria-label="Equipamento correto" style="flex:1;min-width:220px;min-height:40px;border:1px solid #c5ced7;border-radius:8px;padding:6px 8px"><option value="">Escolher o equipamento correto…</option>${EQUIP.filter(e => !e[0].startsWith("BHSI")).map(e => `<option value="${esc(e[0])}">${esc(e[1])} · ${esc(e[0])}</option>`).join("")}</select><button class="btn peq" data-aplica="${i.id}">Corrigir</button></div></div>`).join("") : `<div class="vazio small">Nenhum chamado sem código SAP.</div>`}
+  </div>
+  <div class="card pilha"><h2>Pendências abertas há mais de 7 dias</h2>
+  ${velhas.length ? `<div class="rolar"><table class="tab"><tbody>${velhas.map(i => `<tr><td>${esc(SEC[i.sec].nome)}</td><td><a href="#/item/${i.sec}/${i.id}">${esc(rotuloItem(i))}</a></td><td style="white-space:nowrap">desde ${fmtData(i.ini)}</td><td>${chip(i.status)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="vazio small">Nenhuma.</div>`}</div>
+  <div class="card pilha"><h2>Listas usadas pelo app</h2>
+  <div class="rolar"><table class="tab"><thead><tr><th>Lista</th><th>Itens</th><th>Origem</th></tr></thead><tbody>
+  <tr><td>Equipamentos (Fator Q e Preventiva)</td><td>${EQUIP.length}</td><td>aba codigo_sap_equipamento</td></tr>
+  <tr><td>Locais</td><td>${LOCAIS.length}</td><td>aba codigo_sap</td></tr>
+  <tr><td>Pessoas e perfis</td><td>${PESSOAS.length}</td><td>aba tbl_rh</td></tr></tbody></table></div>
+  <div><button class="btn sec peq" type="button" onclick="toast('No app real, as listas são editadas aqui (RF-021).')">Atualizar listas</button></div></div>
+  </div>`;
+}
+telaLider.depois = () => {
+  document.querySelectorAll("[data-aplica]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.aplica, v = document.querySelector(`[data-corrige="${id}"]`).value;
+    if (!v) { toast("Escolha o equipamento na lista."); return; }
+    const it = S.itens.find(i => i.id === id), eq = achaPorCod(v);
+    it.cod = eq[0]; it.equip = eq[1]; registrar(it, "Código SAP"); registrar(it, "Equipamento");
+    toast(`Corrigido: ${eq[1]} (${tipoEquip(eq[0])}).`); rota();
+  }));
+};
+
+/* ----- Fechamento (RF-013 a RF-017) ----- */
+function pendenciasDeFechamento() {
+  const r = relAtual(), out = [];
+  const perfis = r.equipe.map(p => perfil(p.nome));
+  if (!perfis.includes("Técnico(a)")) out.push("Nenhum técnico fez login neste plantão.");
+  if (!perfis.includes("Operador(a)")) out.push("Nenhum operador fez login neste plantão.");
+  itensRel().forEach(i => {
+    const n = SEC[i.sec].nome;
+    if (SEC[i.sec].tipo === "corretiva" && !i.local) out.push(`${n}: “${rotuloItem(i).slice(0, 50)}” sem local.`);
+    if (i.sec === "fq" && !i.cod) out.push(`Fator Q: chamado ${i.num} sem código SAP (vai sem tipo para o dashboard).`);
+    if (i.sec === "ios" && i.status === "Cancelado" && !i.motivo) out.push(`IOS ${i.num} cancelado sem motivo.`);
+  });
+  return out;
+}
+let fechando = false;
+function telaFechar() {
+  const r = relAtual(), its = itensRel();
+  const ab = its.filter(ehAberto);
+  const av = pendenciasDeFechamento();
+  const assunto = `Relatório de Passagem do Turno ${r.turno === "ALFA" ? "Alfa" : "Bravo"} do CCM - ${fmtPonto(r.data)}`;
+  const corpo = `Prezados,\n\nEncaminho, em anexo, o Relatório de Passagem do Turno ${r.turno === "ALFA" ? "Alfa" : "Bravo"} do CCM, referente ao dia ${fmtPonto(r.data)}.\n\nAtenciosamente,`;
+  const [ano, mes] = r.data.split("-");
+  if (fechado() && !fechando) return `<div class="titulo-pag"><h1>Fechar relatório</h1></div><div class="pilha">${bannerFechado()}${resumoEnvio(r, ab.length)}</div>`;
+  return `<div class="titulo-pag"><div><h1>Fechar relatório</h1><div class="muted small">Qualquer usuário pode fechar e enviar (RN-007, alteração de 19/11). O envio fica registrado com o nome de quem enviou.</div></div></div>
+  <div class="pilha" id="area-fechar">
+  <div class="card pilha"><h2>Equipe que vai no PDF</h2><div class="equipe">${equipeOrdenada(r).map(p => `<span class="pessoa"><span class="avatar">${esc(iniciais(p.nome))}</span><span><b>${esc(p.nome)}</b><small>${esc(perfil(p.nome))}</small></span></span>`).join("") || `<span class="muted">Ninguém da equipe fez login.</span>`}</div>
+    <div class="small muted">Para corrigir a equipe, volte ao <a href="#/relatorio">Relatório</a>.</div></div>
+  <div class="card pilha"><h2>Resumo</h2>
+    <div class="kpis"><div class="kpi"><b>${its.length}</b><span>Registros</span></div><div class="kpi"><b>${ab.length}</b><span>Passam ao próximo turno</span></div><div class="kpi"><b>${fqSemSap().length}</b><span>Fator Q sem SAP</span></div></div>
+    <div class="rolar"><table class="tab"><tbody>${SECOES.map(s => `<tr><td>${esc(s.nome)}</td><td style="text-align:right"><b>${itensSec(s.id).length}</b></td></tr>`).join("")}</tbody></table></div>
+  </div>
+  ${av.length ? `<div class="aviso atencao">${ICO.alerta}<div><b>${av.length} campo(s) a conferir.</b> Campos vazios não impedem o fechamento (RN-008, a confirmar), mas o PDF sai assim:<ul style="margin:6px 0 0;padding-left:18px">${av.map(a => `<li>${esc(a)}</li>`).join("")}</ul></div></div>` : `<div class="aviso ok">${ICO.ok}<div>Nenhum campo vazio encontrado.</div></div>`}
+  <div class="card pilha"><h2>O que acontece ao confirmar</h2>
+    <div class="campo"><span class="lbl">PDF</span><div><b>${nomePDF(r)}.pdf</b> · <a href="#/pdf">pré-visualizar</a></div></div>
+    <div class="campo"><span class="lbl">E-mail para ${DESTINATARIOS.length} destinatários</span>
+      <div class="email"><div><b>Para</b> ${DESTINATARIOS.map(esc).join("; ")}</div><div><b>Assunto</b> ${esc(assunto)}</div><div>${esc(corpo)}</div></div></div>
+    <div class="campo"><span class="lbl">Arquivo</span><div>Pasta do CCM <b>/${ano}/${mes}/</b> (PDF, fotos e arquivos anexados)</div></div>
+    <div class="campo"><span class="lbl">Próximo turno</span><div>${(() => { const p = proximoTurno(r.turno, r.data); return `${p.turno} ${fmtPonto(p.data)}`; })()} recebe <b>${ab.length}</b> pendência(s) com a data de início original.</div></div>
+  </div>
+  <div class="card pilha">
+    <label class="check"><input type="checkbox" id="conf"><span>Eu, <b>${esc(S.usuario)}</b>, confirmo que revisei o relatório e quero fechar e enviar. Depois do envio o PDF não pode ser alterado.</span></label>
+    <div class="linha" style="justify-content:flex-end"><button class="btn" id="btn-fechar" disabled>${ICO.fechar}Fechar e enviar</button></div>
+  </div>
+  </div>`;
+}
+function resumoEnvio(r, n) {
+  const [ano, mes] = r.data.split("-");
+  return `<div class="card pilha"><h2>Enviado</h2><ul class="passos">
+    <li class="feito"><span class="b"></span>PDF gerado: ${nomePDF(r)}.pdf</li>
+    <li class="feito"><span class="b"></span>E-mail enviado aos ${DESTINATARIOS.length} destinatários</li>
+    <li class="feito"><span class="b"></span>PDF e anexos guardados em /${ano}/${mes}/</li>
+    ${r.fechadoPor ? `<li class="feito"><span class="b"></span>Enviado por ${esc(r.fechadoPor)} em ${fmtDH(r.fechadoEm)}</li>` : ""}
+    <li class="feito"><span class="b"></span>Dados enviados ao dashboard (Power BI)</li>
+    <li class="feito"><span class="b"></span>${n} pendência(s) prontas para o próximo turno</li></ul>
+    <div class="linha" style="justify-content:flex-end"><a class="btn" href="#/inicio">Abrir o próximo plantão</a></div></div>`;
+}
+telaFechar.depois = () => {
+  const c = $("#conf"), b = $("#btn-fechar"); if (!c) return;
+  c.addEventListener("change", () => { b.disabled = !c.checked; });
+  b.addEventListener("click", () => {
+    const r = relAtual(), n = itensRel().filter(ehAberto).length, [ano, mes] = r.data.split("-");
+    const passos = [`Gerando o PDF ${nomePDF(r)}.pdf`, `Enviando e-mail aos ${DESTINATARIOS.length} destinatários`, `Guardando PDF e anexos em /${ano}/${mes}/`, "Enviando dados ao dashboard (Power BI)", `Passando ${n} pendência(s) ao próximo turno`];
+    fechando = true;
+    $("#area-fechar").innerHTML = `<div class="card pilha" aria-live="polite"><h2>Fechando…</h2><ul class="passos">${passos.map(p => `<li><span class="b"></span>${esc(p)}</li>`).join("")}</ul></div>`;
+    const lis = [...document.querySelectorAll(".passos li")];
+    let k = 0;
+    const passo = () => {
+      if (k > 0) { lis[k - 1].classList.remove("rodando"); lis[k - 1].classList.add("feito"); }
+      if (k === lis.length) {
+        r.status = "fechado"; r.fechadoPor = S.usuario; r.fechadoEm = agoraISO(); fechando = false;
+        S.historico.push({ quem:S.usuario, quando:agoraISO(), item:null, campo:"Relatório fechado e enviado", rel:r.id });
+        $("#area-fechar").innerHTML = resumoEnvio(r, n); desenhaNav("fechar"); return;
+      }
+      lis[k].classList.add("rodando"); k++; setTimeout(passo, 650);
+    };
+    passo();
+  });
+};
+
+/* ----- Abrir o próximo plantão (RF-001, RN-003, RN-009) ----- */
+function telaInicio() {
+  const r = relAtual();
+  if (!fechado()) return `<div class="titulo-pag"><h1>Abrir plantão</h1></div><div class="aviso info">${ICO.info}<div>O relatório ${r.turno} ${fmtPonto(r.data)} ainda está aberto. Feche-o antes de abrir o próximo. <a href="#/fechar">Ir para Fechar</a></div></div>`;
+  const p = proximoTurno(r.turno, r.data), j = janela(p.turno, p.data);
+  const herd = itensRel().filter(ehAberto);
+  const u = S.usuario;
+  return `<div class="titulo-pag"><div><h1>Abrir plantão</h1><div class="muted small">Relatório criado no início do plantão (RF-001).</div></div></div>
+  <form id="form-abrir" class="pilha" novalidate>
+  <div class="card pilha">
+    <div class="duas">
+      <div class="campo"><label for="a-turno">Turno <span class="ob">*</span></label><select id="a-turno"><option ${p.turno === "ALFA" ? "selected" : ""}>ALFA</option><option ${p.turno === "BRAVO" ? "selected" : ""}>BRAVO</option></select></div>
+      <div class="campo"><span class="lbl">Data do relatório (calculada)</span><div id="a-data" style="min-height:44px;display:flex;flex-direction:column;justify-content:center"></div></div>
+    </div>
+    <div class="campo"><span class="lbl">Equipe do plantão</span>
+      <div class="equipe"><span class="pessoa"><span class="avatar">${esc(iniciais(u))}</span><span><b>${esc(u)}</b><small>${esc(perfil(u))}</small></span></span></div>
+      <span class="ajuda">Ninguém é escolhido em lista: cada pessoa entra na equipe ao fazer login no app durante o plantão. Nome e perfil vão para o PDF.</span></div>
+  </div>
+  <div class="card pilha"><h2>Pendências herdadas (${herd.length})</h2>
+    <p class="muted small" style="margin:0">Entram automaticamente, com a data de início original e as atualizações na descrição (RN-009).</p>
+    ${herd.length ? `<div class="rolar"><table class="tab"><tbody>${herd.map(i => `<tr><td>${esc(SEC[i.sec].nome)}</td><td>${esc(rotuloItem(i))}</td><td style="white-space:nowrap">${fmtDH(i.ini)}</td><td>${chip(i.status)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="vazio small">Nenhuma.</div>`}
+  </div>
+  <div id="avisos-abrir"></div>
+  <div class="acoes"><button class="btn" type="submit">Abrir relatório</button></div>
+  </form>`;
+}
+telaInicio.depois = () => {
+  const f = $("#form-abrir"); if (!f) return;
+  const r = relAtual();
+  const calc = () => {
+    const t = $("#a-turno").value;
+    const base = proximoTurno(r.turno, r.data);
+    const data = t === base.turno ? base.data : (t === "ALFA" ? base.data : addDias(base.data, 1));
+    const j = janela(t, data);
+    $("#a-data").innerHTML = `<b>${fmtData(data)}</b><span class="small muted">${fmtDH(j.ini)} → ${fmtDH(j.fim)}${t === "BRAVO" ? " · o Bravo usa a data em que o plantão termina (RN-003)" : ""}</span>`;
+    return data;
+  };
+  $("#a-turno").addEventListener("change", calc); calc();
+  f.addEventListener("submit", e => {
+    e.preventDefault();
+    const herd = itensRel().filter(ehAberto);
+    const u = S.usuario, agora = agoraISO();
+    const novo = { id:"R" + (S.fechados.length + 2), turno:$("#a-turno").value, data:calc(), status:"aberto", equipe: entraNoPlantao(u) ? [{ nome:u, desde:agora }] : [] };
+    S.fechados.push(r); S.relatorio = novo;
+    if (entraNoPlantao(u)) S.historico.push({ quem:u, quando:agora, item:null, campo:"Entrou no plantão (login)", rel:novo.id });
+    herd.forEach(i => S.itens.push({ ...i, anexos:[...(i.anexos || [])], id:novoId(), rel:novo.id, herdada:true, origem:i.id }));
+    toast(`Relatório ${novo.turno} ${fmtPonto(novo.data)} aberto com ${herd.length} pendência(s) herdada(s).`);
+    location.hash = "#/relatorio";
+  });
+};
+
+/* ----- Pré-visualização do PDF (RNF-007, RNF-008, RF-018) ----- */
+function telaPDF() {
+  const r = relAtual(), j = janela(r.turno, r.data);
+  const tab = (s, cols, row) => {
+    const l = itensSec(s.id).sort((a, b) => a.ini.localeCompare(b.ini));
+    return `<h4>${esc(s.titulo)}</h4><table><thead><tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr></thead><tbody>${l.length ? l.map(i => `<tr>${row(i).map(c => `<td>${c}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${cols.length}" style="color:#888">Sem registros</td></tr>`}</tbody></table><div class="qtd">QUANTIDADE: ${l.length}</div>`;
+  };
+  const corr = i => [esc(i.desc), esc(i.local), fmtDH(i.ini), textoFim(i), esc(i.status)];  return `<div class="titulo-pag"><div><a href="#/relatorio" class="small">${ICO.voltar.replace('<svg','<svg style="width:14px;height:14px;vertical-align:-2px"')} Relatório</a><h1 style="margin-top:6px">Pré-visualização do PDF</h1><div class="muted small">${nomePDF(r)}.pdf · o código SAP do Fator Q não aparece no PDF (RF-018)</div></div></div>
+  <div class="rolar" style="border:0;background:#dfe4e9;padding:16px;border-radius:var(--r)"><div class="folha">
+    <div class="ph">${marcaCompleta()}<div>AEROPORTO INTERNACIONAL DE BRASÍLIA<br>GERÊNCIA DE MANUTENÇÃO<br>COORDENAÇÃO DE PLANEJAMENTO E CONTROLE DE MANUTENÇÃO<br>CENTRO DE CONTROLE DE MANUTENÇÃO</div></div>
+    <div class="tit">Relatório de Passagem de Turno – ${r.turno} – ${fmtData(r.data)}</div>
+    <table><tbody><tr><th style="width:18%">Data</th><td>${fmtData(r.data)} (${fmtDH(j.ini)} a ${fmtDH(j.fim)})</td><th style="width:14%">Turno</th><td>${r.turno}</td></tr></tbody></table>
+    <h4>Equipe do plantão</h4>
+    <table><thead><tr><th>Nome</th><th>Perfil</th><th>Cargo</th></tr></thead><tbody>${equipeOrdenada(r).map(p => `<tr><td>${esc(p.nome)}</td><td>${esc(perfil(p.nome))}</td><td>${esc(cargo(p.nome))}</td></tr>`).join("") || `<tr><td colspan="3" style="color:#888">Ninguém fez login</td></tr>`}</tbody></table>
+    ${r.fechadoPor ? `<div class="qtd" style="text-align:left;font-weight:400">Enviado por <b>${esc(r.fechadoPor)}</b> (${esc(perfil(r.fechadoPor))}) em ${fmtDH(r.fechadoEm)}</div>` : ""}
+    ${SECOES.filter(s => s.tipo === "corretiva").map(s => tab(s, ["Descrição da atividade", "Local", "Hora início", "Hora de conclusão", "Status"], corr)).join("")}
+    ${tab(SEC.fq, ["Equipamento", "Chamado", "Hora início", "Hora de conclusão", "Status"], i => [esc(i.equip), esc(i.num), fmtDH(i.ini), textoFim(i), esc(i.status)])}
+    ${tab(SEC.prev, ["Equipamento", "Ordem de serviço", "Hora início", "Hora de conclusão", "Status"], i => [esc(i.equip), esc(i.num), fmtDH(i.ini), textoFim(i), esc(i.status)])}
+    ${tab(SEC.ios, ["Assunto", "Nº IOS", "Hora início", "Hora de conclusão", "Status do IOS"], i => [esc(i.desc) + (i.status === "Cancelado" ? `<br><i>Motivo: ${esc(i.motivo)}</i>` : ""), esc(i.num), fmtDH(i.ini), textoFim(i), esc(i.status)])}
+    ${(() => { // Anexos dos chamados (substitui o Apêndice)
+      const l = itensRel().filter(i => i.anexos?.length).sort((a, b) => SECOES.findIndex(s => s.id === a.sec) - SECOES.findIndex(s => s.id === b.sec) || a.ini.localeCompare(b.ini));
+      const n = l.reduce((t, i) => t + i.anexos.length, 0);
+      return `<h4>Anexos dos chamados</h4><table><thead><tr><th style="width:24%">Seção</th><th>Chamado</th><th style="width:34%">Fotos e arquivos</th></tr></thead><tbody>${l.length ? l.map(i => `<tr><td>${esc(SEC[i.sec].nome)}</td><td>${esc(rotuloItem(i))}<br><span style="color:#666">Início ${fmtDH(i.ini)}</span></td><td>${i.anexos.map(a => a.url ? `<img src="${esc(a.url)}" alt="" style="max-width:110px;margin:2px">` : `<div>Arquivo: ${esc(a.nome)}</div>`).join("")}</td></tr>`).join("") : `<tr><td colspan="3" style="color:#888">Sem anexos</td></tr>`}</tbody></table><div class="qtd">QUANTIDADE: ${n}</div>`;
+    })()}
+    <div class="rod"><span>Classificação: <b>Interno</b></span><span>${nomePDF(r)}</span><span>Página 1</span></div>
+  </div></div>
+  <p class="marca-agua">Fontes do PDF real: Helvetica Neue (texto) e Borba (títulos), se licenciadas; sem elas, Arial.</p>`;
+}
+
+rota();
+</script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ImportExportXml version="9.2.26111.138" SolutionPackageVersion="9.2" languagecode="1046" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26111.138" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26111.00138">
+  <SolutionManifest>
+    <UniqueName>RLT_CCM</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="RLT – Passagem de Turno CCM" languagecode="1046" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="App de Relatório de Passagem de Turno (RLT) do CCM – substitui a planilha Excel. Ver PRD." languagecode="1046" />
+    </Descriptions>
+    <Version>1.2.0.0</Version>
+    <Managed>0</Managed>
+    <Publisher>
+      <UniqueName>InframericaRLT</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="Inframerica RLT" languagecode="1046" />
+      </LocalizedNames>
+      <Descriptions>
+        <Description description="Publisher do app RLT – Passagem de Turno do CCM" languagecode="1046" />
+      </Descriptions>
+      <EMailAddress xsi:nil="true"></EMailAddress>
+      <SupportingWebsiteUrl xsi:nil="true"></SupportingWebsiteUrl>
+      <CustomizationPrefix>rlt</CustomizationPrefix>
+      <CustomizationOptionValuePrefix>44817</CustomizationOptionValuePrefix>
+      <Addresses>
+        <Address>
+          <AddressNumber>1</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+        <Address>
+          <AddressNumber>2</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+      </Addresses>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="1" schemaName="rlt_anexo" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_equipamento" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_equipe" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_historico" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_local" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_pessoa" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_registro" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_relatorio" behavior="0" />
+      <RootComponent type="20" id="{6a1f3c52-8d4e-4b7a-9e21-3c5d7f9a0b14}" behavior="0" />
+      <RootComponent type="9" schemaName="rlt_perfil" behavior="0" />
+      <RootComponent type="9" schemaName="rlt_secao" behavior="0" />
+      <RootComponent type="9" schemaName="rlt_situacaorelatorio" behavior="0" />
+      <RootComponent type="9" schemaName="rlt_statusatividade" behavior="0" />
+      <RootComponent type="9" schemaName="rlt_statusios" behavior="0" />
+      <RootComponent type="9" schemaName="rlt_tipoequipamento" behavior="0" />
+      <RootComponent type="9" schemaName="rlt_turno" behavior="0" />
+    </RootComponents>
+    <MissingDependencies />
+  </SolutionManifest>
+</ImportExportXml>
