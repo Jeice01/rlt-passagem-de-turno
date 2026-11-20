@@ -248,9 +248,16 @@ def tela_registro():
     ro = f"If({ABERTO_REL}, DisplayMode.Edit, DisplayMode.View)"
     ao_abrir = (
         "UpdateContext({locReg: If(IsBlank(locId), Blank(), LookUp(Registros, rlt_registroid = locId))});\n"
-        "UpdateContext({locIni: Coalesce(locReg.rlt_inicio, Now()), locFim: locReg.rlt_conclusao, locNI: Coalesce(locReg.rlt_ni, false),\n"
-        f"  locFalso: Coalesce(locReg.rlt_chamadofalso, false), locStatus: If(IsBlank(locReg.rlt_status), \"EM ANDAMENTO\", Text(locReg.rlt_status)),\n"
-        f"  locStatusIos: If(IsBlank(locReg.rlt_statusios), \"Em andamento\", Text(locReg.rlt_statusios)), locArea: locReg.rlt_local.rlt_area, locErro: \"\"}});\n"
+        # Uma variável por UpdateContext: se o Studio acusar tipo incompatível, ele sublinha só a variável com problema.
+        "UpdateContext({locIni: Coalesce(locReg.rlt_inicio, Now())});\n"
+        "UpdateContext({locFim: locReg.rlt_conclusao});\n"
+        # Sim/Não do Dataverse não é o mesmo tipo que true/false: If() converte para booleano puro.
+        "UpdateContext({locNI: If(locReg.rlt_ni, true, false)});\n"
+        "UpdateContext({locFalso: If(locReg.rlt_chamadofalso, true, false)});\n"
+        "UpdateContext({locStatus: If(IsBlank(locReg.rlt_status), \"EM ANDAMENTO\", Text(locReg.rlt_status))});\n"
+        "UpdateContext({locStatusIos: If(IsBlank(locReg.rlt_statusios), \"Em andamento\", Text(locReg.rlt_statusios))});\n"
+        "UpdateContext({locArea: locReg.rlt_local.rlt_area});\n"
+        "UpdateContext({locErro: \"\"});\n"
         "Reset(regDesc); Reset(regNum); Reset(regMotivo); Reset(regEquipLivre); Reset(regForaLista); Reset(regLimpeza); Reset(regFalso); Reset(regNI);\n"
         "Reset(regArea); Reset(regLocal); Reset(regEquip); Reset(regIniData); Reset(regIniH); Reset(regIniM); Reset(regFimData); Reset(regFimH); Reset(regFimM);\n"
         "Reset(regStatus); Reset(regStatusIos)")

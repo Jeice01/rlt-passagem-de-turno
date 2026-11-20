@@ -6,9 +6,14 @@ Screens:
         =corFundo
       OnVisible: |-
         =UpdateContext({locReg: If(IsBlank(locId), Blank(), LookUp(Registros, rlt_registroid = locId))});
-        UpdateContext({locIni: Coalesce(locReg.rlt_inicio, Now()), locFim: locReg.rlt_conclusao, locNI: Coalesce(locReg.rlt_ni, false),
-          locFalso: Coalesce(locReg.rlt_chamadofalso, false), locStatus: If(IsBlank(locReg.rlt_status), "EM ANDAMENTO", Text(locReg.rlt_status)),
-          locStatusIos: If(IsBlank(locReg.rlt_statusios), "Em andamento", Text(locReg.rlt_statusios)), locArea: locReg.rlt_local.rlt_area, locErro: ""});
+        UpdateContext({locIni: Coalesce(locReg.rlt_inicio, Now())});
+        UpdateContext({locFim: locReg.rlt_conclusao});
+        UpdateContext({locNI: If(locReg.rlt_ni, true, false)});
+        UpdateContext({locFalso: If(locReg.rlt_chamadofalso, true, false)});
+        UpdateContext({locStatus: If(IsBlank(locReg.rlt_status), "EM ANDAMENTO", Text(locReg.rlt_status))});
+        UpdateContext({locStatusIos: If(IsBlank(locReg.rlt_statusios), "Em andamento", Text(locReg.rlt_statusios))});
+        UpdateContext({locArea: locReg.rlt_local.rlt_area});
+        UpdateContext({locErro: ""});
         Reset(regDesc); Reset(regNum); Reset(regMotivo); Reset(regEquipLivre); Reset(regForaLista); Reset(regLimpeza); Reset(regFalso); Reset(regNI);
         Reset(regArea); Reset(regLocal); Reset(regEquip); Reset(regIniData); Reset(regIniH); Reset(regIniM); Reset(regFimData); Reset(regFimH); Reset(regFimM);
         Reset(regStatus); Reset(regStatusIos)
