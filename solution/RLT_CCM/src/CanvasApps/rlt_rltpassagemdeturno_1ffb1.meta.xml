@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CanvasApp xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>rlt_rltpassagemdeturno_1ffb1</Name>
+  <AppVersion>2026-11-20T22:14:28Z</AppVersion>
+  <Status>Ready</Status>
+  <CreatedByClientVersion>3.26112.12.0</CreatedByClientVersion>
+  <MinClientVersion>3.26112.12.0</MinClientVersion>
+  <Tags>{"primaryDeviceWidth":"1366","primaryDeviceHeight":"768","supportsPortrait":"true","supportsLandscape":"true","primaryFormFactor":"Tablet","showStatusBar":"false","publisherVersion":"3.26112.12","minimumRequiredApiVersion":"2.2.0","hasComponent":"false","hasUnlockedComponent":"false","isUnifiedRootApp":"false","m365CopilotSettingValue":"0","sienaVersion":"20261119T214808Z-3.26112.12.0"}</Tags>
+  <IsCdsUpgraded>0</IsCdsUpgraded>
+  <GalleryItemId xsi:nil="true"></GalleryItemId>
+  <BackgroundColor>rgba(0, 56, 99, 1)</BackgroundColor>
+  <DisplayName>RLT Passagem de Turno</DisplayName>
+  <Description>Relatório de Passagem de Turno (RLT) do CCM – Aeroporto de Brasília. Registro das atividades, chamados do Fator Q, preventivas e IOS do plantão ALFA ou BRAVO, com fechamento e envio do relatório em PDF.</Description>
+  <CommitMessage xsi:nil="true"></CommitMessage>
+  <Publisher></Publisher>
+  <AuthorizationReferences>[]</AuthorizationReferences>
+  <ConnectionReferences>{}</ConnectionReferences>
+  <DatabaseReferences>{"default.cds":{"databaseDetails":{"referenceType":"Environmental","environmentName":"default.cds","overrideValues":{"status":"NotSpecified","environmentVariableName":""}},"dataSources":{"Relatórios":{"entitySetName":"rlt_relatorios","logicalName":"rlt_relatorio"},"Registros":{"entitySetName":"rlt_registros","logicalName":"rlt_registro"},"Equipe do plantão":{"entitySetName":"rlt_equipes","logicalName":"rlt_equipe"},"Anexos":{"entitySetName":"rlt_anexos","logicalName":"rlt_anexo"},"Histórico":{"entitySetName":"rlt_historicos","logicalName":"rlt_historico"},"Pessoas":{"entitySetName":"rlt_pessoas","logicalName":"rlt_pessoa"},"Locais":{"entitySetName":"rlt_locals","logicalName":"rlt_local"},"Equipamentos":{"entitySetName":"rlt_equipamentos","logicalName":"rlt_equipamento"}}}}</DatabaseReferences>
+  <AppComponents>[]</AppComponents>
+  <AppComponentDependencies>[]</AppComponentDependencies>
+  <CanConsumeAppPass>1</CanConsumeAppPass>
+  <CanvasAppType>0</CanvasAppType>
+  <BypassConsent>0</BypassConsent>
+  <AdminControlBypassConsent>0</AdminControlBypassConsent>
+  <EmbeddedApp xsi:nil="true"></EmbeddedApp>
+  <IntroducedVersion>1.0</IntroducedVersion>
+  <CdsDependencies>{"cdsdependencies":[{"logicalname":"rlt_relatorio","componenttype":1},{"logicalname":"rlt_registro","componenttype":1},{"logicalname":"rlt_equipe","componenttype":1},{"logicalname":"rlt_anexo","componenttype":1},{"logicalname":"rlt_historico","componenttype":1},{"logicalname":"rlt_pessoa","componenttype":1},{"logicalname":"rlt_local","componenttype":1},{"logicalname":"rlt_equipamento","componenttype":1}]}</CdsDependencies>
+  <IsCustomizable>1</IsCustomizable>
+  <BackgroundImageUri>/CanvasApps/rlt_rltpassagemdeturno_1ffb1_BackgroundImageUri</BackgroundImageUri>
+  <DocumentUri>/CanvasApps/rlt_rltpassagemdeturno_1ffb1_DocumentUri.msapp</DocumentUri>
+  <AdditionalUris>
+    <AdditionalUri>/CanvasApps/rlt_rltpassagemdeturno_1ffb1_AdditionalUris0_identity.json</AdditionalUri>
+  </AdditionalUris>
+</CanvasApp>
