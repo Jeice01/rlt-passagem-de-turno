@@ -473,8 +473,10 @@ def tela_fechar():
               + hist('"Relatório fechado e enviado"') + ";\n"
               "Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid));\n"
               "Reset(fecConf);\n"
-              "Notify(\"Relatório fechado. O PDF e o e-mail entram com o fluxo Fechar e enviar (próxima etapa).\", NotificationType.Success);\n"
-              "Navigate(scrRelatorio, ScreenTransition.None)")
+              "Notify(\"Relatório fechado. O PDF e o e-mail estão sendo enviados: o resultado aparece nesta tela em cerca de 1 minuto.\", NotificationType.Success)")
+    # O fluxo RLT – Fechar e enviar grava o resultado em rlt_resultadoenvio; tocar no aviso relê o relatório.
+    atualizar = ("If(!IsBlank(gblRel), Refresh(Relatórios); Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid)))")
+    falhou = 'StartsWith(Coalesce(gblRel.rlt_resultadoenvio, ""), "FALHA")'
     filhos = moldura(p, "scrFechar") + titulo(p, '"FECHAR RELATÓRIO"',
                                              '"Qualquer usuário pode fechar e enviar (RN-007). O envio fica registrado com o nome de quem enviou."')
     filhos += [
@@ -491,10 +493,14 @@ def tela_fechar():
           X="224", Y="524", Width="Parent.Width - 248", Height="40", Size="12", Visible=ABERTO_REL),
         botao(f"{p}Btn", '"Fechar e enviar"', fechar, "Parent.Width - 210", "Parent.Height - 70", 190, 48, Visible=ABERTO_REL,
               DisplayMode="If(fecConf.Value, DisplayMode.Edit, DisplayMode.Disabled)"),
-        C(f"{p}Fechado", LBL, Visible=f"Not({ABERTO_REL})", Color="corAzul", Fill="corAzul10", Size="12", PaddingLeft="16", X="224", Y="524", Width="Parent.Width - 248", Height="48",
-          Text='If(IsBlank(gblRel), "Nenhum relatório.", "Relatório fechado em " & Text(gblRel.rlt_fechadoem, "dd/mm/yyyy hh:mm") & " por " & Coalesce(gblRel.rlt_fechadopor.rlt_nome, "—") & ". Abra o próximo plantão na tela Relatório.")'),
+        C(f"{p}Fechado", LBL, Visible=f"Not({ABERTO_REL})", Size="12", PaddingLeft="16", PaddingTop="10", VerticalAlign="VerticalAlign.Top",
+          X="224", Y="524", Width="Parent.Width - 248", Height="110",
+          Color=f"If({falhou}, corVerm, corAzul)", Fill=f"If({falhou}, corVerm20, corAzul10)", OnSelect=atualizar,
+          Text='If(IsBlank(gblRel), "Nenhum relatório.", "Relatório fechado em " & Text(gblRel.rlt_fechadoem, "dd/mm/yyyy hh:mm") & " por " & Coalesce(gblRel.rlt_fechadopor.rlt_nome, "—") & "." & Char(10) & '
+               'If(IsBlank(gblRel.rlt_resultadoenvio), "PDF e e-mail: envio em andamento. Toque aqui para atualizar.", '
+               '"PDF e e-mail: " & gblRel.rlt_resultadoenvio) & Char(10) & "Abra o próximo plantão na tela Relatório.")'),
     ]
-    return tela("scrFechar", {"Fill": "corFundo", "OnVisible": REFRESH}, filhos)
+    return tela("scrFechar", {"Fill": "corFundo", "OnVisible": atualizar + ";\n" + REFRESH}, filhos)
 
 
 # ================================================================== TELA ABRIR PLANTÃO

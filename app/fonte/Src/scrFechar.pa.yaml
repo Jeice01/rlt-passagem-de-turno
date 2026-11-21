@@ -5,7 +5,8 @@ Screens:
       Fill: |-
         =corFundo
       OnVisible: |-
-        =ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+        =If(!IsBlank(gblRel), Refresh(Relatórios); Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid)));
+        ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
         ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)))
     Children:
     - fecTopo:
@@ -447,8 +448,7 @@ Screens:
             Patch(Histórico, Defaults(Histórico), {rlt_campo: "Relatório fechado e enviado", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
             Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid));
             Reset(fecConf);
-            Notify("Relatório fechado. O PDF e o e-mail entram com o fluxo Fechar e enviar (próxima etapa).", NotificationType.Success);
-            Navigate(scrRelatorio, ScreenTransition.None)
+            Notify("Relatório fechado. O PDF e o e-mail estão sendo enviados: o resultado aparece nesta tela em cerca de 1 minuto.", NotificationType.Success)
           X: |-
             =Parent.Width - 210
           Y: |-
@@ -490,14 +490,14 @@ Screens:
         Properties:
           Visible: |-
             =Not(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto)
-          Color: |-
-            =corAzul
-          Fill: |-
-            =corAzul10
           Size: |-
             =12
           PaddingLeft: |-
             =16
+          PaddingTop: |-
+            =10
+          VerticalAlign: |-
+            =VerticalAlign.Top
           X: |-
             =224
           Y: |-
@@ -505,6 +505,12 @@ Screens:
           Width: |-
             =Parent.Width - 248
           Height: |-
-            =48
+            =110
+          Color: |-
+            =If(StartsWith(Coalesce(gblRel.rlt_resultadoenvio, ""), "FALHA"), corVerm, corAzul)
+          Fill: |-
+            =If(StartsWith(Coalesce(gblRel.rlt_resultadoenvio, ""), "FALHA"), corVerm20, corAzul10)
+          OnSelect: |-
+            =If(!IsBlank(gblRel), Refresh(Relatórios); Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid)))
           Text: |-
-            =If(IsBlank(gblRel), "Nenhum relatório.", "Relatório fechado em " & Text(gblRel.rlt_fechadoem, "dd/mm/yyyy hh:mm") & " por " & Coalesce(gblRel.rlt_fechadopor.rlt_nome, "—") & ". Abra o próximo plantão na tela Relatório.")
+            =If(IsBlank(gblRel), "Nenhum relatório.", "Relatório fechado em " & Text(gblRel.rlt_fechadoem, "dd/mm/yyyy hh:mm") & " por " & Coalesce(gblRel.rlt_fechadopor.rlt_nome, "—") & "." & Char(10) & If(IsBlank(gblRel.rlt_resultadoenvio), "PDF e e-mail: envio em andamento. Toque aqui para atualizar.", "PDF e e-mail: " & gblRel.rlt_resultadoenvio) & Char(10) & "Abra o próximo plantão na tela Relatório.")
