@@ -1,0 +1,14 @@
+<environmentvariabledefinition schemaname="rlt_pastapdf">
+  <defaultvalue>/RLT-CCM</defaultvalue>
+  <description default="Pasta do OneDrive onde o PDF é guardado em ano/mês (RF-016).">
+    <label description="Pasta do OneDrive onde o PDF é guardado em ano/mês (RF-016)." languagecode="1046" />
+  </description>
+  <displayname default="RLT – Pasta dos PDFs no OneDrive">
+    <label description="RLT – Pasta dos PDFs no OneDrive" languagecode="1046" />
+  </displayname>
+  <introducedversion>1.0.0.0</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="rlt_destinatarios">
+  <description default="E-mails que recebem o PDF, separados por ponto e vírgula (RN-005). Nos testes, só o e-mail de quem testa.">
+    <label description="E-mails que recebem o PDF, separados por ponto e vírgula (RN-005). Nos testes, só o e-mail de quem testa." languagecode="1046" />
+  </description>
+  <displayname default="RLT – Destinatários do e-mail">
+    <label description="RLT – Destinatários do e-mail" languagecode="1046" />
+  </displayname>
+  <introducedversion>1.0.0.0</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

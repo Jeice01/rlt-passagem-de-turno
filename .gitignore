@@ -13,3 +13,6 @@ desktop.ini
 
 # Pacotes de carga gerados (contêm e-mails da equipe)
 ferramentas/dataverse/saida/
+
+# Pacote da solução de fluxos e arquivos de configuração (contêm e-mails)
+ferramentas/fluxos/saida/

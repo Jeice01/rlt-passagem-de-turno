@@ -1,0 +1,543 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "rlt_dataverse"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_onedriveforbusiness": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "rlt_onedrive"
+        },
+        "api": {
+          "name": "shared_onedriveforbusiness"
+        }
+      },
+      "shared_office365": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "rlt_outlook"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "RLT – Destinatários do e-mail (rlt_destinatarios)": {
+          "defaultValue": "",
+          "type": "String",
+          "metadata": {
+            "schemaName": "rlt_destinatarios"
+          }
+        },
+        "RLT – Pasta dos PDFs no OneDrive (rlt_pastapdf)": {
+          "defaultValue": "/RLT-CCM",
+          "type": "String",
+          "metadata": {
+            "schemaName": "rlt_pastapdf"
+          }
+        }
+      },
+      "triggers": {
+        "Quando_um_relatorio_e_fechado": {
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 3,
+              "subscriptionRequest/entityname": "rlt_relatorio",
+              "subscriptionRequest/scope": 4,
+              "subscriptionRequest/filteringattributes": "rlt_situacao",
+              "subscriptionRequest/filterexpression": "rlt_situacao eq 448170001"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Gerar_e_enviar": {
+          "type": "Scope",
+          "actions": {
+            "Obter_relatorio": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "GetItem",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "rlt_relatorios",
+                  "recordId": "@triggerOutputs()?['body/rlt_relatorioid']"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {}
+            },
+            "Listar_registros": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "rlt_registros",
+                  "$orderby": "rlt_inicio asc",
+                  "$filter": "_rlt_relatorio_value eq @{triggerOutputs()?['body/rlt_relatorioid']}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Obter_relatorio": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Listar_equipe": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "rlt_equipes",
+                  "$orderby": "rlt_nome asc",
+                  "$filter": "_rlt_relatorio_value eq @{triggerOutputs()?['body/rlt_relatorioid']} and rlt_retiradoem eq null"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Obter_relatorio": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Dados": {
+              "type": "Compose",
+              "inputs": {
+                "turno": "@{if(equals(body('Obter_relatorio')?['rlt_turno'], 448170000), 'ALFA', 'BRAVO')}",
+                "turnoNome": "@{if(equals(body('Obter_relatorio')?['rlt_turno'], 448170000), 'Alfa', 'Bravo')}",
+                "nome": "@{concat('RLT-PASSAGEM DE TURNO ', if(equals(body('Obter_relatorio')?['rlt_turno'], 448170000), 'ALFA', 'BRAVO'), ' ', if(empty(coalesce(body('Obter_relatorio')?['rlt_data'], '')), '', formatDateTime(coalesce(body('Obter_relatorio')?['rlt_data'], '2000-01-01T00:00:00'), 'dd.MM.yyyy')))}",
+                "dataPonto": "@{if(empty(coalesce(body('Obter_relatorio')?['rlt_data'], '')), '', formatDateTime(coalesce(body('Obter_relatorio')?['rlt_data'], '2000-01-01T00:00:00'), 'dd.MM.yyyy'))}",
+                "dataBarra": "@{if(empty(coalesce(body('Obter_relatorio')?['rlt_data'], '')), '', formatDateTime(coalesce(body('Obter_relatorio')?['rlt_data'], '2000-01-01T00:00:00'), 'dd/MM/yyyy'))}",
+                "ano": "@{if(empty(coalesce(body('Obter_relatorio')?['rlt_data'], '')), '', formatDateTime(coalesce(body('Obter_relatorio')?['rlt_data'], '2000-01-01T00:00:00'), 'yyyy'))}",
+                "mes": "@{if(empty(coalesce(body('Obter_relatorio')?['rlt_data'], '')), '', formatDateTime(coalesce(body('Obter_relatorio')?['rlt_data'], '2000-01-01T00:00:00'), 'MM'))}",
+                "periodo": "@{concat(if(empty(coalesce(body('Obter_relatorio')?['rlt_inicio'], '')), '', convertFromUtc(coalesce(body('Obter_relatorio')?['rlt_inicio'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm')), ' a ', if(empty(coalesce(body('Obter_relatorio')?['rlt_fim'], '')), '', convertFromUtc(coalesce(body('Obter_relatorio')?['rlt_fim'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm')))}",
+                "fechadoPor": "@{replace(replace(replace(coalesce(body('Obter_relatorio')?['_rlt_fechadopor_value@OData.Community.Display.V1.FormattedValue'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;')}",
+                "fechadoEm": "@{if(empty(coalesce(body('Obter_relatorio')?['rlt_fechadoem'], '')), '', convertFromUtc(coalesce(body('Obter_relatorio')?['rlt_fechadoem'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm'))}"
+              },
+              "runAfter": {
+                "Obter_relatorio": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Linhas": {
+              "type": "Select",
+              "inputs": {
+                "from": "@body('Listar_registros')?['value']",
+                "select": "@concat('S', string(item()?['rlt_secao']), '|<tr><td>', if(or(equals(item()?['rlt_secao'], 448170005), equals(item()?['rlt_secao'], 448170006)), replace(replace(replace(coalesce(coalesce(item()?['_rlt_equipamento_value@OData.Community.Display.V1.FormattedValue'], item()?['rlt_equipamentolivre']), ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), concat(replace(replace(replace(coalesce(coalesce(item()?['rlt_descricao'], item()?['rlt_titulo']), ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), if(and(equals(item()?['rlt_secao'], 448170007), equals(item()?['rlt_statusios'], 448170004)), concat('<br><i>Motivo: ', replace(replace(replace(coalesce(item()?['rlt_motivocancelamento'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '</i>'), ''))), if(equals(item()?['rlt_herdado'], true), ' <span class=\"h\">(herdada)</span>', ''), '</td><td>', if(or(or(equals(item()?['rlt_secao'], 448170005), equals(item()?['rlt_secao'], 448170006)), equals(item()?['rlt_secao'], 448170007)), replace(replace(replace(coalesce(item()?['rlt_numero'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), replace(replace(replace(coalesce(item()?['_rlt_local_value@OData.Community.Display.V1.FormattedValue'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;')), '</td><td>', if(empty(coalesce(item()?['rlt_inicio'], '')), '', convertFromUtc(coalesce(item()?['rlt_inicio'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm')), '</td><td>', if(not(empty(coalesce(item()?['rlt_conclusao'], ''))), if(empty(coalesce(item()?['rlt_conclusao'], '')), '', convertFromUtc(coalesce(item()?['rlt_conclusao'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm')), if(equals(item()?['rlt_ni'], true), 'N/I', if(equals(item()?['rlt_status'], 448170000), '–', ''))), '</td><td>', if(equals(item()?['rlt_secao'], 448170007), coalesce(item()?['rlt_statusios@OData.Community.Display.V1.FormattedValue'], ''), coalesce(item()?['rlt_status@OData.Community.Display.V1.FormattedValue'], '')), '</td></tr>')"
+              },
+              "runAfter": {
+                "Listar_registros": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Linhas_equipe": {
+              "type": "Select",
+              "inputs": {
+                "from": "@body('Listar_equipe')?['value']",
+                "select": "@concat('<tr><td>', replace(replace(replace(coalesce(item()?['rlt_nome'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '</td><td>', coalesce(item()?['rlt_perfil@OData.Community.Display.V1.FormattedValue'], ''), '</td></tr>')"
+              },
+              "runAfter": {
+                "Listar_equipe": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_elm": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170000|')"
+              },
+              "runAfter": {
+                "Linhas": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_ele": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170001|')"
+              },
+              "runAfter": {
+                "Filtrar_elm": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_bhs": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170002|')"
+              },
+              "runAfter": {
+                "Filtrar_ele": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_civ": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170003|')"
+              },
+              "runAfter": {
+                "Filtrar_bhs": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_out": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170004|')"
+              },
+              "runAfter": {
+                "Filtrar_civ": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_fq": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170005|')"
+              },
+              "runAfter": {
+                "Filtrar_out": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_prev": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170006|')"
+              },
+              "runAfter": {
+                "Filtrar_fq": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filtrar_ios": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Linhas')",
+                "where": "@startsWith(item(), 'S448170007|')"
+              },
+              "runAfter": {
+                "Filtrar_prev": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "HTML": {
+              "type": "Compose",
+              "inputs": "@concat('<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>', outputs('Dados')?['nome'], '</title><style>body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#111;margin:0}.ph{border-bottom:3px solid #72BF44;padding-bottom:8px;text-align:right;font-size:9pt;line-height:1.5;color:#003863}.ph b{float:left;font-size:13pt;text-align:left;line-height:1.3}.tit{text-align:center;text-transform:uppercase;font-size:13pt;font-weight:bold;color:#003863;margin:12px 0 8px;letter-spacing:1px}h4{text-transform:uppercase;font-size:10.5pt;color:#fff;background:#003863;padding:5px 8px;margin:14px 0 0}table{width:100%;border-collapse:collapse}td,th{border:1px solid #c9d2db;padding:4px 6px;text-align:left;vertical-align:top}th{background:#e8edf2;font-size:8.5pt;text-transform:uppercase}.qtd{text-align:right;font-weight:bold;padding:3px 6px;background:#f5f7f9;border:1px solid #c9d2db;border-top:0}.vazio{color:#888}.h{color:#5b6876;font-size:8.5pt}.env{margin-top:6px}.rod{margin-top:18px;border-top:1px solid #c9d2db;padding-top:6px;font-size:8.5pt;color:#5b6876}</style></head><body><div class=\"ph\"><b>Aeroporto de Brasília</b>AEROPORTO INTERNACIONAL DE BRASÍLIA<br>GERÊNCIA DE MANUTENÇÃO<br>COORDENAÇÃO DE PLANEJAMENTO E CONTROLE DE MANUTENÇÃO<br>CENTRO DE CONTROLE DE MANUTENÇÃO</div><div class=\"tit\">Relatório de Passagem de Turno – ', outputs('Dados')?['turno'], ' – ', outputs('Dados')?['dataBarra'], '</div><table><tbody><tr><th style=\"width:18%\">Data</th><td>', outputs('Dados')?['dataBarra'], ' (', outputs('Dados')?['periodo'], ')</td><th style=\"width:14%\">Turno</th><td>', outputs('Dados')?['turno'], '</td></tr></tbody></table><h4>Equipe do plantão</h4><table><thead><tr><th>Nome</th><th>Perfil</th></tr></thead><tbody>', if(empty(body('Linhas_equipe')), '<tr><td colspan=\"2\" class=\"vazio\">Ninguém fez login</td></tr>', join(body('Linhas_equipe'), '')), '</tbody></table><div class=\"env\">Enviado por <b>', outputs('Dados')?['fechadoPor'], '</b> em ', outputs('Dados')?['fechadoEm'], '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – ELETROMECÂNICA</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_elm')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_elm'), ''), 'S448170000|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_elm'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – ELETROELETRÔNICA</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_ele')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_ele'), ''), 'S448170001|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_ele'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – BHS</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_bhs')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_bhs'), ''), 'S448170002|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_bhs'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – CIVIL</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_civ')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_civ'), ''), 'S448170003|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_civ'))), '</div>', '<h4>OUTROS</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_out')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_out'), ''), 'S448170004|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_out'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – FATOR Q (Z9)</h4><table><thead><tr><th>Equipamento</th><th>Chamado</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_fq')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_fq'), ''), 'S448170005|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_fq'))), '</div>', '<h4>MANUT. PREVENTIVA – (ZM02)</h4><table><thead><tr><th>Equipamento</th><th>Ordem de serviço</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_prev')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_prev'), ''), 'S448170006|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_prev'))), '</div>', '<h4>IOS INFORMADOS AO CCM</h4><table><thead><tr><th>Assunto</th><th>Nº IOS</th><th>Hora início</th><th>Hora de conclusão</th><th>Status do IOS</th></tr></thead><tbody>', if(empty(body('Filtrar_ios')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_ios'), ''), 'S448170007|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_ios'))), '</div>', '<div class=\"rod\">Classificação: <b>Interno</b> &nbsp;·&nbsp; ', outputs('Dados')?['nome'], '</div></body></html>')",
+              "runAfter": {
+                "Filtrar_ios": [
+                  "Succeeded"
+                ],
+                "Linhas_equipe": [
+                  "Succeeded"
+                ],
+                "Dados": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Verificar_destinatarios": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(trim(coalesce(parameters('RLT – Destinatários do e-mail (rlt_destinatarios)'), '')))",
+                      true
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Registrar_sem_destinatarios": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateOnlyRecord",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "rlt_relatorios",
+                      "recordId": "@triggerOutputs()?['body/rlt_relatorioid']",
+                      "item/rlt_resultadoenvio": "FALHA: a variável de ambiente RLT – Destinatários do e-mail está vazia. Nada foi enviado."
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  },
+                  "runAfter": {}
+                },
+                "Sem_destinatarios": {
+                  "type": "Terminate",
+                  "inputs": {
+                    "runStatus": "Failed",
+                    "runError": {
+                      "code": "SemDestinatarios",
+                      "message": "A variável de ambiente rlt_destinatarios está vazia: informe os e-mails separados por ponto e vírgula."
+                    }
+                  },
+                  "runAfter": {
+                    "Registrar_sem_destinatarios": [
+                      "Succeeded",
+                      "Failed"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "HTML": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Criar_HTML_temporario": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "CreateFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "folderPath": "@{concat(parameters('RLT – Pasta dos PDFs no OneDrive (rlt_pastapdf)'), '/_temp')}",
+                  "name": "@{concat(guid(), '.html')}",
+                  "body": "@outputs('HTML')"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Verificar_destinatarios": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Converter_em_PDF": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "ConvertFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "id": "@body('Criar_HTML_temporario')?['Id']",
+                  "type": "PDF"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Criar_HTML_temporario": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Salvar_PDF": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "CreateFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "folderPath": "@{concat(parameters('RLT – Pasta dos PDFs no OneDrive (rlt_pastapdf)'), '/', outputs('Dados')?['ano'], '/', outputs('Dados')?['mes'])}",
+                  "name": "@{concat(outputs('Dados')?['nome'], '.pdf')}",
+                  "body": "@body('Converter_em_PDF')"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Converter_em_PDF": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Apagar_HTML_temporario": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "DeleteFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "id": "@body('Criar_HTML_temporario')?['Id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Salvar_PDF": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              }
+            },
+            "Enviar_email": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_office365",
+                  "operationId": "SendEmailV2",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                },
+                "parameters": {
+                  "emailMessage/To": "@parameters('RLT – Destinatários do e-mail (rlt_destinatarios)')",
+                  "emailMessage/Subject": "@{concat('Relatório de Passagem do Turno ', outputs('Dados')?['turnoNome'], ' do CCM - ', outputs('Dados')?['dataPonto'])}",
+                  "emailMessage/Body": "<p>Prezados,</p><p>Encaminho, em anexo, o Relatório de Passagem do Turno @{outputs('Dados')?['turnoNome']} do CCM, referente ao dia @{outputs('Dados')?['dataPonto']}.</p><p>Atenciosamente,</p>",
+                  "emailMessage/Attachments": [
+                    {
+                      "Name": "@{concat(outputs('Dados')?['nome'], '.pdf')}",
+                      "ContentBytes": "@body('Converter_em_PDF')"
+                    }
+                  ],
+                  "emailMessage/Importance": "Normal"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Salvar_PDF": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Registrar_envio": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "UpdateOnlyRecord",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "rlt_relatorios",
+                  "recordId": "@triggerOutputs()?['body/rlt_relatorioid']",
+                  "item/rlt_resultadoenvio": "@{concat('Enviado em ', convertFromUtc(utcNow(), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm'), ' para ', parameters('RLT – Destinatários do e-mail (rlt_destinatarios)'), '. PDF: ', body('Salvar_PDF')?['Path'])}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Enviar_email": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "runAfter": {}
+        },
+        "Erros": {
+          "type": "Query",
+          "inputs": {
+            "from": "@result('Gerar_e_enviar')",
+            "where": "@equals(item()?['status'], 'Failed')"
+          },
+          "runAfter": {
+            "Gerar_e_enviar": [
+              "Failed",
+              "TimedOut"
+            ]
+          }
+        },
+        "Registrar_falha": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "UpdateOnlyRecord",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "rlt_relatorios",
+              "recordId": "@triggerOutputs()?['body/rlt_relatorioid']",
+              "item/rlt_resultadoenvio": "@{concat('FALHA em ', convertFromUtc(utcNow(), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm'), ' na etapa ', coalesce(first(body('Erros'))?['name'], '?'), ': ', coalesce(first(body('Erros'))?['error']?['message'], string(first(body('Erros'))?['outputs']?['body']), 'erro desconhecido'))}"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Erros": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Terminar_com_falha": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed",
+            "runError": {
+              "code": "FalhaNoEnvio",
+              "message": "O PDF ou o e-mail não foi enviado. Veja rlt_resultadoenvio no relatório."
+            }
+          },
+          "runAfter": {
+            "Registrar_falha": [
+              "Succeeded",
+              "Failed"
+            ]
+          }
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}
