@@ -131,8 +131,34 @@ CSS = ("body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#111;ma
        "table{width:100%;border-collapse:collapse}td,th{border:1px solid #c9d2db;padding:4px 6px;text-align:left;vertical-align:top}"
        "th{background:#e8edf2;font-size:8.5pt;text-transform:uppercase}"
        ".qtd{text-align:right;font-weight:bold;padding:3px 6px;background:#f5f7f9;border:1px solid #c9d2db;border-top:0}"
+       "img.foto{max-width:220px;max-height:220px;border:1px solid #c9d2db}"
        ".vazio{color:#888}.h{color:#5b6876;font-size:8.5pt}.env{margin-top:6px}"
        ".rod{margin-top:18px;border-top:1px solid #c9d2db;padding-top:6px;font-size:8.5pt;color:#5b6876}")
+
+# ------------------------------------------------------------------ anexos dos chamados (RF-007, RF-016)
+# FetchXML: anexos dos registros deste relatório, com título, seção e início do registro (link-entity "r").
+FETCH_ANEXOS = ("<fetch><entity name=\"rlt_anexo\"><attribute name=\"rlt_anexoid\"/><attribute name=\"rlt_nome\"/><attribute name=\"rlt_tipo\"/>"
+                "<order attribute=\"createdon\"/>"
+                "<link-entity name=\"rlt_registro\" from=\"rlt_registroid\" to=\"rlt_registro\" alias=\"r\">"
+                "<attribute name=\"rlt_titulo\"/><attribute name=\"rlt_secao\"/><attribute name=\"rlt_inicio\"/>"
+                "<filter><condition attribute=\"rlt_relatorio\" operator=\"eq\" value=\"@{triggerOutputs()?['body/rlt_relatorioid']}\"/></filter>"
+                "</link-entity></entity></fetch>")
+
+
+def ia(campo):
+    """Campo do registro ligado (alias r): o Dataverse devolve "r.campo" ou "r_x002e_campo", conforme a versão."""
+    return f"coalesce(items('Para_cada_anexo')?['r.{campo}'], items('Para_cada_anexo')?['r_x002e_{campo}'])"
+
+
+EXT = "toLower(coalesce(items('Para_cada_anexo')?['rlt_tipo'], ''))"
+EH_FOTO = f"contains(createArray('jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'), {EXT})"
+MIME = f"if(equals({EXT}, 'jpg'), 'jpeg', {EXT})"
+NOME_ANEXO = esc("items('Para_cada_anexo')?['rlt_nome']")
+LINHA_ANEXO = (f"@concat('<tr><td>', {esc(ia('rlt_secao' + FMT))}, '</td><td>', {esc(ia('rlt_titulo'))}, "
+               f"'<br><span class=\"h\">Início ', {dh(ia('rlt_inicio'))}, '</span></td><td>', "
+               f"if({EH_FOTO}, concat('<img class=\"foto\" src=\"data:image/', {MIME}, ';base64,', base64(body('Baixar_arquivo')), '\">'), "
+               f"concat('Arquivo: ', {NOME_ANEXO})), '</td></tr>')")
+
 
 D = "outputs('Dados')"
 html = ("@concat('<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>', " + D + "?['nome'], '</title><style>" + CSS + "</style></head><body>"
@@ -145,6 +171,9 @@ html = ("@concat('<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>', "
         "if(empty(body('Linhas_equipe')), '<tr><td colspan=\"2\" class=\"vazio\">Ninguém fez login</td></tr>', join(body('Linhas_equipe'), '')), "
         "'</tbody></table><div class=\"env\">Enviado por <b>', " + D + "?['fechadoPor'], '</b> em ', " + D + "?['fechadoEm'], '</div>', "
         + ", ".join(tabela(s, t, c) for s, t, c in SECOES) +
+        ", '<h4>Anexos dos chamados</h4><table><thead><tr><th style=\"width:22%\">Seção</th><th>Chamado</th><th style=\"width:36%\">Fotos e arquivos</th></tr></thead><tbody>', "
+        "if(empty(variables('linhasAnexos')), '<tr><td colspan=\"3\" class=\"vazio\">Sem anexos</td></tr>', join(variables('linhasAnexos'), '')), "
+        "'</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(variables('linhasAnexos'))), '</div>'"
         ", '<div class=\"rod\">Classificação: <b>Interno</b> &nbsp;·&nbsp; ', " + D + "?['nome'], '</div></body></html>')")
 
 REL = "body('Obter_relatorio')"
@@ -187,7 +216,23 @@ def montar_definicao():
         acoes[nome] = {"type": "Query", "inputs": {"from": "@body('Linhas')", "where": f"@startsWith(item(), 'S{SEC[s]}|')"},
                        "runAfter": depois(anterior)}
         anterior = nome
-    acoes["HTML"] = {"type": "Compose", "inputs": html, "runAfter": depois(anterior, "Linhas_equipe", "Dados")}
+    acoes["Listar_anexos"] = op(DATAVERSE, "ListRecords", {"entityName": "rlt_anexos", "fetchXml": FETCH_ANEXOS}, depois("Obter_relatorio"))
+    acoes["Para_cada_anexo"] = {
+        "type": "Foreach", "foreach": "@body('Listar_anexos')?['value']", "runtimeConfiguration": {"concurrency": {"repetitions": 1}},
+        "runAfter": depois("Listar_anexos", "Dados"),
+        "actions": {
+            "Baixar_arquivo": op(DATAVERSE, "GetEntityFileImageFieldContent", {
+                "entityName": "rlt_anexos", "recordId": "@items('Para_cada_anexo')?['rlt_anexoid']", "fileImageFieldName": "rlt_arquivo"}),
+            # RF-016: fotos e arquivos também na pasta do mês, ao lado do PDF
+            "Guardar_anexo": op(ONEDRIVE, "CreateFile", {
+                "folderPath": f"@{{concat(parameters('{P_PASTA}'), '/', {D}?['ano'], '/', {D}?['mes'], '/', {D}?['nome'], ' - anexos')}}",
+                "name": "@{concat(substring(items('Para_cada_anexo')?['rlt_anexoid'], 0, 8), ' - ', items('Para_cada_anexo')?['rlt_nome'])}",
+                "body": "@body('Baixar_arquivo')"}, depois("Baixar_arquivo")),
+            "Linha_anexo": {"type": "AppendToArrayVariable", "inputs": {"name": "linhasAnexos", "value": LINHA_ANEXO},
+                            "runAfter": depois("Guardar_anexo", status=("Succeeded", "Failed"))},
+        },
+    }
+    acoes["HTML"] = {"type": "Compose", "inputs": html, "runAfter": depois(anterior, "Linhas_equipe", "Dados", "Para_cada_anexo")}
 
     nome_pdf = f"{D}?['nome']"
     pasta = f"parameters('{P_PASTA}')"
@@ -225,7 +270,9 @@ def montar_definicao():
                                         f"' para ', parameters('{P_DEST}'), '. PDF: ', body('Salvar_PDF')?['Path'])}}")},
             depois("Enviar_email")),
     })
-    acoes = {"Gerar_e_enviar": {"type": "Scope", "actions": escopo, "runAfter": {}}}
+    acoes = {"Iniciar_anexos": {"type": "InitializeVariable", "inputs": {"variables": [{"name": "linhasAnexos", "type": "array", "value": []}]},
+                                "runAfter": {}},
+             "Gerar_e_enviar": {"type": "Scope", "actions": escopo, "runAfter": depois("Iniciar_anexos")}}
     acoes["Erros"] = {"type": "Query", "inputs": {"from": "@result('Gerar_e_enviar')", "where": "@equals(item()?['status'], 'Failed')"},
                       "runAfter": depois("Gerar_e_enviar", status=("Failed", "TimedOut"))}
     acoes["Registrar_falha"] = op(DATAVERSE, "UpdateOnlyRecord", {

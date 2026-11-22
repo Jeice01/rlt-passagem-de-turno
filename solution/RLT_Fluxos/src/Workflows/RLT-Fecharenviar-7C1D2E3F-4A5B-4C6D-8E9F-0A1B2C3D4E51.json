@@ -77,6 +77,19 @@
         }
       },
       "actions": {
+        "Iniciar_anexos": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "linhasAnexos",
+                "type": "array",
+                "value": []
+              }
+            ]
+          },
+          "runAfter": {}
+        },
         "Gerar_e_enviar": {
           "type": "Scope",
           "actions": {
@@ -278,9 +291,99 @@
                 ]
               }
             },
+            "Listar_anexos": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "rlt_anexos",
+                  "fetchXml": "<fetch><entity name=\"rlt_anexo\"><attribute name=\"rlt_anexoid\"/><attribute name=\"rlt_nome\"/><attribute name=\"rlt_tipo\"/><order attribute=\"createdon\"/><link-entity name=\"rlt_registro\" from=\"rlt_registroid\" to=\"rlt_registro\" alias=\"r\"><attribute name=\"rlt_titulo\"/><attribute name=\"rlt_secao\"/><attribute name=\"rlt_inicio\"/><filter><condition attribute=\"rlt_relatorio\" operator=\"eq\" value=\"@{triggerOutputs()?['body/rlt_relatorioid']}\"/></filter></link-entity></entity></fetch>"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Obter_relatorio": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Para_cada_anexo": {
+              "type": "Foreach",
+              "foreach": "@body('Listar_anexos')?['value']",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 1
+                }
+              },
+              "runAfter": {
+                "Listar_anexos": [
+                  "Succeeded"
+                ],
+                "Dados": [
+                  "Succeeded"
+                ]
+              },
+              "actions": {
+                "Baixar_arquivo": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "GetEntityFileImageFieldContent",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "rlt_anexos",
+                      "recordId": "@items('Para_cada_anexo')?['rlt_anexoid']",
+                      "fileImageFieldName": "rlt_arquivo"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  },
+                  "runAfter": {}
+                },
+                "Guardar_anexo": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_onedriveforbusiness",
+                      "operationId": "CreateFile",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                    },
+                    "parameters": {
+                      "folderPath": "@{concat(parameters('RLT – Pasta dos PDFs no OneDrive (rlt_pastapdf)'), '/', outputs('Dados')?['ano'], '/', outputs('Dados')?['mes'], '/', outputs('Dados')?['nome'], ' - anexos')}",
+                      "name": "@{concat(substring(items('Para_cada_anexo')?['rlt_anexoid'], 0, 8), ' - ', items('Para_cada_anexo')?['rlt_nome'])}",
+                      "body": "@body('Baixar_arquivo')"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  },
+                  "runAfter": {
+                    "Baixar_arquivo": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Linha_anexo": {
+                  "type": "AppendToArrayVariable",
+                  "inputs": {
+                    "name": "linhasAnexos",
+                    "value": "@concat('<tr><td>', replace(replace(replace(coalesce(coalesce(items('Para_cada_anexo')?['r.rlt_secao@OData.Community.Display.V1.FormattedValue'], items('Para_cada_anexo')?['r_x002e_rlt_secao@OData.Community.Display.V1.FormattedValue']), ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '</td><td>', replace(replace(replace(coalesce(coalesce(items('Para_cada_anexo')?['r.rlt_titulo'], items('Para_cada_anexo')?['r_x002e_rlt_titulo']), ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '<br><span class=\"h\">Início ', if(empty(coalesce(coalesce(items('Para_cada_anexo')?['r.rlt_inicio'], items('Para_cada_anexo')?['r_x002e_rlt_inicio']), '')), '', convertFromUtc(coalesce(coalesce(items('Para_cada_anexo')?['r.rlt_inicio'], items('Para_cada_anexo')?['r_x002e_rlt_inicio']), '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm')), '</span></td><td>', if(contains(createArray('jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'), toLower(coalesce(items('Para_cada_anexo')?['rlt_tipo'], ''))), concat('<img class=\"foto\" src=\"data:image/', if(equals(toLower(coalesce(items('Para_cada_anexo')?['rlt_tipo'], '')), 'jpg'), 'jpeg', toLower(coalesce(items('Para_cada_anexo')?['rlt_tipo'], ''))), ';base64,', base64(body('Baixar_arquivo')), '\">'), concat('Arquivo: ', replace(replace(replace(coalesce(items('Para_cada_anexo')?['rlt_nome'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'))), '</td></tr>')"
+                  },
+                  "runAfter": {
+                    "Guardar_anexo": [
+                      "Succeeded",
+                      "Failed"
+                    ]
+                  }
+                }
+              }
+            },
             "HTML": {
               "type": "Compose",
-              "inputs": "@concat('<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>', outputs('Dados')?['nome'], '</title><style>body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#111;margin:0}.ph{border-bottom:3px solid #72BF44;padding-bottom:8px;text-align:right;font-size:9pt;line-height:1.5;color:#003863}.ph b{float:left;font-size:13pt;text-align:left;line-height:1.3}.tit{text-align:center;text-transform:uppercase;font-size:13pt;font-weight:bold;color:#003863;margin:12px 0 8px;letter-spacing:1px}h4{text-transform:uppercase;font-size:10.5pt;color:#fff;background:#003863;padding:5px 8px;margin:14px 0 0}table{width:100%;border-collapse:collapse}td,th{border:1px solid #c9d2db;padding:4px 6px;text-align:left;vertical-align:top}th{background:#e8edf2;font-size:8.5pt;text-transform:uppercase}.qtd{text-align:right;font-weight:bold;padding:3px 6px;background:#f5f7f9;border:1px solid #c9d2db;border-top:0}.vazio{color:#888}.h{color:#5b6876;font-size:8.5pt}.env{margin-top:6px}.rod{margin-top:18px;border-top:1px solid #c9d2db;padding-top:6px;font-size:8.5pt;color:#5b6876}</style></head><body><div class=\"ph\"><b>Aeroporto de Brasília</b>AEROPORTO INTERNACIONAL DE BRASÍLIA<br>GERÊNCIA DE MANUTENÇÃO<br>COORDENAÇÃO DE PLANEJAMENTO E CONTROLE DE MANUTENÇÃO<br>CENTRO DE CONTROLE DE MANUTENÇÃO</div><div class=\"tit\">Relatório de Passagem de Turno – ', outputs('Dados')?['turno'], ' – ', outputs('Dados')?['dataBarra'], '</div><table><tbody><tr><th style=\"width:18%\">Data</th><td>', outputs('Dados')?['dataBarra'], ' (', outputs('Dados')?['periodo'], ')</td><th style=\"width:14%\">Turno</th><td>', outputs('Dados')?['turno'], '</td></tr></tbody></table><h4>Equipe do plantão</h4><table><thead><tr><th>Nome</th><th>Perfil</th></tr></thead><tbody>', if(empty(body('Linhas_equipe')), '<tr><td colspan=\"2\" class=\"vazio\">Ninguém fez login</td></tr>', join(body('Linhas_equipe'), '')), '</tbody></table><div class=\"env\">Enviado por <b>', outputs('Dados')?['fechadoPor'], '</b> em ', outputs('Dados')?['fechadoEm'], '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – ELETROMECÂNICA</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_elm')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_elm'), ''), 'S448170000|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_elm'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – ELETROELETRÔNICA</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_ele')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_ele'), ''), 'S448170001|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_ele'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – BHS</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_bhs')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_bhs'), ''), 'S448170002|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_bhs'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – CIVIL</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_civ')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_civ'), ''), 'S448170003|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_civ'))), '</div>', '<h4>OUTROS</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_out')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_out'), ''), 'S448170004|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_out'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – FATOR Q (Z9)</h4><table><thead><tr><th>Equipamento</th><th>Chamado</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_fq')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_fq'), ''), 'S448170005|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_fq'))), '</div>', '<h4>MANUT. PREVENTIVA – (ZM02)</h4><table><thead><tr><th>Equipamento</th><th>Ordem de serviço</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_prev')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_prev'), ''), 'S448170006|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_prev'))), '</div>', '<h4>IOS INFORMADOS AO CCM</h4><table><thead><tr><th>Assunto</th><th>Nº IOS</th><th>Hora início</th><th>Hora de conclusão</th><th>Status do IOS</th></tr></thead><tbody>', if(empty(body('Filtrar_ios')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_ios'), ''), 'S448170007|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_ios'))), '</div>', '<div class=\"rod\">Classificação: <b>Interno</b> &nbsp;·&nbsp; ', outputs('Dados')?['nome'], '</div></body></html>')",
+              "inputs": "@concat('<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>', outputs('Dados')?['nome'], '</title><style>body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#111;margin:0}.ph{border-bottom:3px solid #72BF44;padding-bottom:8px;text-align:right;font-size:9pt;line-height:1.5;color:#003863}.ph b{float:left;font-size:13pt;text-align:left;line-height:1.3}.tit{text-align:center;text-transform:uppercase;font-size:13pt;font-weight:bold;color:#003863;margin:12px 0 8px;letter-spacing:1px}h4{text-transform:uppercase;font-size:10.5pt;color:#fff;background:#003863;padding:5px 8px;margin:14px 0 0}table{width:100%;border-collapse:collapse}td,th{border:1px solid #c9d2db;padding:4px 6px;text-align:left;vertical-align:top}th{background:#e8edf2;font-size:8.5pt;text-transform:uppercase}.qtd{text-align:right;font-weight:bold;padding:3px 6px;background:#f5f7f9;border:1px solid #c9d2db;border-top:0}img.foto{max-width:220px;max-height:220px;border:1px solid #c9d2db}.vazio{color:#888}.h{color:#5b6876;font-size:8.5pt}.env{margin-top:6px}.rod{margin-top:18px;border-top:1px solid #c9d2db;padding-top:6px;font-size:8.5pt;color:#5b6876}</style></head><body><div class=\"ph\"><b>Aeroporto de Brasília</b>AEROPORTO INTERNACIONAL DE BRASÍLIA<br>GERÊNCIA DE MANUTENÇÃO<br>COORDENAÇÃO DE PLANEJAMENTO E CONTROLE DE MANUTENÇÃO<br>CENTRO DE CONTROLE DE MANUTENÇÃO</div><div class=\"tit\">Relatório de Passagem de Turno – ', outputs('Dados')?['turno'], ' – ', outputs('Dados')?['dataBarra'], '</div><table><tbody><tr><th style=\"width:18%\">Data</th><td>', outputs('Dados')?['dataBarra'], ' (', outputs('Dados')?['periodo'], ')</td><th style=\"width:14%\">Turno</th><td>', outputs('Dados')?['turno'], '</td></tr></tbody></table><h4>Equipe do plantão</h4><table><thead><tr><th>Nome</th><th>Perfil</th></tr></thead><tbody>', if(empty(body('Linhas_equipe')), '<tr><td colspan=\"2\" class=\"vazio\">Ninguém fez login</td></tr>', join(body('Linhas_equipe'), '')), '</tbody></table><div class=\"env\">Enviado por <b>', outputs('Dados')?['fechadoPor'], '</b> em ', outputs('Dados')?['fechadoEm'], '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – ELETROMECÂNICA</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_elm')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_elm'), ''), 'S448170000|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_elm'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – ELETROELETRÔNICA</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_ele')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_ele'), ''), 'S448170001|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_ele'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – BHS</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_bhs')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_bhs'), ''), 'S448170002|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_bhs'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – CIVIL</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_civ')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_civ'), ''), 'S448170003|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_civ'))), '</div>', '<h4>OUTROS</h4><table><thead><tr><th>Descrição da atividade</th><th>Local</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_out')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_out'), ''), 'S448170004|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_out'))), '</div>', '<h4>MANUT. CORRETIVA NÃO PROGRAMADA – FATOR Q (Z9)</h4><table><thead><tr><th>Equipamento</th><th>Chamado</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_fq')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_fq'), ''), 'S448170005|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_fq'))), '</div>', '<h4>MANUT. PREVENTIVA – (ZM02)</h4><table><thead><tr><th>Equipamento</th><th>Ordem de serviço</th><th>Hora início</th><th>Hora de conclusão</th><th>Status</th></tr></thead><tbody>', if(empty(body('Filtrar_prev')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_prev'), ''), 'S448170006|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_prev'))), '</div>', '<h4>IOS INFORMADOS AO CCM</h4><table><thead><tr><th>Assunto</th><th>Nº IOS</th><th>Hora início</th><th>Hora de conclusão</th><th>Status do IOS</th></tr></thead><tbody>', if(empty(body('Filtrar_ios')), '<tr><td colspan=\"5\" class=\"vazio\">Sem registros</td></tr>', replace(join(body('Filtrar_ios'), ''), 'S448170007|', '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(body('Filtrar_ios'))), '</div>', '<h4>Anexos dos chamados</h4><table><thead><tr><th style=\"width:22%\">Seção</th><th>Chamado</th><th style=\"width:36%\">Fotos e arquivos</th></tr></thead><tbody>', if(empty(variables('linhasAnexos')), '<tr><td colspan=\"3\" class=\"vazio\">Sem anexos</td></tr>', join(variables('linhasAnexos'), '')), '</tbody></table><div class=\"qtd\">QUANTIDADE: ', string(length(variables('linhasAnexos'))), '</div>', '<div class=\"rod\">Classificação: <b>Interno</b> &nbsp;·&nbsp; ', outputs('Dados')?['nome'], '</div></body></html>')",
               "runAfter": {
                 "Filtrar_ios": [
                   "Succeeded"
@@ -289,6 +392,9 @@
                   "Succeeded"
                 ],
                 "Dados": [
+                  "Succeeded"
+                ],
+                "Para_cada_anexo": [
                   "Succeeded"
                 ]
               }
@@ -483,7 +589,11 @@
               }
             }
           },
-          "runAfter": {}
+          "runAfter": {
+            "Iniciar_anexos": [
+              "Succeeded"
+            ]
+          }
         },
         "Erros": {
           "type": "Query",
