@@ -35,40 +35,133 @@ Screens:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            ="RLT · CCM   Passagem de Turno"
+            ="RLT · CCM"
           Color: |-
             =Color.White
           Size: |-
-            =15
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =20
+          Y: |-
+            =7
+          Width: |-
+            =300
+          Height: |-
+            =24
+    - hisMarca2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =10
           FontWeight: |-
             =FontWeight.Semibold
           X: |-
             =20
           Y: |-
-            =0
+            =29
           Width: |-
-            =500
+            =300
           Height: |-
-            =56
+            =20
+          Font: |-
+            =Font.Arial
     - hisUsuario:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+            =Coalesce(gblUsuario.rlt_nome, User().FullName)
           Color: |-
             =Color.White
           Size: |-
-            =13
+            =12
+          FontWeight: |-
+            =FontWeight.Bold
           Align: |-
             =Align.Right
           X: |-
-            =Parent.Width - 620
+            =Parent.Width - 470
           Y: |-
-            =0
+            =8
           Width: |-
-            =600
+            =410
           Height: |-
-            =56
+            =22
+          Font: |-
+            =Font.Arial
+    - hisPerfil:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), "fora da lista de pessoas", Text(gblUsuario.rlt_perfil) & If(IsBlank(gblUsuario.rlt_cargo), "", " · " & Lower(gblUsuario.rlt_cargo)))
+          Color: |-
+            =Color.White
+          Size: |-
+            =9
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 470
+          Y: |-
+            =29
+          Width: |-
+            =410
+          Height: |-
+            =18
+          Font: |-
+            =Font.Arial
+    - hisAvatar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =Upper(Left(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), 1) & If(CountRows(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")) > 1, Left(Last(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")).Value, 1), ""))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =Parent.Width - 52
+          Y: |-
+            =10
+          Width: |-
+            =36
+          Height: |-
+            =36
+          Fill: |-
+            =corVerde
+          DisabledFill: |-
+            =corVerde
+          BorderColor: |-
+            =corVerde
+          DisabledBorderColor: |-
+            =corVerde
+          BorderThickness: |-
+            =0
+          RadiusTopLeft: |-
+            =18
+          RadiusTopRight: |-
+            =18
+          RadiusBottomLeft: |-
+            =18
+          RadiusBottomRight: |-
+            =18
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.Arial
     - hisMenuFundo:
         Control: Rectangle@2.3.0
         Properties:
@@ -90,13 +183,13 @@ Screens:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Relatório"
+            ="▤    Relatório"
           OnSelect: |-
             =Navigate(scrRelatorio, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -108,11 +201,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -129,17 +222,19 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - hisMenu1:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Chamados"
+            ="◔    Chamados"
           OnSelect: |-
             =Navigate(scrChamados, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -151,11 +246,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -172,13 +267,15 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - hisMenu2:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Histórico"
+            ="↺    Histórico"
           OnSelect: |-
-            =Navigate(scrHistorico, ScreenTransition.None)
+            =Navigate(scrHistorico, ScreenTransition.None, {locHistReg: Blank()})
           Fill: |-
             =corAzul10
           Color: |-
@@ -194,11 +291,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
-            =FontWeight.Semibold
+            =FontWeight.Bold
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -215,6 +312,8 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - hisMenuMarca:
         Control: Rectangle@2.3.0
         Properties:
@@ -225,20 +324,20 @@ Screens:
           Y: |-
             =176
           Width: |-
-            =5
+            =4
           Height: |-
             =46
     - hisMenu3:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Painel geral"
+            ="◈    Painel geral"
           OnSelect: |-
             =Navigate(scrPainel, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -250,11 +349,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -271,17 +370,66 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
+    - hisMenuBolha:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento)))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =166
+          Y: |-
+            =240
+          Width: |-
+            =22
+          Height: |-
+            =18
+          Fill: |-
+            =corVerm
+          DisabledFill: |-
+            =corVerm
+          BorderColor: |-
+            =corVerm
+          DisabledBorderColor: |-
+            =corVerm
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =12
+          RadiusTopRight: |-
+            =12
+          RadiusBottomLeft: |-
+            =12
+          RadiusBottomRight: |-
+            =12
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Visible: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0
+          Font: |-
+            =Font.Arial
     - hisMenu4:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Fechar"
+            ="➤    Fechar"
           OnSelect: |-
             =Navigate(scrFechar, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -293,11 +441,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -314,6 +462,21 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
+    - hisAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =224
+          Y: |-
+            =76
+          Width: |-
+            =36
+          Height: |-
+            =4
     - hisTit:
         Control: Label@2.5.1
         Properties:
@@ -325,136 +488,372 @@ Screens:
             =20
           FontWeight: |-
             =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
           X: |-
             =224
           Y: |-
-            =78
+            =82
           Width: |-
             =Parent.Width - 460
           Height: |-
-            =36
+            =34
     - hisSub:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            ="Quem alterou, quando e o campo. Ninguém pode alterar o histórico (RN-021)."
+            =If(IsBlank(locHistReg), "Todas as alterações do relatório", LookUp(Registros, rlt_registroid = locHistReg).rlt_titulo) & ". Guarda quem alterou, quando e o campo. Não pode ser alterado (RN-021, RNF-003)."
           Color: |-
             =corMuted
           Size: |-
-            =11
+            =10
           X: |-
             =224
           Y: |-
-            =112
+            =116
           Width: |-
             =Parent.Width - 460
           Height: |-
-            =26
+            =24
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          Font: |-
+            =Font.Arial
+    - hisVoltar:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="‹  Voltar ao registro"
+          Color: |-
+            =corAzul
+          Size: |-
+            =10
+          Underline: |-
+            =true
+          Visible: |-
+            =!IsBlank(locHistReg)
+          X: |-
+            =Parent.Width - 224
+          Y: |-
+            =86
+          Width: |-
+            =200
+          Height: |-
+            =24
+          Align: |-
+            =Align.Right
+          OnSelect: |-
+            =Navigate(scrRegistro, ScreenTransition.None, {locId: locHistReg, locSecao: LookUp(Registros, rlt_registroid = locHistReg).rlt_secao})
+          Font: |-
+            =Font.Arial
+    - hisTabela:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =""
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =224
+          Y: |-
+            =146
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =Parent.Height - 160
+          Fill: |-
+            =Color.White
+          DisabledFill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          DisabledBorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =10
+          RadiusTopRight: |-
+            =10
+          RadiusBottomLeft: |-
+            =10
+          RadiusBottomRight: |-
+            =10
+          Font: |-
+            =Font.Arial
+    - hisCabQuando:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="QUANDO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12
+          Y: |-
+            =152
+          Width: |-
+            =140
+          Height: |-
+            =30
+          Font: |-
+            =Font.Arial
+    - hisCabQuem:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="QUEM"
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 152
+          Y: |-
+            =152
+          Width: |-
+            =150
+          Height: |-
+            =30
+          Font: |-
+            =Font.Arial
+    - hisCabRegistro:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="REGISTRO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 310
+          Y: |-
+            =152
+          Width: |-
+            =Parent.Width - 248 - 310 - 230
+          Height: |-
+            =30
+          Font: |-
+            =Font.Arial
+    - hisCabCampo:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="CAMPO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + Parent.Width - 248 - 220
+          Y: |-
+            =152
+          Width: |-
+            =208
+          Height: |-
+            =30
+          Font: |-
+            =Font.Arial
+    - hisCabLinha:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corLinha
+          X: |-
+            =225
+          Y: |-
+            =182
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =2
     - hisGal:
         Control: Gallery@2.15.0
         Variant: Vertical
         Properties:
-          TemplateSize: |-
-            =64
-          TemplatePadding: |-
-            =4
-          X: |-
-            =218
-          Y: |-
-            =146
-          Width: |-
-            =Parent.Width - 236
-          Height: |-
-            =Parent.Height - 154
           Items: |-
-            =Sort(Filter(Histórico, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid), rlt_quando, SortOrder.Descending)
+            =Sort(If(IsBlank(locHistReg), Filter(Histórico, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid), Filter(Histórico, rlt_registro.rlt_registroid = locHistReg)), rlt_quando, SortOrder.Descending)
+          TemplateSize: |-
+            =58
+          TemplatePadding: |-
+            =0
+          X: |-
+            =225
+          Y: |-
+            =184
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =Parent.Height - 184 - 16
         Children:
-          - hisFundo:
-              Control: Rectangle@2.3.0
-              Properties:
-                Fill: |-
-                  =Color.White
-                BorderColor: |-
-                  =corLinha
-                BorderThickness: |-
-                  =1
-                X: |-
-                  =0
-                Y: |-
-                  =0
-                Width: |-
-                  =Parent.TemplateWidth
-                Height: |-
-                  =Parent.TemplateHeight
           - hisQuando:
               Control: Label@2.5.1
               Properties:
                 Text: |-
                   =Text(ThisItem.rlt_quando, "dd/mm/yyyy hh:mm")
                 Color: |-
-                  =corMuted
+                  =corTexto
                 Size: |-
-                  =11
+                  =10
                 X: |-
-                  =14
+                  =12
                 Y: |-
-                  =6
+                  =8
                 Width: |-
-                  =150
+                  =140
                 Height: |-
-                  =24
+                  =22
+                Font: |-
+                  =Font.Arial
           - hisQuem:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =Coalesce(ThisItem.rlt_quem.rlt_nome, "—") & If(IsBlank(ThisItem.rlt_quem), "", "  ·  " & Text(ThisItem.rlt_quem.rlt_perfil))
+                  =Coalesce(ThisItem.rlt_quem.rlt_nome, "—")
                 Color: |-
                   =corTexto
                 Size: |-
-                  =11
-                FontWeight: |-
-                  =FontWeight.Semibold
+                  =10
                 X: |-
-                  =170
+                  =152
                 Y: |-
-                  =6
+                  =8
                 Width: |-
-                  =320
+                  =150
                 Height: |-
-                  =24
+                  =22
+                Font: |-
+                  =Font.Arial
+          - hisQuemPerfil:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(IsBlank(ThisItem.rlt_quem), "", Text(ThisItem.rlt_quem.rlt_perfil))
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =152
+                Y: |-
+                  =28
+                Width: |-
+                  =150
+                Height: |-
+                  =20
+                Font: |-
+                  =Font.Arial
+          - hisReg:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(IsBlank(ThisItem.rlt_registro), "—", Left(ThisItem.rlt_registro.rlt_titulo, 70))
+                Color: |-
+                  =If(IsBlank(ThisItem.rlt_registro), corMuted, corAzul)
+                Underline: |-
+                  =!IsBlank(ThisItem.rlt_registro)
+                Size: |-
+                  =10
+                X: |-
+                  =310
+                Y: |-
+                  =8
+                Width: |-
+                  =Parent.Width - 248 - 310 - 230
+                Height: |-
+                  =22
+                OnSelect: |-
+                  =If(!IsBlank(ThisItem.rlt_registro), Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registro.rlt_registroid, locSecao: ThisItem.rlt_registro.rlt_secao}))
+                Font: |-
+                  =Font.Arial
+          - hisSecao:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(IsBlank(ThisItem.rlt_registro), "", LookUp(tabSecoes, Valor = ThisItem.rlt_registro.rlt_secao).Nome)
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =310
+                Y: |-
+                  =28
+                Width: |-
+                  =Parent.Width - 248 - 310 - 230
+                Height: |-
+                  =20
+                Font: |-
+                  =Font.Arial
           - hisCampo:
               Control: Label@2.5.1
               Properties:
                 Text: |-
                   =ThisItem.rlt_campo
                 Color: |-
-                  =corAzul
+                  =corTexto
                 Size: |-
-                  =11
+                  =10
                 FontWeight: |-
                   =FontWeight.Bold
                 X: |-
-                  =500
+                  =Parent.Width - 248 - 220
                 Y: |-
-                  =6
+                  =8
                 Width: |-
-                  =Parent.TemplateWidth - 520
+                  =208
                 Height: |-
-                  =24
-          - hisReg:
-              Control: Label@2.5.1
+                  =40
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - hisLinha:
+              Control: Rectangle@2.3.0
               Properties:
-                Text: |-
-                  =Coalesce(ThisItem.rlt_registro.rlt_titulo, "")
-                Color: |-
-                  =corMuted
-                Size: |-
-                  =10
+                Fill: |-
+                  =corLinha
                 X: |-
-                  =170
+                  =0
                 Y: |-
-                  =32
+                  =Parent.TemplateHeight - 1
                 Width: |-
-                  =Parent.TemplateWidth - 190
+                  =Parent.TemplateWidth
                 Height: |-
-                  =24
+                  =1
+    - hisVazio:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Nenhuma alteração registrada."
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          Align: |-
+            =Align.Center
+          Visible: |-
+            =CountRows(hisGal.AllItems) = 0
+          X: |-
+            =224
+          Y: |-
+            =220
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =40
+          Font: |-
+            =Font.Arial

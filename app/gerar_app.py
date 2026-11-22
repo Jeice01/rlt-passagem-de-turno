@@ -23,11 +23,18 @@ def bloco(f):
     return "|-\n" + "\n".join(linhas)
 
 
-def emitir(nome, controle, props, filhos=None, variante=None, nivel=0):
+FONTE, FONTE_TIT = "Font.Arial", "Font.'Open Sans Condensed'"  # PRD: Helvetica Neue/Arial no texto; Borba (condensada) nos títulos
+
+
+def emitir(nome, controle, props, filhos=None, variante=None, nivel=0, chaves=None):
+    if controle in COM_FONTE and "Font" not in props:
+        props = {**props, "Font": FONTE}
     ind = "  " * nivel
     out = [f"{ind}- {nome}:", f"{ind}    Control: {controle}"]
     if variante:
         out.append(f"{ind}    Variant: {variante}")
+    for k, v in (chaves or {}).items():  # Layout, IsLocked, MetadataKey (formulários e cartões)
+        out.append(f"{ind}    {k}: {v}")
     if props:
         out.append(f"{ind}    Properties:")
         for k, v in props.items():
@@ -41,8 +48,8 @@ def emitir(nome, controle, props, filhos=None, variante=None, nivel=0):
     return "\n".join(out)
 
 
-def C(nome, controle, variante=None, filhos=None, **props):
-    return lambda nivel: emitir(nome, controle, props, filhos, variante, nivel)
+def C(nome, controle, variante=None, filhos=None, chaves=None, **props):
+    return lambda nivel: emitir(nome, controle, props, filhos, variante, nivel, chaves)
 
 
 def tela(nome, props, filhos):
@@ -60,6 +67,7 @@ def tela(nome, props, filhos):
 LBL, BTN, RET = "Label@2.5.1", "Classic/Button@2.2.0", "Rectangle@2.3.0"
 TXT, DDL, CBX = "Classic/TextInput@2.3.2", "Classic/DropDown@2.3.1", "Classic/ComboBox@2.4.0"
 DTP, CHK, GAL = "Classic/DatePicker@2.6.0", "Classic/CheckBox@2.1.0", "Gallery@2.15.0"
+COM_FONTE = {LBL, BTN, TXT, DDL, CBX, DTP, CHK}
 
 # ------------------------------------------------------------------ trechos de fórmula
 SEC = "[@'Seção']"
@@ -82,37 +90,79 @@ def hist(campo, registro="Blank()"):
 
 
 # ------------------------------------------------------------------ moldura comum (topo + menu)
-MENU = [("Relatório", "scrRelatorio"), ("Chamados", "scrChamados"), ("Histórico", "scrHistorico"),
-        ("Painel geral", "scrPainel"), ("Fechar", "scrFechar")]
+MENU = [("Relatório", "scrRelatorio", "▤"), ("Chamados", "scrChamados", "◔"), ("Histórico", "scrHistorico", "↺"),
+        ("Painel geral", "scrPainel", "◈"), ("Fechar", "scrFechar", "➤")]
+FQ_SEM_SAP = f"CountRows(Filter(colRegs, rlt_secao = {SEC}.'Fator Q (Z9)' && IsBlank(rlt_equipamento)))"
+
+
+def iniciais(nome):
+    """Duas letras para o avatar: primeira do primeiro nome e do último sobrenome."""
+    return f'Upper(Left(Trim({nome}), 1) & If(CountRows(Split(Trim({nome}), " ")) > 1, Left(Last(Split(Trim({nome}), " ")).Value, 1), ""))'
+
+
+# ------------------------------------------------------------------ componentes visuais do protótipo
+# O retângulo do Power Apps não arredonda: cartões, etiquetas e avatares são botões desativados (que arredondam).
+def cartao(nome, x, y, w, h, fill="Color.White", borda="corLinha", raio=10, espessura=1, **extra):
+    r = str(raio)
+    props = dict(Text='""', DisplayMode="DisplayMode.Disabled", TabIndex="-1", X=str(x), Y=str(y), Width=str(w), Height=str(h),
+                 Fill=fill, DisabledFill=fill, BorderColor=borda, DisabledBorderColor=borda, BorderThickness=str(espessura),
+                 RadiusTopLeft=r, RadiusTopRight=r, RadiusBottomLeft=r, RadiusBottomRight=r)
+    props.update(extra)
+    return C(nome, BTN, **props)
+
+
+def chip(nome, texto, x, y, w, fill, cor, borda, h=24, **extra):
+    """Etiqueta arredondada (status, ABERTO, HERDADA, SEM SAP)."""
+    return cartao(nome, x, y, w, h, fill=fill, borda=borda, raio=12, Text=texto, Color=cor, DisabledColor=cor,
+                  Size="9", FontWeight="FontWeight.Bold", **extra)
+
+
+def avatar(nome, nome_pessoa, x, y, d=36, fill="corVerde", **extra):
+    return cartao(nome, x, y, d, d, fill=fill, borda=fill, raio=d // 2, espessura=0, Text=iniciais(nome_pessoa),
+                  Color="Color.White", DisabledColor="Color.White", Size=str(max(8, d // 4)), FontWeight="FontWeight.Bold", **extra)
 
 
 def moldura(p, atual):
+    nome_usuario = "Coalesce(gblUsuario.rlt_nome, User().FullName)"
     itens = [
         C(f"{p}Topo", RET, Fill="corAzul", X="0", Y="0", Width="Parent.Width", Height="56"),
         C(f"{p}Faixa", RET, Fill="corVerde", X="0", Y="56", Width="Parent.Width", Height="5"),
-        C(f"{p}Marca", LBL, Text='"RLT · CCM   Passagem de Turno"', Color="Color.White", Size="15", FontWeight="FontWeight.Semibold",
-          X="20", Y="0", Width="500", Height="56"),
-        C(f"{p}Usuario", LBL, Text='If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))',
-          Color="Color.White", Size="13", Align="Align.Right", X="Parent.Width - 620", Y="0", Width="600", Height="56"),
+        C(f"{p}Marca", LBL, Text='"RLT · CCM"', Color="Color.White", Size="14", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+          X="20", Y="7", Width="300", Height="24"),
+        C(f"{p}Marca2", LBL, Text='"Passagem de Turno"', Color="Color.White", Size="10", FontWeight="FontWeight.Semibold",
+          X="20", Y="29", Width="300", Height="20"),
+        C(f"{p}Usuario", LBL, Text=nome_usuario, Color="Color.White", Size="12", FontWeight="FontWeight.Bold", Align="Align.Right",
+          X="Parent.Width - 470", Y="8", Width="410", Height="22"),
+        C(f"{p}Perfil", LBL, Text='If(IsBlank(gblUsuario), "fora da lista de pessoas", Text(gblUsuario.rlt_perfil) & If(IsBlank(gblUsuario.rlt_cargo), "", " · " & Lower(gblUsuario.rlt_cargo)))',
+          Color="Color.White", Size="9", Align="Align.Right", X="Parent.Width - 470", Y="29", Width="410", Height="18"),
+        avatar(f"{p}Avatar", nome_usuario, "Parent.Width - 52", 10),
         C(f"{p}MenuFundo", RET, Fill="Color.White", BorderColor="corLinha", BorderThickness="1", X="0", Y="61", Width="200", Height="Parent.Height - 61"),
     ]
-    for i, (rot, destino) in enumerate(MENU):
+    for i, (rot, destino, icone) in enumerate(MENU):
         on = destino == atual
-        itens.append(C(f"{p}Menu{i}", BTN, Text=f'"{rot}"', OnSelect=f"Navigate({destino}, ScreenTransition.None)",
-                       Fill="corAzul10" if on else "Color.White", Color="corAzul", HoverFill="corAzul10", HoverColor="corAzul",
-                       PressedFill="corAzul10", BorderThickness="0", Align="Align.Left", PaddingLeft="20",
-                       FontWeight="FontWeight.Semibold" if on else "FontWeight.Normal", Size="13",
-                       X="0", Y=str(76 + i * 50), Width="200", Height="46",
+        y = 76 + i * 50
+        ir = "Navigate(scrHistorico, ScreenTransition.None, {locHistReg: Blank()})" if destino == "scrHistorico" else f"Navigate({destino}, ScreenTransition.None)"
+        itens.append(C(f"{p}Menu{i}", BTN, Text=f'"{icone}    {rot}"', OnSelect=ir,
+                       Fill="corAzul10" if on else "Color.White", Color="corAzul" if on else "corMuted", HoverFill="corAzul10", HoverColor="corAzul",
+                       PressedFill="corAzul10", BorderThickness="0", Align="Align.Left", PaddingLeft="22",
+                       FontWeight="FontWeight.Bold" if on else "FontWeight.Normal", Size="12",
+                       X="0", Y=str(y), Width="200", Height="46",
                        RadiusTopLeft="0", RadiusTopRight="0", RadiusBottomLeft="0", RadiusBottomRight="0"))
         if on:
-            itens.append(C(f"{p}MenuMarca", RET, Fill="corVerde", X="0", Y=str(76 + i * 50), Width="5", Height="46"))
+            itens.append(C(f"{p}MenuMarca", RET, Fill="corVerde", X="0", Y=str(y), Width="4", Height="46"))
+        if destino == "scrPainel":  # bolha vermelha: Fator Q sem código SAP
+            itens.append(chip(f"{p}MenuBolha", FQ_SEM_SAP, 166, y + 14, 22, "corVerm", "Color.White", "corVerm", h=18,
+                              Visible=f"{FQ_SEM_SAP} > 0"))
     return itens
 
 
 def titulo(p, texto, sub=None, y=78):
-    out = [C(f"{p}Tit", LBL, Text=texto, Color="corAzul", Size="20", FontWeight="FontWeight.Bold", X="224", Y=str(y), Width="Parent.Width - 460", Height="36")]
+    out = [C(f"{p}Acento", RET, Fill="corVerde", X="224", Y=str(y - 2), Width="36", Height="4"),
+           C(f"{p}Tit", LBL, Text=texto, Color="corAzul", Size="20", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+             X="224", Y=str(y + 4), Width="Parent.Width - 460", Height="34")]
     if sub:
-        out.append(C(f"{p}Sub", LBL, Text=sub, Color="corMuted", Size="11", X="224", Y=str(y + 34), Width="Parent.Width - 460", Height="26"))
+        out.append(C(f"{p}Sub", LBL, Text=sub, Color="corMuted", Size="10", X="224", Y=str(y + 38), Width="Parent.Width - 460", Height="24",
+                     VerticalAlign="VerticalAlign.Top"))
     return out
 
 
@@ -132,117 +182,252 @@ def rotulo(nome, texto, x, y, w=300, vis="true"):
 
 # ================================================================== TELA RELATÓRIO
 def tela_relatorio():
+    """Painel do plantão, no layout do protótipo (telaRelatorio): plantão, indicadores, seções e últimas alterações."""
     p = "rel"
-    kpis = [("Em aberto", f"CountRows(Filter(colRegs, {ABERTO}))", "corLaranja", "Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: true, locSecaoFiltro: Blank()})"),
-            ("Concluídos ou encerrados", f"CountRows(Filter(colRegs, Not({ABERTO})))", "corVerde", "Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: false, locSecaoFiltro: Blank()})"),
-            ("Herdados ainda abertos", f"CountRows(Filter(colRegs, rlt_herdado && {ABERTO}))", "corAzul", "Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: true, locSecaoFiltro: Blank()})"),
-            ("Fator Q sem código SAP", f"CountRows(Filter(colRegs, rlt_secao = {SEC}.'Fator Q (Z9)' && IsBlank(rlt_equipamento)))", "corVerm", "Navigate(scrPainel, ScreenTransition.None)")]
+    off = f"If({FQ_SEM_SAP} > 0, 52, 0)"          # o aviso de Fator Q sem SAP empurra o resto para baixo
+    y = lambda base: f"{base} + {off}"
+    LARG = "Parent.Width - 248"                    # área útil à direita do menu
+    ASIDE = 300                                    # coluna "Últimas alterações"
+    ir_cha = lambda so_abertos, sec="Blank()": f"Navigate(scrChamados, ScreenTransition.None, {{locSoAbertos: {so_abertos}, locSecaoFiltro: {sec}}})"
+    aberto = f"!IsBlank(gblRel) && gblRel.rlt_situacao = {SIT}.Aberto"
     filhos = moldura(p, "scrRelatorio") + titulo(
-        p, 'If(IsBlank(gblRel), "NENHUM RELATÓRIO ABERTO", "RELATÓRIO " & Text(gblRel.rlt_turno) & " " & Text(gblRel.rlt_data, "dd.mm.yyyy"))',
-        'If(IsBlank(gblRel), "Abra o plantão para começar.", gblRel.rlt_nome & ".pdf  ·  " & Text(gblRel.rlt_situacao))')
+        p, 'If(IsBlank(gblRel), "NENHUM RELATÓRIO", "RELATÓRIO " & Text(gblRel.rlt_turno) & " " & Text(gblRel.rlt_data, "dd.mm.yyyy"))')
     filhos += [
-        botao(f"{p}BtnAbrir", '"Abrir plantão"', "Navigate(scrAbrir, ScreenTransition.None)", "Parent.Width - 210", 84, Visible=f"Not({ABERTO_REL})"),
-        botao(f"{p}BtnFechar", '"Fechar relatório"', "Navigate(scrFechar, ScreenTransition.None)", "Parent.Width - 210", 84, Visible=ABERTO_REL),
+        chip(f"{p}Situacao", 'If(IsBlank(gblRel), "SEM PLANTÃO", If(' + aberto + ', "ABERTO", "FECHADO"))', 224, 118, 84,
+             f"If({aberto}, RGBA(227, 242, 218, 1), corAzul10)", f"If({aberto}, RGBA(47, 98, 20, 1), corAzul)", f"If({aberto}, RGBA(191, 226, 168, 1), corLinha)", h=22),
+        C(f"{p}Pdf", LBL, Text='If(IsBlank(gblRel), "Abra o plantão para começar.", gblRel.rlt_nome & ".pdf")', Color="corMuted", Size="10",
+          X="316", Y="117", Width="Parent.Width - 560", Height="24"),
+        botao(f"{p}BtnAbrir", '"＋  Abrir plantão"', "Navigate(scrAbrir, ScreenTransition.None)", "Parent.Width - 214", 86, 190, 42, Visible=f"Not({ABERTO_REL})"),
+        botao(f"{p}BtnFechar", '"➤  Fechar relatório"', "Navigate(scrFechar, ScreenTransition.None)", "Parent.Width - 214", 86, 190, 42, Visible=ABERTO_REL),
+        # aviso: Fator Q sem código SAP (RF-020)
+        cartao(f"{p}Aviso", 224, 146, LARG, 42, fill="corVerm20", borda="RGBA(231, 163, 179, 1)", Visible=f"{FQ_SEM_SAP} > 0"),
+        C(f"{p}AvisoTxt", LBL, Text=f'"⚠   " & {FQ_SEM_SAP} & If({FQ_SEM_SAP} = 1, " chamado", " chamados") & " do Fator Q sem código SAP. Corrija no Painel geral de informações."',
+          Color="RGBA(138, 0, 33, 1)", Size="11", FontWeight="FontWeight.Semibold", PaddingLeft="16", X="224", Y="146", Width=LARG, Height="42",
+          Visible=f"{FQ_SEM_SAP} > 0", OnSelect="Navigate(scrPainel, ScreenTransition.None)"),
         # cartão do plantão
-        C(f"{p}Cartao", RET, Fill="Color.White", BorderColor="corLinha", BorderThickness="1", X="224", Y="146", Width="Parent.Width - 248", Height="150"),
-        rotulo(f"{p}RotTurno", '"TURNO"', 244, 158), rotulo(f"{p}RotData", '"DATA"', 404, 158),
-        C(f"{p}Turno", LBL, Text='Text(gblRel.rlt_turno)', Color="corAzul", Size="17", FontWeight="FontWeight.Bold", X="244", Y="178", Width="150", Height="30"),
-        C(f"{p}Data", LBL, Text='Text(gblRel.rlt_data, "dd/mm/yyyy")', Color="corAzul", Size="17", FontWeight="FontWeight.Bold", X="404", Y="178", Width="200", Height="30"),
-        C(f"{p}Janela", LBL, Text='If(IsBlank(gblRel), "", Text(gblRel.rlt_inicio, "dd/mm hh:mm") & " → " & Text(gblRel.rlt_fim, "dd/mm hh:mm"))',
-          Color="corMuted", Size="11", X="404", Y="206", Width="300", Height="22"),
-        rotulo(f"{p}RotEquipe", '"EQUIPE DO PLANTÃO (" & CountRows(colEquipe) & ")"', 244, 232, 400),
-        C(f"{p}GalEquipe", GAL, variante="Vertical", Items="Sort(colEquipe, rlt_nome)", WrapCount="4", TemplateSize="40", TemplatePadding="2",
-          X="240", Y="254", Width="Parent.Width - 280", Height="40", ShowScrollbar="false",
+        cartao(f"{p}Cartao", 224, y(146), LARG, 150),
+        rotulo(f"{p}RotTurno", '"TURNO"', 244, y(158), 120), rotulo(f"{p}RotData", '"DATA"', 380, y(158), 200),
+        C(f"{p}Turno", LBL, Text='Text(gblRel.rlt_turno)', Color="corAzul", Size="17", FontWeight="FontWeight.Bold", Font=FONTE_TIT, X="244", Y=y(176), Width="130", Height="28"),
+        C(f"{p}TurnoHoras", LBL, Text='If(IsBlank(gblRel), "", If(Text(gblRel.rlt_turno) = "ALFA", "07:00 às 19:00", "19:00 às 07:00"))', Color="corMuted", Size="9",
+          X="244", Y=y(202), Width="130", Height="20"),
+        C(f"{p}Data", LBL, Text='Text(gblRel.rlt_data, "dd/mm/yyyy")', Color="corAzul", Size="17", FontWeight="FontWeight.Bold", Font=FONTE_TIT, X="380", Y=y(176), Width="220", Height="28"),
+        C(f"{p}Janela", LBL, Text='If(IsBlank(gblRel), "", Text(gblRel.rlt_inicio, "dd/mm/yyyy hh:mm") & " → " & Text(gblRel.rlt_fim, "dd/mm/yyyy hh:mm"))',
+          Color="corMuted", Size="9", X="380", Y=y(202), Width="260", Height="20"),
+    ]
+    # andamento do turno (barra)
+    pct = ("If(IsBlank(gblRel), 0, Max(0, Min(1, DateDiff(gblRel.rlt_inicio, Now(), TimeUnit.Minutes) / "
+           "Max(1, DateDiff(gblRel.rlt_inicio, gblRel.rlt_fim, TimeUnit.Minutes)))))")
+    xa, wa = "660", "Parent.Width - 24 - 20 - 660"
+    filhos += [
+        rotulo(f"{p}RotAnd", '"ANDAMENTO DO TURNO"', xa, y(158), 260),
+        C(f"{p}AndFundo", RET, Fill="corAzul10", X=xa, Y=y(184), Width=wa, Height="8"),
+        C(f"{p}AndBarra", RET, Fill="corVerde", X=xa, Y=y(184), Width=f"({wa}) * {pct}", Height="8"),
+        C(f"{p}AndTxt", LBL, Color="corMuted", Size="9", X=xa, Y=y(196), Width=wa, Height="20",
+          Text=(f'If(IsBlank(gblRel), "", If(Now() >= gblRel.rlt_fim, "Turno encerrado", Round({pct} * 100, 0) & "%  ·  faltam " & '
+                'RoundDown(DateDiff(Now(), gblRel.rlt_fim, TimeUnit.Minutes) / 60, 0) & "h" & Text(Mod(DateDiff(Now(), gblRel.rlt_fim, TimeUnit.Minutes), 60), "00")))')),
+        C(f"{p}Linha", RET, Fill="corLinha", X="244", Y=y(226), Width="Parent.Width - 288", Height="1"),
+        rotulo(f"{p}RotEquipe", '"EQUIPE DO PLANTÃO (" & CountRows(colEquipe) & ")"', 244, y(234), 400),
+        C(f"{p}GalEquipe", GAL, variante="Vertical", Items="Sort(colEquipe, rlt_nome)", WrapCount="4", TemplateSize="44", TemplatePadding="0",
+          X="240", Y=y(254), Width="Parent.Width - 280", Height="44", ShowScrollbar="false",
           filhos=[
-              C("relEqNome", LBL, Text='ThisItem.rlt_nome & "  ·  " & Text(ThisItem.rlt_perfil)', Color="corTexto", Size="11",
-                X="4", Y="4", Width="Parent.TemplateWidth - 44", Height="30", Fill="corAzul10",
-                PaddingLeft="10"),
-              C("relEqSair", BTN, Text='"×"', Visible=ABERTO_REL, X="Parent.TemplateWidth - 40", Y="4", Width="32", Height="30",
-                Fill="corAzul10", Color="corMuted", BorderThickness="0", HoverFill="corLinha", HoverColor="corVerm", Size="13",
+              cartao("relEqPilula", 4, 2, "Parent.TemplateWidth - 12", 40, raio=20),
+              avatar("relEqAvatar", "ThisItem.rlt_nome", 10, 8, d=28),
+              C("relEqNome", LBL, Text="ThisItem.rlt_nome", Color="corTexto", Size="10", FontWeight="FontWeight.Bold",
+                X="44", Y="5", Width="Parent.TemplateWidth - 90", Height="18"),
+              C("relEqPerfil", LBL, Text='Text(ThisItem.rlt_perfil) & If(IsBlank(ThisItem.rlt_entrouem), "", "  ·  login " & Text(ThisItem.rlt_entrouem, "hh:mm"))',
+                Color="corMuted", Size="8", X="44", Y="22", Width="Parent.TemplateWidth - 90", Height="16"),
+              C("relEqSair", BTN, Text='"×"', Visible=ABERTO_REL, X="Parent.TemplateWidth - 40", Y="8", Width="26", Height="28",
+                Fill="Color.White", Color="corMuted", BorderThickness="0", HoverFill="corAzul10", HoverColor="corVerm", Size="12",
                 OnSelect="Patch('Equipe do plantão', LookUp('Equipe do plantão', rlt_equipeid = ThisItem.rlt_equipeid), {rlt_retiradoem: Now(), rlt_retiradopor: gblUsuario});\n"
                          + hist('"Tirou " & ThisItem.rlt_nome & " da equipe do plantão"') + ";\n" + REFRESH),
           ]),
     ]
-    # indicadores
+    # indicadores (cartões com borda colorida à esquerda)
+    kpis = [("Em aberto", f"CountRows(Filter(colRegs, {ABERTO}))", "corLaranja", ir_cha("true")),
+            ("Concluídos ou encerrados", f"CountRows(Filter(colRegs, Not({ABERTO})))", "corVerde", ir_cha("false")),
+            ("Herdados ainda abertos", f"CountRows(Filter(colRegs, rlt_herdado && {ABERTO}))", "corAzul", ir_cha("true")),
+            ("Fator Q sem código SAP", FQ_SEM_SAP, f"If({FQ_SEM_SAP} > 0, corVerm, corVerde)", "Navigate(scrPainel, ScreenTransition.None)")]
     for i, (rot, conta, cor, nav) in enumerate(kpis):
-        x = f"224 + {i} * (Parent.Width - 248 + 12) / 4"
-        w = "(Parent.Width - 248 - 36) / 4"
+        x = f"224 + {i} * (({LARG} - 36) / 4 + 12)"
+        w = f"({LARG} - 36) / 4"
         filhos += [
-            C(f"{p}Kpi{i}", LBL, Text=f'{conta} & Char(10) & "{rot}"', OnSelect=nav, Fill="Color.White", BorderColor=cor, BorderThickness="1",
-              Color="corAzul", Size="13", FontWeight="FontWeight.Semibold", PaddingLeft="16", X=x, Y="308", Width=w, Height="70"),
-            C(f"{p}KpiBarra{i}", RET, Fill=cor, X=x, Y="308", Width="5", Height="70"),
+            cartao(f"{p}Kpi{i}", x, y(306), w, 64),
+            C(f"{p}KpiBarra{i}", RET, Fill=cor, X=x, Y=y(308), Width="4", Height="60"),
+            C(f"{p}KpiNum{i}", LBL, Text=conta, Color="If(" + conta + ' > 0 && "' + rot + '" = "Fator Q sem código SAP", RGBA(138, 0, 33, 1), corAzul)',
+              Size="20", FontWeight="FontWeight.Bold", X=f"{x} + 14", Y=y(310), Width=f"{w} - 20", Height="32", OnSelect=nav),
+            C(f"{p}KpiRot{i}", LBL, Text=f'"{rot}"', Color="corMuted", Size="10", X=f"{x} + 14", Y=y(342), Width=f"{w} - 20", Height="22", OnSelect=nav),
         ]
+    # seções (grade de cartões) + últimas alterações
+    larg_sec = f"Parent.Width - 236 - {ASIDE} - 24"
+    pct_ok = "(t - a) / Max(1, t)"
     filhos += [
-        C(f"{p}SecTit", LBL, Text='"SEÇÕES"', Color="corAzul", Size="14", FontWeight="FontWeight.Bold", X="224", Y="390", Width="300", Height="30"),
-        C(f"{p}GalSecoes", GAL, variante="Vertical", Items="tabSecoes", WrapCount="4", TemplateSize="150", TemplatePadding="6",
-          X="218", Y="420", Width="Parent.Width - 236", Height="Parent.Height - 428",
+        C(f"{p}SecTit", LBL, Text='"SEÇÕES"', Color="corAzul", Size="14", FontWeight="FontWeight.Bold", Font=FONTE_TIT, X="224", Y=y(380), Width="200", Height="28"),
+        C(f"{p}VerTodos", LBL, Text='"Ver todos os chamados"', Color="corAzul", Size="10", Underline="true", Align="Align.Right",
+          X=f"224 + {larg_sec} - 220 - 6", Y=y(382), Width="220", Height="24", OnSelect=ir_cha("false")),
+        C(f"{p}GalSecoes", GAL, variante="Vertical", Items="tabSecoes", WrapCount="3", TemplateSize="150", TemplatePadding="6",
+          X="218", Y=y(408), Width=larg_sec, Height=f"Parent.Height - ({y(408)}) - 8",
           filhos=[
-              C("relSecFundo", RET, Fill="Color.White", BorderColor="corLinha", BorderThickness="1", X="0", Y="0", Width="Parent.TemplateWidth", Height="Parent.TemplateHeight"),
-              C("relSecCor", RET, Fill="ThisItem.Cor", X="0", Y="0", Width="Parent.TemplateWidth", Height="4"),
-              C("relSecNome", LBL, Text="Upper(ThisItem.Nome)", Color="corAzul", Size="11", FontWeight="FontWeight.Bold", X="14", Y="12", Width="Parent.TemplateWidth - 28", Height="24",
-                OnSelect="Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: false, locSecaoFiltro: ThisItem.Valor})"),
-              C("relSecTotal", LBL, Text="CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))", Color="corAzul", Size="24", FontWeight="FontWeight.Bold",
-                X="14", Y="38", Width="120", Height="40",
-                OnSelect="Navigate(scrChamados, ScreenTransition.None, {locSoAbertos: false, locSecaoFiltro: ThisItem.Valor})"),
-              C("relSecResumo", LBL, Color="corMuted", Size="10", X="14", Y="78", Width="Parent.TemplateWidth - 28", Height="22",
+              cartao("relSecCor", 0, 0, "Parent.TemplateWidth", "Parent.TemplateHeight", fill="ThisItem.Cor", borda="ThisItem.Cor"),
+              cartao("relSecFundo", 0, 4, "Parent.TemplateWidth", "Parent.TemplateHeight - 4"),
+              C("relSecNome", LBL, Text="Upper(ThisItem.Nome)", Color="corAzul", Size="10", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+                X="14", Y="14", Width="Parent.TemplateWidth - 28", Height="20", OnSelect=ir_cha("false", "ThisItem.Valor")),
+              C("relSecTotal", LBL, Text="CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))", Color="corAzul", Size="22", FontWeight="FontWeight.Bold",
+                X="14", Y="34", Width="100", Height="36", OnSelect=ir_cha("false", "ThisItem.Valor")),
+              chip("relSecSemSap", f'{FQ_SEM_SAP} & " SEM SAP"', "Parent.TemplateWidth - 104", 42, 90, "corVerm20", "RGBA(138, 0, 33, 1)", "corVerm20", h=20,
+                   Visible=f'ThisItem.Tipo = "fq" && {FQ_SEM_SAP} > 0'),
+              C("relSecBarraFundo", RET, Fill="corAzul10", X="14", Y="74", Width="Parent.TemplateWidth - 28", Height="6"),
+              C("relSecBarraOk", RET, Fill="corVerde", X="14", Y="74", Height="6",
+                Width=f"With({{a: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && {ABERTO})), t: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))}}, (Parent.TemplateWidth - 28) * {pct_ok})"),
+              C("relSecBarraAb", RET, Fill="corLaranja", Y="74", Height="6",
+                X=f"14 + With({{a: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && {ABERTO})), t: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))}}, (Parent.TemplateWidth - 28) * {pct_ok})",
+                Width=f"With({{a: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && {ABERTO})), t: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))}}, (Parent.TemplateWidth - 28) * a / Max(1, t))"),
+              C("relSecResumo", LBL, Color="corMuted", Size="9", X="14", Y="84", Width="Parent.TemplateWidth - 28", Height="20",
                 Text=f'With({{a: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && {ABERTO})), t: CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))}}, '
                      f'If(t = 0, "Sem registros", If(a > 0, a & " em aberto  ·  ", "") & (t - a) & " concluído" & If(t - a = 1, "", "s")))'),
-              C("relSecAdd", BTN, Text='"+ Registrar"', Visible=ABERTO_REL, X="0", Y="Parent.TemplateHeight - 40", Width="Parent.TemplateWidth", Height="40",
-                Fill="Color.White", Color="corAzul", BorderColor="corLinha", BorderThickness="1", HoverFill="corAzul", HoverColor="Color.White", Size="12",
-                FontWeight="FontWeight.Semibold", RadiusTopLeft="0", RadiusTopRight="0", RadiusBottomLeft="0", RadiusBottomRight="0",
+              C("relSecLinha", RET, Fill="corLinha", X="1", Y="Parent.TemplateHeight - 41", Width="Parent.TemplateWidth - 2", Height="1", Visible=ABERTO_REL),
+              C("relSecAdd", BTN, Text='"＋  Registrar"', Visible=ABERTO_REL, X="1", Y="Parent.TemplateHeight - 40", Width="Parent.TemplateWidth - 2", Height="39",
+                Fill="Color.White", Color="corAzul", BorderThickness="0", HoverFill="corAzul", HoverColor="Color.White", PressedFill="corAzul80", Size="11",
+                FontWeight="FontWeight.Bold", RadiusTopLeft="0", RadiusTopRight="0", RadiusBottomLeft="9", RadiusBottomRight="9",
                 OnSelect="Navigate(scrRegistro, ScreenTransition.None, {locId: Blank(), locSecao: ThisItem.Valor})"),
           ]),
+        # últimas alterações
+        cartao(f"{p}Recentes", f"Parent.Width - 24 - {ASIDE}", y(380), ASIDE, f"Parent.Height - ({y(380)}) - 14"),
+        C(f"{p}RecTit", LBL, Text='"ÚLTIMAS ALTERAÇÕES"', Color="corAzul", Size="11", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+          X=f"Parent.Width - 24 - {ASIDE} + 16", Y=y(392), Width="190", Height="22"),
+        C(f"{p}RecHist", LBL, Text='"Histórico"', Color="corAzul", Size="9", Underline="true", Align="Align.Right",
+          X=f"Parent.Width - 24 - 96", Y=y(392), Width="80", Height="22", OnSelect="Navigate(scrHistorico, ScreenTransition.None, {locHistReg: Blank()})"),
+        C(f"{p}GalRec", GAL, variante="Vertical", TemplateSize="64", TemplatePadding="0", ShowScrollbar="false",
+          Items="FirstN(Sort(Filter(Histórico, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid), rlt_quando, SortOrder.Descending), 8)",
+          X=f"Parent.Width - 24 - {ASIDE} + 8", Y=y(420), Width=str(ASIDE - 16), Height=f"Parent.Height - ({y(420)}) - 22",
+          filhos=[
+              avatar("relRecAvatar", "Coalesce(ThisItem.rlt_quem.rlt_nome, \"?\")", 8, 6, d=28, fill="RGBA(153, 175, 193, 1)"),
+              C("relRecQuem", LBL, Text='First(Split(Coalesce(ThisItem.rlt_quem.rlt_nome, "—"), " ")).Value & "  ·  " & ThisItem.rlt_campo',
+                Color="corTexto", Size="9", FontWeight="FontWeight.Semibold", X="44", Y="2", Width="Parent.TemplateWidth - 48", Height="20"),
+              C("relRecReg", LBL, Text='If(IsBlank(ThisItem.rlt_registro), "", Left(ThisItem.rlt_registro.rlt_titulo, 40) & If(Len(ThisItem.rlt_registro.rlt_titulo) > 40, "…", ""))',
+                Color="corAzul", Size="9", Underline="true", X="44", Y="21", Width="Parent.TemplateWidth - 48", Height="20",
+                OnSelect="If(!IsBlank(ThisItem.rlt_registro), Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registro.rlt_registroid, locSecao: ThisItem.rlt_registro.rlt_secao}))"),
+              C("relRecQuando", LBL, Text='Text(ThisItem.rlt_quando, "dd/mm/yyyy hh:mm")', Color="corMuted", Size="8", X="44", Y="41", Width="Parent.TemplateWidth - 48", Height="18"),
+          ]),
+        C(f"{p}RecVazio", LBL, Text='"Nada registrado ainda."', Color="corMuted", Size="10", Visible=f"CountRows({p}GalRec.AllItems) = 0",
+          X=f"Parent.Width - 24 - {ASIDE} + 16", Y=y(424), Width=str(ASIDE - 32), Height="24"),
     ]
     return tela("scrRelatorio", {"Fill": "corFundo", "OnVisible": "If(!IsBlank(gblRel), Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid)));\n" + REFRESH}, filhos)
 
 
 # ================================================================== TELA CHAMADOS
+# Cores das etiquetas de status do protótipo (.st-*): (fundo, texto, borda)
+CHIP_STATUS = [
+    (["CONCLUÍDO"], "RGBA(227, 242, 218, 1)", "RGBA(47, 98, 20, 1)", "RGBA(191, 226, 168, 1)"),
+    (["EM ANDAMENTO"], "corLaranja20", "corLaranjaTxt", "RGBA(247, 201, 140, 1)"),
+    (["PENDENTE"], "Color.White", "corLaranjaTxt", "corLaranja"),
+    (["CHAMADO FALSO", "SUSPENSO"], "RGBA(236, 239, 242, 1)", "RGBA(71, 82, 94, 1)", "RGBA(207, 214, 221, 1)"),
+    (["AGENDADO"], "corAzul10", "corAzul", "RGBA(204, 215, 224, 1)"),
+    (["CANCELADO"], "corVerm20", "RGBA(138, 0, 33, 1)", "RGBA(231, 163, 179, 1)"),
+    (["NÃO INFORMADO (NI)"], "Color.White", "RGBA(71, 82, 94, 1)", "RGBA(142, 153, 164, 1)"),
+]
+
+
+def cor_status(st, i, padrao):
+    """Switch sobre o texto do status (em maiúsculas) devolvendo fundo (i=1), texto (i=2) ou borda (i=3)."""
+    pares = ", ".join(f'"{s}", {c[i]}' for c in CHIP_STATUS for s in c[0])
+    return f"Switch(Upper({st}), {pares}, {padrao})"
+
+
 def tela_chamados():
+    """Chamados do plantão agrupados por seção, no layout do protótipo (telaPendencias)."""
     p = "cha"
-    itens = (f"Sort(AddColumns(Filter(colRegs, (!locSoAbertos || {ABERTO}) && (IsBlank(locSecaoFiltro) || rlt_secao = locSecaoFiltro)), "
-             f"Ordem, {ORDEM_SEC} * 10000000000000 + Value(rlt_inicio)), Ordem)")
-    concluir = (f"With({{r: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)}},\n"
+    filtro = f"(!locSoAbertos || {ABERTO})"
+    do_grupo = f"Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && {filtro}), rlt_inicio)"
+    grupos = (f"Filter(tabSecoes, (IsBlank(locSecaoFiltro) || Valor = locSecaoFiltro) && "
+              f"CountRows(Filter(colRegs, rlt_secao = Valor && {filtro})) > 0)")
+    reg = "LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)"
+    concluir = (f"With({{r: {reg}}},\n"
                 f"  If(ThisItem.rlt_secao = {SEC}.'IOS informados',\n"
                 f"    Patch(Registros, r, {{rlt_conclusao: Now(), rlt_ni: false, rlt_statusios: {SI}.Concluído}}),\n"
                 f"    Patch(Registros, r, {{rlt_conclusao: Now(), rlt_ni: false, rlt_status: {ST}.CONCLUÍDO}})));\n"
-                + hist('"Hora de conclusão e status"', "LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)") + ";\n"
+                + hist('"Hora de conclusão e status"', reg) + ";\n"
                 + REFRESH + ";\nNotify(\"Concluído: \" & Left(ThisItem.rlt_titulo, 50), NotificationType.Success)")
-    filhos = moldura(p, "scrChamados") + titulo(p, '"CHAMADOS DO PLANTÃO"',
-                                               '"Todos os registros do turno, por seção e hora de início. Os que ficarem em aberto passam para o próximo turno (RN-009)."')
+    limpar = (f"With({{r: {reg}}},\n"
+              f"  If(ThisItem.rlt_secao = {SEC}.'IOS informados',\n"
+              f"    Patch(Registros, r, {{rlt_conclusao: Blank(), rlt_statusios: If(ThisItem.rlt_statusios = {SI}.Concluído, {SI}.'Em andamento', ThisItem.rlt_statusios)}}),\n"
+              f"    Patch(Registros, r, {{rlt_conclusao: Blank(), rlt_status: If(ThisItem.rlt_status = {ST}.CONCLUÍDO, {ST}.'EM ANDAMENTO', ThisItem.rlt_status)}})));\n"
+              + hist('"Hora de conclusão"', reg) + ";\n" + REFRESH)
+    st = f"If(ThisItem.rlt_secao = {SEC}.'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))"
+    aberto_item = ABERTO.replace("rlt_", "ThisItem.rlt_")
+    larg_chip = f"Len({st}) * 8 + 44"  # uma linha só, mesmo em "EM ANDAMENTO"
+    ALT = 112  # altura de cada chamado (cartão de 102 + 10 de espaço)
+
+    filhos = moldura(p, "scrChamados") + titulo(
+        p, '"CHAMADOS DO PLANTÃO"',
+        'If(IsBlank(gblRel), "", "Todos os registros do turno " & Text(gblRel.rlt_turno) & " " & Text(gblRel.rlt_data, "dd.mm.yyyy") & '
+        '", incluindo os concluídos. Os abertos passam para o próximo turno (RN-009).")')
+    pilula = dict(RadiusTopLeft="18", RadiusTopRight="18", RadiusBottomLeft="18", RadiusBottomRight="18", BorderColor="If(Self.Fill = corAzul, corAzul, RGBA(197, 206, 215, 1))")
     filhos += [
-        botao(f"{p}Todos", '"Todos (" & CountRows(colRegs) & ")"', "UpdateContext({locSoAbertos: false})", 224, 146, 150, 36,
-              primario=True, Fill="If(locSoAbertos, Color.White, corAzul)", Color="If(locSoAbertos, corAzul, Color.White)"),
-        botao(f"{p}Abertos", f'"Só em aberto (" & CountRows(Filter(colRegs, {ABERTO})) & ")"', "UpdateContext({locSoAbertos: true})", 382, 146, 170, 36,
-              primario=True, Fill="If(locSoAbertos, corAzul, Color.White)", Color="If(locSoAbertos, Color.White, corAzul)"),
-        botao(f"{p}LimpaSec", '"Seção: " & LookUp(tabSecoes, Valor = locSecaoFiltro).Nome & "  ×"', "UpdateContext({locSecaoFiltro: Blank()})", 560, 146, 260, 36,
-              primario=False, Visible="!IsBlank(locSecaoFiltro)"),
-        C(f"{p}Gal", GAL, variante="Vertical", Items=itens, TemplateSize="104", TemplatePadding="6", X="218", Y="190", Width="Parent.Width - 236", Height="Parent.Height - 198",
+        botao(f"{p}Todos", '"Todos (" & CountRows(colRegs) & ")"', "UpdateContext({locSoAbertos: false})", 224, 146, 130, 34,
+              Fill="If(locSoAbertos, Color.White, corAzul)", Color="If(locSoAbertos, corTexto, Color.White)", HoverFill="If(locSoAbertos, corAzul10, corAzul80)",
+              HoverColor="If(locSoAbertos, corTexto, Color.White)", Size="11", **pilula),
+        botao(f"{p}Abertos", f'"Só em aberto (" & CountRows(Filter(colRegs, {ABERTO})) & ")"', "UpdateContext({locSoAbertos: true})", 362, 146, 160, 34,
+              Fill="If(locSoAbertos, corAzul, Color.White)", Color="If(locSoAbertos, Color.White, corTexto)", HoverFill="If(locSoAbertos, corAzul80, corAzul10)",
+              HoverColor="If(locSoAbertos, Color.White, corTexto)", Size="11", **pilula),
+        botao(f"{p}LimpaSec", '"Seção: " & LookUp(tabSecoes, Valor = locSecaoFiltro).Nome & "   ×"', "UpdateContext({locSecaoFiltro: Blank()})", 530, 146, 240, 34,
+              primario=False, Visible="!IsBlank(locSecaoFiltro)", Size="11", **{**pilula, "BorderColor": "corAzul"}),
+        C(f"{p}Grupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0",
+          X="224", Y="188", Width="Parent.Width - 236", Height="Parent.Height - 194",
           filhos=[
-              C("chaFundo", RET, Fill="Color.White", BorderColor="corLinha", BorderThickness="1", X="0", Y="0", Width="Parent.TemplateWidth", Height="Parent.TemplateHeight"),
-              C("chaBarra", RET, Fill=f"If({ABERTO.replace('rlt_', 'ThisItem.rlt_')}, corLaranja, corVerde)", X="0", Y="0", Width="5", Height="Parent.TemplateHeight"),
-              C("chaSecao", LBL, Text="Upper(LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome)", Color="corAzul", Size="9", FontWeight="FontWeight.Bold",
-                X="18", Y="6", Width="220", Height="20"),
-              C("chaStatus", LBL, Text=f"If(ThisItem.rlt_secao = {SEC}.'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status)) & If(ThisItem.rlt_herdado, \"  ·  HERDADA\", \"\")",
-                Color="corLaranjaTxt", Size="9", FontWeight="FontWeight.Bold", X="240", Y="6", Width="300", Height="20"),
-              C("chaTitulo", LBL, Text="ThisItem.rlt_titulo", Color="corTexto", Size="12", FontWeight="FontWeight.Semibold", X="18", Y="26", Width="Parent.TemplateWidth - 420", Height="40"),
-              C("chaMeta", LBL, Color="corMuted", Size="10", X="18", Y="68", Width="Parent.TemplateWidth - 420", Height="24",
-                Text='"Início " & Text(ThisItem.rlt_inicio, "dd/mm hh:mm") & If(IsBlank(ThisItem.rlt_local), "", "  ·  " & ThisItem.rlt_local.rlt_nome) & '
-                     'If(IsBlank(ThisItem.rlt_numero), "", "  ·  Nº " & ThisItem.rlt_numero) & If(ThisItem.rlt_ni && IsBlank(ThisItem.rlt_conclusao), "  ·  Conclusão N/I", "")'),
-              C("chaConcl", LBL, Text='If(IsBlank(ThisItem.rlt_conclusao), If(ThisItem.rlt_ni, "Conclusão: N/I", "Conclusão: em aberto"), "Conclusão: " & Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"))',
-                Color="corTexto", Size="11", Align="Align.Right", X="Parent.TemplateWidth - 400", Y="10", Width="380", Height="26"),
-              botao("chaAgora", '"Concluir agora"', concluir, "Parent.TemplateWidth - 330", 50, 150, 36,
-                    Visible=f"{ABERTO_REL} && IsBlank(ThisItem.rlt_conclusao) && !ThisItem.rlt_chamadofalso"),
-              botao("chaEditar", 'If(' + ABERTO_REL + ', "Editar", "Ver")', "Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})",
-                    "Parent.TemplateWidth - 170", 50, 150, 36, primario=False),
+              C("chaGrpNome", LBL, Text="Upper(ThisItem.Nome)", Color="corAzul", Size="13", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+                X="0", Y="12", Width="Len(ThisItem.Nome) * 11 + 12", Height="26"),
+              chip("chaGrpQtd", f"CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && {filtro}))", "Len(ThisItem.Nome) * 11 + 14", 16, 24,
+                   "corAzul10", "corAzul", "corAzul10", h=18),
+              C("chaGal", GAL, variante="Vertical", Items=do_grupo, TemplateSize=str(ALT), TemplatePadding="0", ShowScrollbar="false",
+                X="0", Y="44", Width="Parent.TemplateWidth - 12", Height=f"CountRows({do_grupo}) * {ALT}",
+                filhos=[
+                    cartao("chaBorda", 0, 0, "Parent.TemplateWidth", ALT - 10,
+                           fill=f"If({aberto_item}, corLaranja, corVerde)", borda=f"If({aberto_item}, corLaranja, corVerde)"),
+                    cartao("chaFundo", 4, 0, "Parent.TemplateWidth - 4", ALT - 10),
+                    chip("chaStatus", f'"●  " & Upper({st})', 18, 12, larg_chip,
+                         cor_status(st, 1, "Color.White"), cor_status(st, 2, "corTexto"), cor_status(st, 3, "corLinha"), h=22),
+                    chip("chaHerdada", '"HERDADA"', f"18 + {larg_chip} + 8", 13, 70, "RGBA(255, 243, 224, 1)", "corLaranjaTxt", "RGBA(255, 243, 224, 1)", h=20,
+                         Visible="ThisItem.rlt_herdado", RadiusTopLeft="4", RadiusTopRight="4", RadiusBottomLeft="4", RadiusBottomRight="4"),
+                    C("chaTitulo", LBL, Text="ThisItem.rlt_titulo", Color="corTexto", Size="11", FontWeight="FontWeight.Bold",
+                      X="18", Y="38", Width="Parent.TemplateWidth - 470", Height="38", VerticalAlign="VerticalAlign.Top"),
+                    C("chaMeta", LBL, Color="corMuted", Size="9", X="18", Y="76", Width="Parent.TemplateWidth - 470", Height="20",
+                      Text=('"Início " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy hh:mm") & '
+                            'If(IsBlank(ThisItem.rlt_local), "", "     " & ThisItem.rlt_local.rlt_nome) & '
+                            'If(IsBlank(ThisItem.rlt_numero), "", "     Nº " & ThisItem.rlt_numero) & '
+                            f'If({aberto_item} && DateDiff(ThisItem.rlt_inicio, Now(), TimeUnit.Days) >= 1, "     aberto há " & DateDiff(ThisItem.rlt_inicio, Now(), TimeUnit.Days) & '
+                            'If(DateDiff(ThisItem.rlt_inicio, Now(), TimeUnit.Days) = 1, " dia", " dias"), "")')),
+                    C("chaRotConcl", LBL, Text='"Conclusão"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold", Align="Align.Right",
+                      X="Parent.TemplateWidth - 430", Y="14", Width="90", Height="30"),
+                    cartao("chaConcl", "Parent.TemplateWidth - 334", 12, 180, 34, borda="RGBA(197, 206, 215, 1)", raio=8,
+                           Text='If(IsBlank(ThisItem.rlt_conclusao), If(ThisItem.rlt_ni, "N/I – não informado", "dd/mm/aaaa  --:--"), Text(ThisItem.rlt_conclusao, "dd/mm/yyyy  hh:mm"))',
+                           Color="If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)", DisabledColor="If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)",
+                           Size="10", Align="Align.Left", PaddingLeft="12"),
+                    botao("chaAgora", '"Concluir agora"', concluir, "Parent.TemplateWidth - 146", 12, 132, 34, Size="10",
+                          Visible=f"{ABERTO_REL} && IsBlank(ThisItem.rlt_conclusao) && !ThisItem.rlt_chamadofalso"),
+                    botao("chaLimpar", '"Limpar"', limpar, "Parent.TemplateWidth - 146", 12, 132, 34, primario=False, Size="10",
+                          Visible=f"{ABERTO_REL} && !IsBlank(ThisItem.rlt_conclusao)"),
+                    botao("chaEditar", 'If(' + ABERTO_REL + ', "Editar", "Ver")', "Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})",
+                          "Parent.TemplateWidth - 146", 54, 132, 34, primario=False, Size="10"),
+                ]),
           ]),
-        C(f"{p}Vazio", LBL, Text='"Nenhum chamado " & If(locSoAbertos, "em aberto.", "neste plantão.")', Visible=f"CountRows({p}Gal.AllItems) = 0",
-          Color="corMuted", Size="13", Align="Align.Center", X="224", Y="260", Width="Parent.Width - 248", Height="40"),
+        C(f"{p}Vazio", LBL, Text='"Nenhum chamado " & If(locSoAbertos, "em aberto.", "neste plantão.")', Visible=f"CountRows({p}Grupos.AllItems) = 0",
+          Color="corMuted", Size="12", Align="Align.Center", X="224", Y="260", Width="Parent.Width - 248", Height="40"),
     ]
     return tela("scrChamados", {"Fill": "corFundo", "OnVisible": REFRESH}, filhos)
 
 
 # ================================================================== TELA REGISTRO (formulário)
+# Controle de arquivo do formulário frmAnexo (janela "Anexar foto ou arquivo"). O código do formulário vem do
+# Studio (Inserir > Formulário de edição, fonte Anexos, campos Nome/Arquivo/Registro > Copiar código), porque o
+# YAML de formulários e cartões não é documentado. Enquanto ele não existe, a janela mostra só um aviso.
+FORM_ANEXO = None  # preenchido logo abaixo de janela_anexo(): form_anexo
+EXT_IMAGEM = '["jpg", "jpeg", "png", "gif", "bmp", "webp", "heic"]'
+
+
 def tela_registro():
+    """Formulário do chamado, no layout do protótipo (telaItem): página rolável com um cartão de campos,
+    "Fotos e arquivos" embaixo e Cancelar/Salvar. Os campos ficam numa galeria de altura flexível de uma linha
+    (é ela que rola); por isso o "Reset" dos campos é feito pela propriedade Reset = locResetar."""
     p = "reg"
     tipo = "LookUp(tabSecoes, Valor = locSecao).Tipo"
     ro = f"If({ABERTO_REL}, DisplayMode.Edit, DisplayMode.View)"
@@ -258,9 +443,12 @@ def tela_registro():
         "UpdateContext({locStatusIos: If(IsBlank(locReg.rlt_statusios), \"Em andamento\", Text(locReg.rlt_statusios))});\n"
         "UpdateContext({locArea: locReg.rlt_local.rlt_area});\n"
         "UpdateContext({locErro: \"\"});\n"
-        "Reset(regDesc); Reset(regNum); Reset(regMotivo); Reset(regEquipLivre); Reset(regForaLista); Reset(regLimpeza); Reset(regFalso); Reset(regNI);\n"
-        "Reset(regArea); Reset(regLocal); Reset(regEquip); Reset(regIniData); Reset(regIniH); Reset(regIniM); Reset(regFimData); Reset(regFimH); Reset(regFimM);\n"
-        "Reset(regStatus); Reset(regStatusIos)")
+        "UpdateContext({locAnexar: false});\n"
+        "UpdateContext({locFicar: false});\n"
+        # campos dentro da galeria: Reset() não alcança, então eles leem Reset = locResetar
+        "UpdateContext({locResetar: true});\n"
+        "UpdateContext({locResetar: false});\n"
+        "ResetForm(frmAnexo)")
     v_ini = "DateTime(Year(regIniData.SelectedDate), Month(regIniData.SelectedDate), Day(regIniData.SelectedDate), Value(regIniH.Selected.Value), Value(regIniM.Selected.Value), 0)"
     v_fim = ("If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), "
              "Value(Coalesce(regFimH.Selected.Value, \"0\")), Value(Coalesce(regFimM.Selected.Value, \"0\")), 0))")
@@ -312,194 +500,607 @@ def tela_registro():
         {hist("c", "gblSalvo")})
     );
     Notify(If(vTipo = "fq" && IsBlank(gblSalvo.rlt_equipamento), "Salvo sem código SAP: aparece no Painel Geral de informações.", "Registro salvo."), NotificationType.Success);
-    Back()
+    If(locFicar,
+      UpdateContext({{locId: gblSalvo.rlt_registroid}});
+      UpdateContext({{locReg: gblSalvo}});
+      UpdateContext({{locFicar: false}});
+      UpdateContext({{locAnexar: true}}),
+      Back())
   )
 )"""
     status_fim = (f"UpdateContext({{locFim: {v_fim}}}); If(!IsBlank(locFim), UpdateContext({{locNI: false, locStatus: \"CONCLUÍDO\", locStatusIos: \"Concluído\"}}))")
     agora = 'UpdateContext({locFim: Now(), locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"})'
     limpar = (f"UpdateContext({{locFim: Blank(), locStatus: If(locStatus = \"CONCLUÍDO\", \"EM ANDAMENTO\", locStatus), "
-              f"locStatusIos: If(locStatusIos = \"Concluído\", \"Em andamento\", locStatusIos)}}); Reset(regFimData); Reset(regFimH); Reset(regFimM)")
-    xl, xr, w = 224, "(224 + (Parent.Width - 248) / 2 + 12)", "((Parent.Width - 248) / 2 - 12)"
+              f"locStatusIos: If(locStatusIos = \"Concluído\", \"Em andamento\", locStatusIos)}});\n"
+              "UpdateContext({locResetFim: true});\nUpdateContext({locResetFim: false})")
+
+    # ---------- geometria (dentro da linha da galeria): coluna esquerda/direita do cartão
+    TW = "Parent.TemplateWidth - 14"
+    xl, xr = "18", f"(18 + ({TW} - 36) / 2 + 12)"
+    w, full = f"(({TW} - 36) / 2 - 12)", f"({TW} - 36)"
+    em = lambda *tipos: f"{tipo} in [{', '.join(chr(34) + t + chr(34) for t in tipos)}]"
+    D = f"If({em('corretiva', 'ios')}, 116, 0)"            # descrição
+    R2 = f"If({em('corretiva', 'fq', 'prev')}, 96, 0)"     # local ou equipamento
+    N = f"If({em('fq', 'prev', 'ios')}, 76, 0)"            # número
+    F = f"If({em('corretiva', 'fq')}, 64, 0)"              # chamado falso
+    y_row2 = f"18 + {D}"
+    y_num = f"18 + {D} + {R2}"
+    y_ini = f"18 + {D} + {R2} + {N}"
+    y_st = f"({y_ini}) + 104"
+    y_falso = f"({y_st}) + 96"
+    y_fotos = f"({y_falso}) + {F}"
+    anexos = "Filter(Anexos, rlt_registro.rlt_registroid = locId)"
+    n_anx = f"If(IsBlank(locId), 0, CountRows({anexos}))"
+    ALT_ANX = 46
+    h_fotos = f"(24 + If({n_anx} > 0, {n_anx} * {ALT_ANX} + 6, 0) + 40 + 30)"
+    h_card = f"({y_fotos}) + {h_fotos} + 10"
+    y_botoes = f"({h_card}) + 16"
+
+    # ---------- estilo dos campos (protótipo: borda #c5ced7, raio 8, foco verde)
+    BORDA = "RGBA(197, 206, 215, 1)"
+    estilo_campo = dict(BorderColor=BORDA, BorderThickness="1", HoverBorderColor="corAzul80", FocusedBorderColor="corVerde", FocusedBorderThickness="2",
+                        Size="11", Color="corTexto", Reset="locResetar")
+    estilo_lista = dict(ChevronBackground="Color.White", ChevronFill="corTexto", ChevronHoverBackground="corAzul10", ChevronHoverFill="corTexto",
+                        ChevronDisabledBackground="Color.White", SelectionFill="corAzul", HoverFill="corAzul10")
+    estilo_check = dict(CheckboxBorderColor="RGBA(91, 104, 118, 1)", CheckboxSize="20", CheckmarkFill="Color.White", CheckboxBackgroundFill="Color.White",
+                        Color="corTexto", Size="11", FontWeight="FontWeight.Semibold", Reset="locResetar")
 
     def ent(nome, controle, x, y, largura, **kw):
-        base = dict(X=str(x), Y=str(y), Width=largura, DisplayMode=ro)
+        base = dict(X=str(x), Y=str(y), Width=largura, Height="40", DisplayMode=ro)
+        base.update({k: v for k, v in estilo_campo.items() if controle != CHK})
+        if controle in (DDL, CBX):
+            base.update(estilo_lista)
+        if controle == TXT:
+            base.update(RadiusTopLeft="8", RadiusTopRight="8", RadiusBottomLeft="8", RadiusBottomRight="8", PaddingLeft="12")
+        if controle == DTP:
+            base.pop("HoverBorderColor", None)  # o seletor de data clássico não tem borda de "hover"
+            base.update(IconBackground="Color.White", IconFill="corTexto")
+        if controle == CHK:
+            base.update(estilo_check)
         base.update(kw)
         return C(nome, controle, **base)
 
-    filhos = moldura(p, "scrChamados") + titulo(
-        p, 'If(IsBlank(locId), "NOVO REGISTRO", "REGISTRO") & "  ·  " & Upper(LookUp(tabSecoes, Valor = locSecao).Nome)',
-        'If(locReg.rlt_herdado, "Pendência herdada: a data de início original é mantida (RN-009).", "Campos com * são obrigatórios.")')
-    filhos += [
-        C(f"{p}Fundo", RET, Fill="Color.White", BorderColor="corLinha", BorderThickness="1", X="218", Y="146", Width="Parent.Width - 236", Height="Parent.Height - 216"),
+    def rot(nome, texto, x, y, larg="400", vis="true"):
+        return C(nome, LBL, Text=texto, Color="corMuted", Size="9", FontWeight="FontWeight.Bold", X=str(x), Y=str(y), Width=larg, Height="20", Visible=vis)
+
+    def ajuda(nome, texto, x, y, larg, vis="true", h="20"):
+        return C(nome, LBL, Text=texto, Color="corMuted", Size="9", X=str(x), Y=str(y), Width=larg, Height=h, Visible=vis, VerticalAlign="VerticalAlign.Top")
+
+    ini_ro = f"If({ABERTO_REL} && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)"
+    nome_secao = "LookUp(tabSecoes, Valor = locSecao).Nome"
+    pagina = [
+        cartao("regCartao", 0, 0, TW, h_card),
         # descrição / assunto
-        rotulo(f"{p}RotDesc", f'If({tipo} = "ios", "ASSUNTO *", "DESCRIÇÃO DA ATIVIDADE *")', xl + 12, 156, 400, f'{tipo} in ["corretiva", "ios"]'),
-        ent("regDesc", TXT, xl + 12, 178, "Parent.Width - 272", Mode="TextMode.MultiLine", Height="64", Default="locReg.rlt_descricao",
-            Visible=f'{tipo} in ["corretiva", "ios"]'),
-        # local (corretivas)
-        rotulo(f"{p}RotArea", '"LOCAL – ÁREA"', xl + 12, 252, 300, f'{tipo} = "corretiva"'), rotulo(f"{p}RotLocal", '"LOCAL – ESPECÍFICO *"', f"{xr}", 252, 300, f'{tipo} = "corretiva"'),
-        ent("regArea", DDL, xl + 12, 274, w, Height="40", Items="Sort(Distinct(Locais, rlt_area), Value)", Default="locArea", Visible=f'{tipo} = "corretiva"'),
-        ent("regLocal", CBX, xr, 274, w, Height="40", Items="Filter(Locais, rlt_area = regArea.Selected.Value)", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome"]',
-            SelectMultiple="false", DefaultSelectedItems="Filter(Locais, rlt_localid = locReg.rlt_local.rlt_localid)", Visible=f'{tipo} = "corretiva"'),
+        rot("regRotDesc", f'If({tipo} = "ios", "ASSUNTO *", "DESCRIÇÃO DA ATIVIDADE *")', xl, 18, vis=em("corretiva", "ios")),
+        ent("regDesc", TXT, xl, 40, full, Mode="TextMode.MultiLine", Height="80", Default="locReg.rlt_descricao", Visible=em("corretiva", "ios")),
+        # local (corretivas): área e local específico
+        rot("regRotArea", '"LOCAL – ÁREA"', xl, y_row2, vis=em("corretiva")),
+        rot("regRotLocal", '"LOCAL – ESPECÍFICO *"', xr, y_row2, vis=em("corretiva")),
+        ent("regArea", DDL, xl, f"({y_row2}) + 22", w, Items="Sort(Distinct(Locais, rlt_area), Value)", Default="locArea", Visible=em("corretiva")),
+        ent("regLocal", CBX, xr, f"({y_row2}) + 22", w, Items="Filter(Locais, rlt_area = regArea.Selected.Value)", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome"]',
+            SelectMultiple="false", DefaultSelectedItems="Filter(Locais, rlt_localid = locReg.rlt_local.rlt_localid)", InputTextPlaceholder='"Escolha a área primeiro"',
+            Visible=em("corretiva")),
+        ajuda("regAjudaLocal", f'"Lista de " & CountIf(Locais, true) & " locais (código SAP), escolhida em dois passos."', xr, f"({y_row2}) + 66", w, em("corretiva")),
         # equipamento (Fator Q e Preventiva)
-        rotulo(f"{p}RotEquip", '"EQUIPAMENTO *"', xl + 12, 252, 300, f'{tipo} in ["fq", "prev"]'),
-        ent("regEquip", CBX, xl + 12, 274, w, Height="40", Items="Equipamentos", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome", "rlt_codigosap"]',
+        rot("regRotEquip", '"EQUIPAMENTO *"', xl, y_row2, vis=em("fq", "prev")),
+        ent("regEquip", CBX, xl, f"({y_row2}) + 22", w, Items="Equipamentos", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome", "rlt_codigosap"]',
             SelectMultiple="false", DefaultSelectedItems="Filter(Equipamentos, rlt_equipamentoid = locReg.rlt_equipamento.rlt_equipamentoid)",
-            Visible=f'{tipo} in ["fq", "prev"] && !regForaLista.Value'),
-        ent("regForaLista", CHK, xr, 270, w, Height="24", Text='"Equipamento fora da lista (vai para o Painel geral)"', Default="!IsBlank(locReg.rlt_equipamentolivre)",
-            Visible=f'{tipo} = "fq"', Size="11"),
-        ent("regEquipLivre", TXT, xl + 12, 274, w, Height="40", Default="locReg.rlt_equipamentolivre", HintText='"Descreva o equipamento"',
-            Visible=f'{tipo} = "fq" && regForaLista.Value'),
-        ent("regEquipSap", LBL, xr, 296, w, Height="24", Text='If(IsBlank(regEquip.Selected), "", "Código SAP " & regEquip.Selected.rlt_codigosap & "  ·  " & Text(regEquip.Selected.rlt_tipo))',
-            Color="corMuted", Size="10", Visible=f'{tipo} in ["fq", "prev"] && !regForaLista.Value'),
+            InputTextPlaceholder='"Buscar por nome ou código"', Visible=f"{em('fq', 'prev')} && !regForaLista.Value"),
+        ent("regEquipLivre", TXT, xl, f"({y_row2}) + 22", w, Default="locReg.rlt_equipamentolivre", HintText='"Descreva o equipamento"',
+            Visible=f"{em('fq')} && regForaLista.Value"),
+        ajuda("regEquipSap", 'If(IsBlank(regEquip.Selected), "Buscar por nome ou código SAP.", "SAP " & regEquip.Selected.rlt_codigosap & "  ·  " & Text(regEquip.Selected.rlt_tipo) & "   (o código aparece no app, não no PDF – RF-018)")',
+              xl, f"({y_row2}) + 66", w, f"{em('fq', 'prev')} && !regForaLista.Value"),
+        ent("regForaLista", CHK, xr, f"({y_row2}) + 24", w, Height="36", Text='"Equipamento fora da lista"', Default="!IsBlank(locReg.rlt_equipamentolivre)",
+            Visible=em("fq")),
+        ajuda("regAjudaFora", '"Não bloqueia: vai para o Painel geral de informações (RN-017)."', f"{xr} + 30", f"({y_row2}) + 60", f"{w} - 30", em("fq")),
         # número
-        rotulo(f"{p}RotNum", f'Switch({tipo}, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos)")', xl + 12, 324, 300, f'{tipo} in ["fq", "prev", "ios"]'),
-        ent("regNum", TXT, xl + 12, 346, w, Height="40", Default="locReg.rlt_numero", Visible=f'{tipo} in ["fq", "prev", "ios"]'),
+        rot("regRotNum", f'Switch({tipo}, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos: ano + número)")', xl, y_num, vis=em("fq", "prev", "ios")),
+        ent("regNum", TXT, xl, f"({y_num}) + 22", w, Default="locReg.rlt_numero", Visible=em("fq", "prev", "ios")),
         # início
-        rotulo(f"{p}RotIni", '"INÍCIO (DATA E HORA) *"', xl + 12, 396),
-        ent("regIniData", DTP, xl + 12, 418, "200", Height="40", DefaultDate="locIni", Format='"dd/mm/yyyy"',
-            DisplayMode=f"If({ABERTO_REL} && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)"),
-        ent("regIniH", DDL, xl + 220, 418, "80", Height="40", Items="tabHoras", Default='Text(Hour(locIni), "00")',
-            DisplayMode=f"If({ABERTO_REL} && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)"),
-        ent("regIniM", DDL, xl + 306, 418, "80", Height="40", Items="tabMinutos", Default='Text(Minute(locIni), "00")',
-            DisplayMode=f"If({ABERTO_REL} && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)"),
-        ent("regNI", CHK, xl + 12, 466, "300", Height="30", Text='"N/I – não informado"', Default="locNI", Size="12",
+        rot("regRotIni", '"INÍCIO (DATA E HORA) *"', xl, y_ini),
+        ent("regIniData", DTP, xl, f"({y_ini}) + 22", f"{w} - 172", DefaultDate="locIni", Format='"dd/mm/yyyy"', DisplayMode=ini_ro),
+        ent("regIniH", DDL, f"{xl} + {w} - 164", f"({y_ini}) + 22", "78", Items="tabHoras", Default='Text(Hour(locIni), "00")', DisplayMode=ini_ro),
+        ent("regIniM", DDL, f"{xl} + {w} - 80", f"({y_ini}) + 22", "80", Items="tabMinutos", Default='Text(Minute(locIni), "00")', DisplayMode=ini_ro),
+        ent("regNI", CHK, xl, f"({y_ini}) + 68", "300", Height="30", Text='"N/I – não informado"', Default="locNI",
             OnCheck="UpdateContext({locNI: true})", OnUncheck="UpdateContext({locNI: false})",
             DisplayMode=f"If({ABERTO_REL} && IsBlank(locFim), DisplayMode.Edit, DisplayMode.Disabled)"),
         # conclusão
-        rotulo(f"{p}RotFim", '"HORA DE CONCLUSÃO"', xr, 396),
-        ent("regFimData", DTP, xr, 418, "200", Height="40", DefaultDate="locFim", Format='"dd/mm/yyyy"', OnChange=status_fim),
-        ent("regFimH", DDL, f"{xr} + 208", 418, "80", Height="40", Items="tabHoras", Default='If(IsBlank(locFim), "", Text(Hour(locFim), "00"))',
-            AllowEmptySelection="true", OnChange=status_fim),
-        ent("regFimM", DDL, f"{xr} + 294", 418, "80", Height="40", Items="tabMinutos", Default='If(IsBlank(locFim), "", Text(Minute(locFim), "00"))',
-            AllowEmptySelection="true", OnChange=status_fim),
-        botao("regAgora", '"Agora"', agora, f"{xr} + 382", 418, 80, 40, primario=False, Visible=ABERTO_REL),
-        botao("regLimpar", '"Limpar"', limpar, f"{xr} + 468", 418, 80, 40, primario=False, Visible=ABERTO_REL),
-        C(f"{p}AjudaFim", LBL, Text='If(IsBlank(locFim), "Preencha quando o chamado for concluído. O status muda sozinho.", "")', Color="corMuted", Size="10",
-          X=xr, Y="462", Width=w, Height="22"),
+        rot("regRotFim", '"HORA DE CONCLUSÃO"', xr, y_ini),
+        ent("regFimData", DTP, xr, f"({y_ini}) + 22", f"{w} - 340", DefaultDate="locFim", Format='"dd/mm/yyyy"', OnChange=status_fim, Reset="locResetar || locResetFim"),
+        ent("regFimH", DDL, f"{xr} + {w} - 332", f"({y_ini}) + 22", "78", Items="tabHoras", Default='If(IsBlank(locFim), "", Text(Hour(locFim), "00"))',
+            AllowEmptySelection="true", OnChange=status_fim, Reset="locResetar || locResetFim"),
+        ent("regFimM", DDL, f"{xr} + {w} - 248", f"({y_ini}) + 22", "78", Items="tabMinutos", Default='If(IsBlank(locFim), "", Text(Minute(locFim), "00"))',
+            AllowEmptySelection="true", OnChange=status_fim, Reset="locResetar || locResetFim"),
+        botao("regAgora", '"Agora"', agora, f"{xr} + {w} - 162", f"({y_ini}) + 22", 76, 40, primario=False, Size="10", Visible=ABERTO_REL),
+        botao("regLimpar", '"Limpar"', limpar, f"{xr} + {w} - 78", f"({y_ini}) + 22", 78, 40, primario=False, Size="10", Visible=ABERTO_REL),
+        ajuda("regAjudaFim", 'If(IsBlank(locFim), "Preencha quando o chamado for concluído. O status muda sozinho.", "")', xr, f"({y_ini}) + 68", w),
         # status
-        rotulo(f"{p}RotStatus", f'If({tipo} = "ios", "STATUS DO IOS *", "STATUS *")', xl + 12, 506),
-        ent("regStatus", DDL, xl + 12, 528, w, Height="40", Default="locStatus", Visible=f'{tipo} <> "ios"',
+        rot("regRotStatus", f'If({tipo} = "ios", "STATUS DO IOS *", "STATUS *")', xl, y_st),
+        ent("regStatus", DDL, xl, f"({y_st}) + 22", w, Default="locStatus", Visible=f'{tipo} <> "ios"',
             Items='Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")',
             OnChange="UpdateContext({locStatus: Self.Selected.Value})",
             DisplayMode=f"If({ABERTO_REL} && !regFalso.Value && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
-        ent("regStatusIos", DDL, xl + 12, 528, w, Height="40", Default="locStatusIos", Visible=f'{tipo} = "ios"',
+        ent("regStatusIos", DDL, xl, f"({y_st}) + 22", w, Default="locStatusIos", Visible=f'{tipo} = "ios"',
             Items='Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !IsBlank(locFim) || Value <> "Concluído")',
             OnChange="UpdateContext({locStatusIos: Self.Selected.Value})",
             DisplayMode=f"If({ABERTO_REL} && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
-        C(f"{p}AjudaStatus", LBL, Color="corMuted", Size="10", X=str(xl + 12), Y="572", Width=w, Height="22",
-          Text=f'If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", '
-               f'!IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
-               f'"Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")'),
-        rotulo(f"{p}RotMotivo", '"MOTIVO DO CANCELAMENTO *"', xr, 506, 300, f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
-        ent("regMotivo", TXT, xr, 528, w, Height="40", Default="locReg.rlt_motivocancelamento",
+        ajuda("regAjudaStatus", f'If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", '
+                                f'!IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
+                                f'"Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")', xl, f"({y_st}) + 66", w),
+        rot("regRotMotivo", '"MOTIVO DO CANCELAMENTO *"', xr, y_st, vis=f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
+        ent("regMotivo", TXT, xr, f"({y_st}) + 22", w, Default="locReg.rlt_motivocancelamento",
             Visible=f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
-        ent("regFalso", CHK, xl + 12, 600, "400", Height="30", Text='"Chamado falso"', Default="locFalso", Size="12",
-            OnCheck="UpdateContext({locFalso: true})", OnUncheck="UpdateContext({locFalso: false})", Visible=f'{tipo} in ["corretiva", "fq"]'),
-        ent("regLimpeza", CHK, xr, 600, w, Height="30", Text='"Limpeza técnica (fora de preventiva x corretiva)"', Default="Coalesce(locReg.rlt_limpezatecnica, false)",
-            Size="12", Visible=f"locSecao = {SEC}.Outros"),
-        C(f"{p}Erro", LBL, Text="locErro", Visible="!IsBlank(locErro)", Color="corVerm", Fill="corVerm20", Size="11", FontWeight="FontWeight.Semibold",
-          PaddingLeft="12", X="224", Y="Parent.Height - 62", Width="Parent.Width - 600", Height="48"),
-        botao(f"{p}Cancelar", 'If(' + ABERTO_REL + ', "Cancelar", "Voltar")', "Back()", "Parent.Width - 360", "Parent.Height - 58", 160, 44, primario=False),
-        botao(f"{p}Salvar", '"Salvar"', salvar, "Parent.Width - 190", "Parent.Height - 58", 170, 44, Visible=ABERTO_REL),
+        ajuda("regAjudaMotivo", '"Obrigatório para IOS cancelado (RN-014)."', xr, f"({y_st}) + 66", w, f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
+        ent("regLimpeza", CHK, xr, f"({y_st}) + 24", w, Height="36", Text='"Limpeza técnica (fora de preventiva x corretiva)"',
+            Default="Coalesce(locReg.rlt_limpezatecnica, false)", Visible=f"locSecao = {SEC}.Outros"),
+        # chamado falso
+        ent("regFalso", CHK, xl, y_falso, "300", Height="30", Text='"Chamado falso"', Default="locFalso",
+            OnCheck="UpdateContext({locFalso: true})", OnUncheck="UpdateContext({locFalso: false})", Visible=em("corretiva", "fq")),
+        ajuda("regAjudaFalso", f'"Status CHAMADO FALSO: conta como encerrado, não vira pendência e fica fora de preventiva x corretiva (RN-011" & If({tipo} = "fq", ").", "; nesta seção, conforme a proposta do PRD 1.2).")',
+              f"{xl} + 30", f"({y_falso}) + 28", f"{full} - 30", em("corretiva", "fq")),
+        # fotos e arquivos (RF-007)
+        C("regRotFotos", LBL, Text='"FOTOS E ARQUIVOS  (opcional)"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold", X=xl, Y=y_fotos, Width="400", Height="20"),
+        C("regGalAnexos", GAL, variante="Vertical", Items=anexos, TemplateSize=str(ALT_ANX), TemplatePadding="0", ShowScrollbar="false",
+          X=xl, Y=f"({y_fotos}) + 24", Width=full, Height=f"{n_anx} * {ALT_ANX}", Visible=f"{n_anx} > 0",
+          filhos=[
+              cartao("regAnxFundo", 0, 3, "Parent.TemplateWidth", ALT_ANX - 6, raio=8),
+              C("regAnxIcone", LBL, Text=f'If(Lower(Coalesce(ThisItem.rlt_tipo, "")) in {EXT_IMAGEM}, "▣", "▤")', Color="corAzul", Size="14", Align="Align.Center",
+                X="8", Y="3", Width="30", Height=str(ALT_ANX - 6)),
+              C("regAnxNome", LBL, Text='ThisItem.rlt_nome & If(IsBlank(ThisItem.rlt_tamanho), "", "   ·   " & Round(ThisItem.rlt_tamanho / 1024, 0) & " KB")',
+                Color="corTexto", Size="10", X="42", Y="3", Width="Parent.TemplateWidth - 240", Height=str(ALT_ANX - 6)),
+              C("regAnxAbrir", LBL, Text='"Abrir"', Color="corAzul", Underline="true", Size="10", Align="Align.Right",
+                X="Parent.TemplateWidth - 190", Y="3", Width="80", Height=str(ALT_ANX - 6), OnSelect="Download(ThisItem.rlt_arquivo.Value)"),
+              C("regAnxExcluir", LBL, Text='"Excluir"', Color="RGBA(138, 0, 33, 1)", Underline="true", Size="10", Align="Align.Right", Visible=ABERTO_REL,
+                X="Parent.TemplateWidth - 100", Y="3", Width="86", Height=str(ALT_ANX - 6),
+                OnSelect=("Remove(Anexos, LookUp(Anexos, rlt_anexoid = ThisItem.rlt_anexoid));\n"
+                          + hist('"Anexo excluído: " & ThisItem.rlt_nome', "locReg") + ";\nNotify(\"Anexo excluído.\", NotificationType.Success)")),
+          ]),
+        botao("regAnexar", 'If(IsBlank(locId), "＋  Salvar e anexar foto ou arquivo", "＋  Anexar foto ou arquivo")',
+              f"If(IsBlank(locId), UpdateContext({{locFicar: true}}); {salvar}, UpdateContext({{locAnexar: true}}))",
+              xl, f"({y_fotos}) + 24 + If({n_anx} > 0, {n_anx} * {ALT_ANX} + 6, 0)", 'If(IsBlank(locId), 280, 220)', 40,
+              primario=False, Size="10", Visible=ABERTO_REL),
+        ajuda("regAjudaFotos", '"Fotos aparecem no PDF, no fim do relatório. Outros arquivos ficam guardados com o chamado e são listados no PDF."',
+              xl, f"({y_fotos}) + 24 + If({n_anx} > 0, {n_anx} * {ALT_ANX} + 6, 0) + 46", full),
+        # erros e botões
+        C("regErro", LBL, Text="locErro", Visible="!IsBlank(locErro)", Color="RGBA(138, 0, 33, 1)", Fill="corVerm20", Size="10", FontWeight="FontWeight.Semibold",
+          PaddingLeft="12", X="0", Y=y_botoes, Width=f"{TW} - 380", Height="44"),
+        botao("regCancelar", 'If(' + ABERTO_REL + ', "Cancelar", "Voltar")', "Back()", f"{TW} - 190 - 108", y_botoes, 100, 44, primario=False),
+        botao("regSalvar", '"Salvar"', "UpdateContext({locFicar: false});\n" + salvar, f"{TW} - 190", y_botoes, 190, 44, Visible=ABERTO_REL),
+        C("regEspaco", RET, Fill="Color.Transparent", X="0", Y=f"({y_botoes}) + 44", Width="10", Height="24"),
     ]
+    filhos = moldura(p, "scrChamados") + [
+        C("regVoltar", LBL, Text=f'"‹  " & {nome_secao}', Color="corAzul", Size="10", Underline="true", X="224", Y="70", Width="300", Height="22",
+          OnSelect="Back()"),
+    ] + titulo(p, 'If(IsBlank(locId), "NOVO REGISTRO", "REGISTRO")',
+               f'{nome_secao} & If(locReg.rlt_herdado, "   ·   Pendência herdada: a data de início original é mantida (RN-009).", "")', y=100)
+    filhos += [
+        # histórico só deste chamado (como no protótipo); também dá tipo (GUID) à variável locHistReg da tela Histórico
+        C(f"{p}VerHist", LBL, Text='"↺  Histórico deste chamado"', Color="corAzul", Size="10", Underline="true", Align="Align.Right",
+          Visible="!IsBlank(locId)", X="Parent.Width - 244", Y="112", Width="220", Height="24",
+          OnSelect="Navigate(scrHistorico, ScreenTransition.None, {locHistReg: locId})"),
+        C(f"{p}Pagina", GAL, variante="VariableHeight", Items="Table({b: 1})", TemplateSize="400", TemplatePadding="0",
+          X="224", Y="168", Width="Parent.Width - 230", Height="Parent.Height - 172", filhos=pagina),
+    ] + janela_anexo()
     return tela("scrRegistro", {"Fill": "corFundo", "OnVisible": ao_abrir}, filhos)
+
+
+def janela_anexo():
+    """Janela por cima da tela para anexar um arquivo (formulário de edição frmAnexo, fonte Anexos)."""
+    vis = "locAnexar"
+    W, H = "560", "330"
+    x, y = f"(Parent.Width - {W}) / 2", f"(Parent.Height - {H}) / 2"
+    out = [
+        C("regJanFundo", RET, Fill="RGBA(0, 0, 0, 0.45)", X="0", Y="0", Width="Parent.Width", Height="Parent.Height", Visible=vis),
+        cartao("regJanCartao", x, y, W, H, raio=12, Visible=vis),
+        C("regJanAcento", RET, Fill="corVerde", X=f"{x} + 24", Y=f"{y} + 20", Width="36", Height="4", Visible=vis),
+        C("regJanTit", LBL, Text='"ANEXAR FOTO OU ARQUIVO"', Color="corAzul", Size="14", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+          X=f"{x} + 24", Y=f"{y} + 28", Width=f"{W} - 48", Height="30", Visible=vis),
+        C("regJanSub", LBL, Text='Coalesce(locReg.rlt_titulo, "")', Color="corMuted", Size="10", X=f"{x} + 24", Y=f"{y} + 58", Width=f"{W} - 48", Height="22", Visible=vis),
+    ]
+    if FORM_ANEXO:
+        out += FORM_ANEXO(x, y, W, vis)
+    else:
+        out.append(C("regJanAviso", LBL, Text='"O campo de arquivo entra quando o formulário frmAnexo for colado do Studio."', Color="corLaranjaTxt",
+                     Size="10", X=f"{x} + 24", Y=f"{y} + 100", Width=f"{W} - 48", Height="60", Visible=vis))
+    out.append(botao("regJanFechar", '"Cancelar"', "UpdateContext({locAnexar: false})" + ("; ResetForm(frmAnexo)" if FORM_ANEXO else ""),
+                     f"{x} + {W} - 24 - 150 - 8 - 110", f"{y} + {H} - 64", 110, 40, primario=False, Visible=vis))
+    return out
+
+
+# Formulário de anexo, no formato que o Studio gera (Copiar código de um formulário ligado a Anexos):
+# Form@2.4.4 (Classic) com cartões TypedDataCard@1.0.8; o arquivo usa o controle Attachments@2.3.0.
+CARD = "TypedDataCard@1.0.8"
+COR_FORM = "RGBA(197, 206, 215, 1)"
+
+
+def _filhos_cartao(n, valor, nome_valor=None):
+    """Rótulo, valor, mensagem de erro e asterisco, com os MetadataKey que o cartão bloqueado exige."""
+    return [
+        C(f"anxChave{n}", LBL, chaves={"MetadataKey": "FieldName"}, AutoHeight="true", Color="corMuted", Size="9", FontWeight="FontWeight.Bold",
+          Height="24", Text="Parent.DisplayName", Width="Parent.Width - 30", Wrap="false", X="0", Y="4"),
+        valor,
+        C(f"anxErro{n}", LBL, chaves={"MetadataKey": "ErrorMessage"}, AutoHeight="true", Color="RGBA(138, 0, 33, 1)", Size="10", FontWeight="FontWeight.Semibold",
+          Height="10", Live="Live.Assertive", PaddingBottom="0", PaddingLeft="0", PaddingRight="0", PaddingTop="0", Text="Parent.Error",
+          Visible="Parent.DisplayMode = DisplayMode.Edit", Width="Parent.Width", X="0",
+          Y=f"{nome_valor or f'anxValor{n}'}.Y + {nome_valor or f'anxValor{n}'}.Height"),
+        C(f"anxObrig{n}", LBL, chaves={"MetadataKey": "FieldRequired"}, Align="Align.Center", Color="corVerm", Height=f"anxChave{n}.Height",
+          Text='"*"', Visible="false", Width="20", Wrap="false", X="Parent.Width - 24", Y=f"anxChave{n}.Y"),
+    ]
+
+
+def _cartao_texto(nome, n, campo, rotulo, update, y):
+    """Cartão de texto escondido, preenchido a partir do arquivo escolhido (o usuário não digita)."""
+    valor = C(f"anxValor{n}", TXT, chaves={"MetadataKey": "FieldValue"}, Default="Parent.Default", DelayOutput="true", DisplayMode="Parent.DisplayMode",
+              MaxLength="Parent.MaxLength", Width="Parent.Width", X="0", Y=f"anxChave{n}.Y + anxChave{n}.Height + 4")
+    return C(nome, CARD, variante="ClassicTextualEdit", chaves={"IsLocked": "true"},
+             DataField=f'"{campo}"', Default=f"ThisItem.{campo}", DisplayName=f'"{rotulo}"', MaxLength=f"DataSourceInfo([@Anexos], DataSourceInfo.MaxLength, {campo})",
+             Required="false", Update=update, Visible="false", Width="500", X="0", Y=str(y), filhos=_filhos_cartao(n, valor))
+
+
+def form_anexo(x, y, W, vis):
+    escolhido = "First(anxArquivo.Attachments)"
+    arquivo_valor = C("anxArquivo", "Attachments@2.3.0", chaves={"MetadataKey": "FieldValue"},
+                      AddAttachmentText='"＋  Escolher foto ou arquivo"', NoAttachmentsText='"Nenhum arquivo escolhido."', MaxAttachments="1", MaxAttachmentsText='""',
+                      BorderColor=f"If(IsBlank(Parent.Error), {COR_FORM}, corVerm)", DisplayMode="Parent.DisplayMode", Font=FONTE, Size="11",
+                      Color="corAzul", Fill="Color.White", HoverFill="corAzul10", ItemColor="Color.White", ItemFill="corAzul", ItemHoverFill="corAzul80",
+                      PressedColor="Color.White", PressedFill="corAzul", Items="Parent.Default", Height="96",
+                      PaddingBottom="6", PaddingLeft="8", PaddingRight="8", PaddingTop="6", Tooltip="Parent.DisplayName",
+                      Width="Parent.Width", X="0", Y="anxChave1.Y + anxChave1.Height + 4")
+    cartao_arquivo = C("anxArquivoCard", CARD, variante="ClassicFileEdit", chaves={"IsLocked": "true"},
+                       DataField='"rlt_arquivo"', Default="If(!IsBlank(ThisItem.Arquivo.FileName), Table({DisplayName: ThisItem.Arquivo.FileName, Value: ThisItem.Arquivo.Value}), Blank())",
+                       DisplayName='"FOTO OU ARQUIVO"', Required="false", Update="anxArquivo.Attachments", Width="500", X="0", Y="0",
+                       filhos=_filhos_cartao(1, arquivo_valor, "anxArquivo"))
+    ao_salvar = ("Patch(Anexos, LookUp(Anexos, rlt_anexoid = frmAnexo.LastSubmit.rlt_anexoid), {rlt_registro: locReg});\n"
+                 + hist('"Anexo incluído: " & frmAnexo.LastSubmit.rlt_nome', "locReg") + ";\n"
+                 "UpdateContext({locAnexar: false});\nResetForm(frmAnexo);\nNotify(\"Anexo salvo.\", NotificationType.Success)")
+    form = C("frmAnexo", "Form@2.4.4", variante="Classic", chaves={"Layout": "Vertical"},
+             DataSource="Anexos", DefaultMode="FormMode.New", BorderColor="Color.Transparent", Visible=vis,
+             X=f"{x} + 24", Y=f"{y} + 88", Width=f"{W} - 48", Height="170",
+             OnSuccess=ao_salvar,
+             OnFailure='Notify("Não foi possível salvar o anexo: " & frmAnexo.Error, NotificationType.Error)',
+             filhos=[cartao_arquivo,
+                     _cartao_texto("anxNomeCard", 2, "rlt_nome", "Nome", f'If(IsEmpty(anxArquivo.Attachments), "", {escolhido}.Name)', 1),
+                     _cartao_texto("anxTipoCard", 3, "rlt_tipo", "Tipo",
+                                   f'If(IsEmpty(anxArquivo.Attachments), "", Lower(Last(Split({escolhido}.Name, ".")).Value))', 2)])
+    salvar = botao("regJanSalvar", '"Salvar anexo"',
+                   'If(IsEmpty(anxArquivo.Attachments), Notify("Escolha uma foto ou arquivo.", NotificationType.Warning), SubmitForm(frmAnexo))',
+                   f"{x} + {W} - 24 - 150", f"{y} + 330 - 64", 150, 40, Visible=vis)
+    return [form, salvar]
+
+
+FORM_ANEXO = form_anexo
 
 
 # ================================================================== TELA HISTÓRICO
 def tela_historico():
+    """Histórico de alterações (RF-012, RN-021, RNF-003), em tabela como no protótipo (telaHistorico).
+
+    Mostra as alterações do relatório atual; com locHistReg (id de um registro) mostra só as daquele registro.
+    Só leitura: a tela não tem nenhuma ação que altere o histórico.
+    """
     p = "his"
-    filhos = moldura(p, "scrHistorico") + titulo(p, '"HISTÓRICO DE ALTERAÇÕES"',
-                                                '"Quem alterou, quando e o campo. Ninguém pode alterar o histórico (RN-021)."')
+    reg = "LookUp(Registros, rlt_registroid = locHistReg)"
+    itens = ("Sort(If(IsBlank(locHistReg), Filter(Histórico, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid), "
+             "Filter(Histórico, rlt_registro.rlt_registroid = locHistReg)), rlt_quando, SortOrder.Descending)")
+    W = "Parent.Width - 248"
+    col = {"quando": ("12", "140"), "quem": ("152", "150"), "registro": ("310", f"{W} - 310 - 230"), "campo": (f"{W} - 220", "208")}
+    filhos = moldura(p, "scrHistorico") + titulo(
+        p, '"HISTÓRICO DE ALTERAÇÕES"',
+        f'If(IsBlank(locHistReg), "Todas as alterações do relatório", {reg}.rlt_titulo) & ". Guarda quem alterou, quando e o campo. Não pode ser alterado (RN-021, RNF-003)."')
     filhos += [
-        C(f"{p}Gal", GAL, variante="Vertical", TemplateSize="64", TemplatePadding="4", X="218", Y="146", Width="Parent.Width - 236", Height="Parent.Height - 154",
-          Items="Sort(Filter(Histórico, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid), rlt_quando, SortOrder.Descending)",
+        C(f"{p}Voltar", LBL, Text='"‹  Voltar ao registro"', Color="corAzul", Size="10", Underline="true", Visible="!IsBlank(locHistReg)",
+          X="Parent.Width - 224", Y="86", Width="200", Height="24", Align="Align.Right",
+          OnSelect=f"Navigate(scrRegistro, ScreenTransition.None, {{locId: locHistReg, locSecao: {reg}.rlt_secao}})"),
+        cartao(f"{p}Tabela", 224, 146, W, "Parent.Height - 160"),
+    ]
+    for chave, rot in [("quando", "QUANDO"), ("quem", "QUEM"), ("registro", "REGISTRO"), ("campo", "CAMPO")]:
+        x, w = col[chave]
+        filhos.append(C(f"{p}Cab{chave.capitalize()}", LBL, Text=f'"{rot}"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold",
+                        X=f"224 + {x}", Y="152", Width=w, Height="30"))
+    filhos += [
+        C(f"{p}CabLinha", RET, Fill="corLinha", X="225", Y="182", Width=f"{W} - 2", Height="2"),
+        C(f"{p}Gal", GAL, variante="Vertical", Items=itens, TemplateSize="58", TemplatePadding="0",
+          X="225", Y="184", Width=f"{W} - 2", Height="Parent.Height - 184 - 16",
           filhos=[
-              C("hisFundo", RET, Fill="Color.White", BorderColor="corLinha", BorderThickness="1", X="0", Y="0", Width="Parent.TemplateWidth", Height="Parent.TemplateHeight"),
-              C("hisQuando", LBL, Text='Text(ThisItem.rlt_quando, "dd/mm/yyyy hh:mm")', Color="corMuted", Size="11", X="14", Y="6", Width="150", Height="24"),
-              C("hisQuem", LBL, Text='Coalesce(ThisItem.rlt_quem.rlt_nome, "—") & If(IsBlank(ThisItem.rlt_quem), "", "  ·  " & Text(ThisItem.rlt_quem.rlt_perfil))',
-                Color="corTexto", Size="11", FontWeight="FontWeight.Semibold", X="170", Y="6", Width="320", Height="24"),
-              C("hisCampo", LBL, Text="ThisItem.rlt_campo", Color="corAzul", Size="11", FontWeight="FontWeight.Bold", X="500", Y="6", Width="Parent.TemplateWidth - 520", Height="24"),
-              C("hisReg", LBL, Text='Coalesce(ThisItem.rlt_registro.rlt_titulo, "")', Color="corMuted", Size="10", X="170", Y="32", Width="Parent.TemplateWidth - 190", Height="24"),
+              C("hisQuando", LBL, Text='Text(ThisItem.rlt_quando, "dd/mm/yyyy hh:mm")', Color="corTexto", Size="10",
+                X=col["quando"][0], Y="8", Width=col["quando"][1], Height="22"),
+              C("hisQuem", LBL, Text='Coalesce(ThisItem.rlt_quem.rlt_nome, "—")', Color="corTexto", Size="10",
+                X=col["quem"][0], Y="8", Width=col["quem"][1], Height="22"),
+              C("hisQuemPerfil", LBL, Text='If(IsBlank(ThisItem.rlt_quem), "", Text(ThisItem.rlt_quem.rlt_perfil))', Color="corMuted", Size="9",
+                X=col["quem"][0], Y="28", Width=col["quem"][1], Height="20"),
+              C("hisReg", LBL, Text='If(IsBlank(ThisItem.rlt_registro), "—", Left(ThisItem.rlt_registro.rlt_titulo, 70))',
+                Color="If(IsBlank(ThisItem.rlt_registro), corMuted, corAzul)", Underline="!IsBlank(ThisItem.rlt_registro)", Size="10",
+                X=col["registro"][0], Y="8", Width=col["registro"][1], Height="22",
+                OnSelect="If(!IsBlank(ThisItem.rlt_registro), Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registro.rlt_registroid, locSecao: ThisItem.rlt_registro.rlt_secao}))"),
+              C("hisSecao", LBL, Text='If(IsBlank(ThisItem.rlt_registro), "", LookUp(tabSecoes, Valor = ThisItem.rlt_registro.rlt_secao).Nome)',
+                Color="corMuted", Size="9", X=col["registro"][0], Y="28", Width=col["registro"][1], Height="20"),
+              C("hisCampo", LBL, Text="ThisItem.rlt_campo", Color="corTexto", Size="10", FontWeight="FontWeight.Bold",
+                X=col["campo"][0], Y="8", Width=col["campo"][1], Height="40", VerticalAlign="VerticalAlign.Top"),
+              C("hisLinha", RET, Fill="corLinha", X="0", Y="Parent.TemplateHeight - 1", Width="Parent.TemplateWidth", Height="1"),
           ]),
+        C(f"{p}Vazio", LBL, Text='"Nenhuma alteração registrada."', Color="corMuted", Size="11", Align="Align.Center",
+          Visible=f"CountRows({p}Gal.AllItems) = 0", X="224", Y="220", Width=W, Height="40"),
     ]
     return tela("scrHistorico", {"Fill": "corFundo"}, filhos)
 
 
 # ================================================================== TELA PAINEL GERAL
 def tela_painel():
+    """Painel geral de informações (RF-020, RF-021), no layout do protótipo (telaLider).
+
+    A página é uma galeria de altura flexível com um cartão por linha: assim ela rola como no protótipo
+    e cada cartão cresce com o conteúdo (controles invisíveis não contam na altura da linha).
+    """
     p = "pai"
     sem_sap = f"Filter(colRegs, rlt_secao = {SEC}.'Fator Q (Z9)' && IsBlank(rlt_equipamento))"
+    velhas = f"Sort(Filter(colRegs, {ABERTO} && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)"
     corrigir = ("If(IsBlank(paiCbx.Selected), Notify(\"Escolha o equipamento na lista.\", NotificationType.Warning),\n"
                 "  Patch(Registros, LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid), {rlt_equipamento: paiCbx.Selected, rlt_equipamentolivre: \"\"});\n  "
                 + hist('"Código SAP corrigido: " & paiCbx.Selected.rlt_codigosap', "LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)")
-                + ";\n  " + REFRESH.replace("\n", "\n  ") + ";\n  Notify(\"Corrigido.\", NotificationType.Success))")
-    filhos = moldura(p, "scrPainel") + titulo(p, '"PAINEL GERAL DE INFORMAÇÕES"', '"Correções, pendências antigas e listas do app. Todos os usuários podem ver."')
-    filhos += [
-        C(f"{p}T1", LBL, Text=f'"FATOR Q SEM CÓDIGO SAP (" & CountRows({sem_sap}) & ")"', Color="corAzul", Size="13", FontWeight="FontWeight.Bold",
-          X="224", Y="146", Width="600", Height="28"),
-        C(f"{p}Gal1", GAL, variante="Vertical", Items=sem_sap, TemplateSize="64", TemplatePadding="4", X="218", Y="176", Width="Parent.Width - 236", Height="210",
+                + ";\n  " + REFRESH.replace("\n", "\n  ") + ";\n  Notify(\"Corrigido: \" & paiCbx.Selected.rlt_nome, NotificationType.Success))")
+    st = "Text(ThisItem.rlt_status)"
+    larg_chip = f"Len({st}) * 8 + 44"
+    TW = "Parent.TemplateWidth - 14"         # largura dos cartões (sobra espaço para a barra de rolagem)
+    ALT_FQ, ALT_VELHA = 136, 44
+    n_fq, n_velha = f"CountRows({sem_sap})", f"CountRows({velhas})"
+    vis = lambda b: f"ThisItem.b = {b}"
+    h1 = f"84 + If({n_fq} = 0, 40, {n_fq} * {ALT_FQ})"
+    h2 = f"64 + If({n_velha} = 0, 40, {n_velha} * {ALT_VELHA} + 2) + 14"
+    h3 = "262"
+
+    def tit(nome, texto, b):
+        return C(nome, LBL, Text=f'"{texto}"', Color="corAzul", Size="13", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+                 X="16", Y="14", Width=f"{TW} - 200", Height="26", Visible=vis(b))
+
+    def espaco(nome, h, b):  # espaço de 12 px entre os cartões
+        return C(nome, RET, Fill="Color.Transparent", X="0", Y=h, Width="10", Height="12", Visible=vis(b))
+
+    pagina = [
+        # ---------- 1. Fator Q sem código SAP (RF-020)
+        cartao("paiC1", 0, 0, TW, h1, Visible=vis(1)),
+        tit("paiT1", "FATOR Q SEM CÓDIGO SAP", 1),
+        chip("paiTag1", f'If({n_fq} > 0, {n_fq} & " PARA CORRIGIR", "TUDO CERTO")', f"{TW} - 150", 16, 134,
+             f"If({n_fq} > 0, corVerm20, corAzul10)", f"If({n_fq} > 0, RGBA(138, 0, 33, 1), corAzul)", f"If({n_fq} > 0, corVerm20, corAzul10)",
+             h=22, Visible=vis(1), RadiusTopLeft="4", RadiusTopRight="4", RadiusBottomLeft="4", RadiusBottomRight="4"),
+        C("paiD1", LBL, Text='"Chamados registrados com equipamento fora da lista. Ficam sem tipo e fora da Tela 3 do dashboard até a correção (RN-017, RN-018)."',
+          Color="corMuted", Size="10", X="16", Y="44", Width=f"{TW} - 32", Height="24", Visible=vis(1)),
+        C("paiVazio1", LBL, Text='"Nenhum chamado sem código SAP."', Color="corMuted", Size="10", Align="Align.Center",
+          X="16", Y="76", Width=f"{TW} - 32", Height="32", Visible=f"{vis(1)} && {n_fq} = 0"),
+        C("paiGal1", GAL, variante="Vertical", Items=sem_sap, TemplateSize=str(ALT_FQ), TemplatePadding="0", ShowScrollbar="false",
+          X="16", Y="76", Width=f"{TW} - 32", Height=f"{n_fq} * {ALT_FQ}", Visible=f"{vis(1)} && {n_fq} > 0",
           filhos=[
-              C("paiFundo", RET, Fill="Color.White", BorderColor="corVerm", BorderThickness="1", X="0", Y="0", Width="Parent.TemplateWidth", Height="Parent.TemplateHeight"),
-              C("paiNome", LBL, Text='Coalesce(ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo) & "  ·  Chamado " & ThisItem.rlt_numero',
-                Color="corTexto", Size="11", FontWeight="FontWeight.Semibold", X="14", Y="16", Width="Parent.TemplateWidth - 560", Height="28"),
+              cartao("paiBorda", 0, 0, "Parent.TemplateWidth", ALT_FQ - 10, fill="corVerm", borda="corVerm"),
+              cartao("paiFundo", 4, 0, "Parent.TemplateWidth - 4", ALT_FQ - 10),
+              chip("paiStatus", f'"●  " & Upper({st})', 18, 12, larg_chip,
+                   cor_status(st, 1, "Color.White"), cor_status(st, 2, "corTexto"), cor_status(st, 3, "corLinha"), h=22),
+              chip("paiSemSap", '"SEM SAP"', f"18 + {larg_chip} + 8", 13, 70, "corVerm20", "RGBA(138, 0, 33, 1)", "corVerm20", h=20,
+                   RadiusTopLeft="4", RadiusTopRight="4", RadiusBottomLeft="4", RadiusBottomRight="4"),
+              C("paiNome", LBL, Text="Coalesce(ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo)", Color="corTexto", Size="11", FontWeight="FontWeight.Bold",
+                X="18", Y="38", Width="Parent.TemplateWidth - 36", Height="24"),
+              C("paiMeta", LBL, Text='"Chamado " & ThisItem.rlt_numero & "     Início " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy hh:mm")',
+                Color="corMuted", Size="9", X="18", Y="60", Width="Parent.TemplateWidth - 36", Height="20"),
               C("paiCbx", CBX, Items="Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem)", DisplayFields='["rlt_nome"]',
-                SearchFields='["rlt_nome", "rlt_codigosap"]', SelectMultiple="false", X="Parent.TemplateWidth - 540", Y="12", Width="380", Height="40",
+                SearchFields='["rlt_nome", "rlt_codigosap"]', SelectMultiple="false", InputTextPlaceholder='"Escolher o equipamento correto…"',
+                X="18", Y="84", Width="Parent.TemplateWidth - 36 - 112", Height="36",
                 DisplayMode=f"If({ABERTO_REL}, DisplayMode.Edit, DisplayMode.View)"),
-              botao("paiCorrigir", '"Corrigir"', corrigir, "Parent.TemplateWidth - 150", 12, 130, 40, Visible=ABERTO_REL),
+              botao("paiCorrigir", '"Corrigir"', corrigir, "Parent.TemplateWidth - 18 - 100", 84, 100, 36, Size="10", Visible=ABERTO_REL),
           ]),
-        C(f"{p}T2", LBL, Text=f'"PENDÊNCIAS ABERTAS HÁ MAIS DE 7 DIAS"', Color="corAzul", Size="13", FontWeight="FontWeight.Bold",
-          X="224", Y="396", Width="600", Height="28"),
-        C(f"{p}Gal2", GAL, variante="Vertical", Items=f"Filter(colRegs, {ABERTO} && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7)",
-          TemplateSize="44", TemplatePadding="2", X="218", Y="426", Width="Parent.Width - 236", Height="Parent.Height - 520",
+        espaco("paiE1", h1, 1),
+        # ---------- 2. Pendências abertas há mais de 7 dias
+        cartao("paiC2", 0, 0, TW, h2, Visible=vis(2)),
+        tit("paiT2", "PENDÊNCIAS ABERTAS HÁ MAIS DE 7 DIAS", 2),
+        C("paiVazio2", LBL, Text='"Nenhuma."', Color="corMuted", Size="10", Align="Align.Center",
+          X="16", Y="58", Width=f"{TW} - 32", Height="32", Visible=f"{vis(2)} && {n_velha} = 0"),
+        cartao("paiTab2", 16, 52, f"{TW} - 32", f"{n_velha} * {ALT_VELHA} + 2", raio=8, Visible=f"{vis(2)} && {n_velha} > 0"),
+        C("paiGal2", GAL, variante="Vertical", Items=velhas, TemplateSize=str(ALT_VELHA), TemplatePadding="0", ShowScrollbar="false",
+          X="17", Y="53", Width=f"{TW} - 34", Height=f"{n_velha} * {ALT_VELHA}", Visible=f"{vis(2)} && {n_velha} > 0",
           filhos=[
-              C("paiVelha", LBL, Text='Upper(LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome) & "  ·  " & ThisItem.rlt_titulo & "  ·  desde " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy")',
-                Color="corTexto", Size="11", Fill="Color.White", PaddingLeft="12", X="0", Y="0", Width="Parent.TemplateWidth", Height="40"),
+              C("paiVSecao", LBL, Text="LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome", Color="corTexto", Size="10",
+                X="12", Y="0", Width="130", Height=str(ALT_VELHA)),
+              C("paiVTitulo", LBL, Text="ThisItem.rlt_titulo", Color="corAzul", Underline="true", Size="10",
+                X="150", Y="0", Width="Parent.TemplateWidth - 150 - 300", Height=str(ALT_VELHA),
+                OnSelect="Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})"),
+              C("paiVDesde", LBL, Text='"desde " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy")', Color="corTexto", Size="10",
+                X="Parent.TemplateWidth - 290", Y="0", Width="130", Height=str(ALT_VELHA)),
+              chip("paiVStatus", f'"●  " & Upper({st})', "Parent.TemplateWidth - 12 - (" + larg_chip + ")", 11, larg_chip,
+                   cor_status(st, 1, "Color.White"), cor_status(st, 2, "corTexto"), cor_status(st, 3, "corLinha"), h=22),
+              C("paiVLinha", RET, Fill="corLinha", X="0", Y="Parent.TemplateHeight - 1", Width="Parent.TemplateWidth", Height="1"),
           ]),
-        C(f"{p}Listas", LBL, Color="corMuted", Size="11", X="224", Y="Parent.Height - 84", Width="Parent.Width - 248", Height="60",
-          Text='"Listas usadas pelo app:  " & CountRows(Equipamentos) & " equipamentos  ·  " & CountRows(Locais) & " locais  ·  " & CountRows(Pessoas) & " pessoas e perfis"'),
+        espaco("paiE2", h2, 2),
+        # ---------- 3. Listas usadas pelo app (RF-021)
+        cartao("paiC3", 0, 0, TW, h3, Visible=vis(3)),
+        tit("paiT3", "LISTAS USADAS PELO APP", 3),
+        cartao("paiTab3", 16, 52, f"{TW} - 32", 32 + 3 * 38 + 2, raio=8, Visible=vis(3)),
     ]
+    # tabela das listas: cabeçalho e 3 linhas
+    linhas = [("LISTA", "ITENS", "ORIGEM", True),
+              # CountIf(..., true) conta no Dataverse; CountRows pode devolver um valor em cache (aviso do Studio)
+              ('"Equipamentos (Fator Q e Preventiva)"', "CountIf(Equipamentos, true)", '"aba codigo_sap_equipamento"', False),
+              ('"Locais"', "CountIf(Locais, true)", '"aba codigo_sap"', False),
+              ('"Pessoas e perfis"', "CountIf(Pessoas, true)", '"aba tbl_rh"', False)]
+    for i, (a, b, c, cab) in enumerate(linhas):
+        yl = 52 + (0 if i == 0 else 32 + (i - 1) * 38)
+        hl = 32 if cab else 38
+        estilo = dict(Color="corMuted", Size="8", FontWeight="FontWeight.Bold") if cab else dict(Color="corTexto", Size="10")
+        for j, (txt, xl) in enumerate([(a, "28"), (b, f"16 + ({TW} - 32) * 0.6"), (c, f"16 + ({TW} - 32) * 0.72")]):
+            pagina.append(C(f"paiL{i}{j}", LBL, Text=f'"{txt}"' if cab else txt, X=xl, Y=str(yl), Width=f"({TW} - 32) * 0.3", Height=str(hl),
+                            Visible=vis(3), **estilo))
+        if i < 3:
+            pagina.append(C(f"paiL{i}Linha", RET, Fill="corLinha", X="17", Y=str(yl + hl), Width=f"{TW} - 34", Height="2" if cab else "1", Visible=vis(3)))
+    pagina += [
+        botao("paiAtualizar", '"Atualizar listas"', 'Notify("As listas de equipamentos, locais e pessoas são atualizadas pela carga das planilhas (RF-021).", NotificationType.Information)',
+              16, 52 + 32 + 3 * 38 + 14, 140, 34, primario=False, Size="10", Visible=vis(3)),
+        espaco("paiE3", h3, 3),
+    ]
+    filhos = moldura(p, "scrPainel") + titulo(p, '"PAINEL GERAL DE INFORMAÇÕES"', '"Correções, pendências antigas e listas do app. Todos os usuários podem ver."')
+    filhos.append(C(f"{p}Pagina", GAL, variante="VariableHeight", Items="Table({b: 1}, {b: 2}, {b: 3})", TemplateSize="100", TemplatePadding="0",
+                    X="224", Y="146", Width="Parent.Width - 230", Height="Parent.Height - 150", filhos=pagina))
     return tela("scrPainel", {"Fill": "corFundo", "OnVisible": REFRESH}, filhos)
 
 
 # ================================================================== TELA FECHAR
+DESTINATARIOS_RN005 = ("Manutencao_Civil_SBBR@inframerica.aero; SupervisoresBHS@inframerica.aero; eletroeletronica@inframerica.aero; "
+                       "Eletromecanica@inframerica.aero; WCirilo@inframerica.aero; JValadao@inframerica.aero; admcomercial@inframerica.aero; "
+                       "NCampos@inframerica.aero; LideresVip_SBBR@inframerica.aero; LideresAtendimento_SBBR@inframerica.aero")
+
+
 def tela_fechar():
+    """Fechar relatório (RF-013 a RF-016), no layout do protótipo (telaFechar).
+
+    Página rolável (galeria de altura flexível, um cartão por linha): equipe, resumo, campos a conferir,
+    o que acontece ao confirmar e a confirmação. O envio é feito pelo fluxo "RLT – Fechar e enviar",
+    que grava o resultado em rlt_resultadoenvio; esta tela mostra esse resultado.
+    """
     p = "fec"
-    avisos = (f'Concat(Filter(Table('
-              f'{{m: If(CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].\'Técnico(a)\')) = 0, "Nenhum técnico fez login neste plantão.", "")}},'
-              f'{{m: If(CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].\'Operador(a)\')) = 0, "Nenhum operador fez login neste plantão.", "")}},'
-              f'{{m: If(CountRows(Filter(colRegs, rlt_secao = {SEC}.\'Fator Q (Z9)\' && IsBlank(rlt_equipamento))) > 0, "Há chamados do Fator Q sem código SAP.", "")}}'
-              f'), !IsBlank(m)), "•  " & m, Char(10))')
+    aberto_rel = ABERTO_REL
+    # ---- campos a conferir (RN-008: não impedem o fechamento)
+    corretiva = 'LookUp(tabSecoes, Valor = rlt_secao).Tipo = "corretiva"'
+    sem_local = f"Filter(colRegs, {corretiva} && IsBlank(rlt_local))"
+    fq_sem_sap = f"Filter(colRegs, rlt_secao = {SEC}.'Fator Q (Z9)' && IsBlank(rlt_equipamento))"
+    ios_sem_motivo = f"Filter(colRegs, rlt_secao = {SEC}.'IOS informados' && rlt_statusios = {SI}.Cancelado && IsBlank(Trim(rlt_motivocancelamento)))"
+    sem_tec = "CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Técnico(a)')) = 0"
+    sem_op = "CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Operador(a)')) = 0"
+    n_avisos = (f"(If({sem_tec}, 1, 0) + If({sem_op}, 1, 0) + CountRows({sem_local}) + CountRows({fq_sem_sap}) + CountRows({ios_sem_motivo}))")
+    avisos = (f'If({sem_tec}, "•  Nenhum técnico fez login neste plantão." & Char(10), "") & '
+              f'If({sem_op}, "•  Nenhum operador fez login neste plantão." & Char(10), "") & '
+              f'Concat({sem_local}, "•  " & LookUp(tabSecoes, Valor = rlt_secao).Nome & ": “" & Left(rlt_titulo, 50) & "” sem local." & Char(10)) & '
+              f'Concat({fq_sem_sap}, "•  Fator Q: chamado " & rlt_numero & " sem código SAP (vai sem tipo para o dashboard)." & Char(10)) & '
+              f'Concat({ios_sem_motivo}, "•  IOS " & rlt_numero & " cancelado sem motivo." & Char(10))')
+    # ---- ações (mesma lógica de antes)
     fechar = (f"Patch(Relatórios, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid), {{rlt_situacao: {SIT}.Fechado, rlt_fechadoem: Now(), rlt_fechadopor: gblUsuario}});\n"
               + hist('"Relatório fechado e enviado"') + ";\n"
               "Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid));\n"
               "Reset(fecConf);\n"
               "Notify(\"Relatório fechado. O PDF e o e-mail estão sendo enviados: o resultado aparece nesta tela em cerca de 1 minuto.\", NotificationType.Success)")
-    # O fluxo RLT – Fechar e enviar grava o resultado em rlt_resultadoenvio; tocar no aviso relê o relatório.
-    atualizar = ("If(!IsBlank(gblRel), Refresh(Relatórios); Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid)))")
+    atualizar = "If(!IsBlank(gblRel), Refresh(Relatórios); Set(gblRel, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid)))"
     falhou = 'StartsWith(Coalesce(gblRel.rlt_resultadoenvio, ""), "FALHA")'
-    filhos = moldura(p, "scrFechar") + titulo(p, '"FECHAR RELATÓRIO"',
-                                             '"Qualquer usuário pode fechar e enviar (RN-007). O envio fica registrado com o nome de quem enviou."')
-    filhos += [
-        C(f"{p}Resumo", LBL, Color="corTexto", Size="12", Fill="Color.White", PaddingLeft="16", PaddingTop="12", VerticalAlign="VerticalAlign.Top",
-          X="224", Y="146", Width="(Parent.Width - 248) / 2 - 8", Height="300",
-          Text='"RESUMO" & Char(10) & Char(10) & Concat(tabSecoes, Nome & ": " & CountRows(Filter(colRegs, rlt_secao = Valor)), Char(10)) & Char(10) & Char(10) & '
-               f'"Passam ao próximo turno: " & CountRows(Filter(colRegs, {ABERTO}))'),
-        C(f"{p}Avisos", LBL, Color="corLaranjaTxt", Size="12", Fill="corLaranja20", PaddingLeft="16", PaddingTop="12", VerticalAlign="VerticalAlign.Top",
-          X="224 + (Parent.Width - 248) / 2 + 8", Y="146", Width="(Parent.Width - 248) / 2 - 8", Height="300",
-          Text=f'If(IsBlank({avisos}), "Nenhum ponto a conferir.", "A CONFERIR (não impedem o fechamento)" & Char(10) & Char(10) & {avisos})'),
-        C(f"{p}Equipe", LBL, Color="corTexto", Size="12", X="224", Y="456", Width="Parent.Width - 248", Height="60",
-          Text='"Equipe que vai no PDF: " & Concat(colEquipe, rlt_nome & " (" & Text(rlt_perfil) & ")", ", ")'),
-        C("fecConf", CHK, Text='"Eu, " & Coalesce(gblUsuario.rlt_nome, User().FullName) & ", confirmo que revisei o relatório e quero fechar e enviar."',
-          X="224", Y="524", Width="Parent.Width - 248", Height="40", Size="12", Visible=ABERTO_REL),
-        botao(f"{p}Btn", '"Fechar e enviar"', fechar, "Parent.Width - 210", "Parent.Height - 70", 190, 48, Visible=ABERTO_REL,
-              DisplayMode="If(fecConf.Value, DisplayMode.Edit, DisplayMode.Disabled)"),
-        C(f"{p}Fechado", LBL, Visible=f"Not({ABERTO_REL})", Size="12", PaddingLeft="16", PaddingTop="10", VerticalAlign="VerticalAlign.Top",
-          X="224", Y="524", Width="Parent.Width - 248", Height="110",
-          Color=f"If({falhou}, corVerm, corAzul)", Fill=f"If({falhou}, corVerm20, corAzul10)", OnSelect=atualizar,
+    turno_nome = 'If(Text(gblRel.rlt_turno) = "ALFA", "Alfa", "Bravo")'
+    data_ponto = 'Text(gblRel.rlt_data, "dd.mm.yyyy")'
+    prox = ('If(Text(gblRel.rlt_turno) = "ALFA", "BRAVO " & Text(DateAdd(gblRel.rlt_data, 1, TimeUnit.Days), "dd.mm.yyyy"), '
+            '"ALFA " & Text(gblRel.rlt_data, "dd.mm.yyyy"))')
+    n_abertos = f"CountRows(Filter(colRegs, {ABERTO}))"
+
+    TW = "Parent.TemplateWidth - 14"
+    # avisos (3) e "o que acontece" (4) só existem com o relatório aberto; fechado, a página mostra equipe, resumo e resultado
+    vis = lambda b: f"ThisItem.b = {b}" + (f" && {aberto_rel}" if b in (3, 4) else "")
+    n_eq = "CountRows(colEquipe)"
+    h1 = f"52 + Max(1, RoundUp({n_eq} / 5, 0)) * 50 + 30 + 10"
+    h2 = 52 + 76 + 12 + 8 * 38 + 2 + 16
+    h3 = f"If({n_avisos} = 0, 48, 58 + {n_avisos} * 20 + 10)"
+    h4 = 470
+    h5 = f"If({aberto_rel}, 112, 118)"
+
+    def tit(nome, texto, b):
+        return C(nome, LBL, Text=f'"{texto}"', Color="corAzul", Size="13", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+                 X="16", Y="14", Width=f"{TW} - 32", Height="26", Visible=vis(b))
+
+    def rot(nome, texto, y, b):
+        return C(nome, LBL, Text=f'"{texto}"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold", X="16", Y=str(y), Width="400", Height="20", Visible=vis(b))
+
+    def espaco(nome, h, b):
+        return C(nome, RET, Fill="Color.Transparent", X="0", Y=str(h), Width="10", Height="12", Visible=vis(b))
+
+    pagina = [
+        # ---------- 1. Equipe que vai no PDF
+        cartao("fecC1", 0, 0, TW, h1, Visible=vis(1)),
+        tit("fecT1", "EQUIPE QUE VAI NO PDF", 1),
+        C("fecEqVazio", LBL, Text='"Ninguém da equipe fez login."', Color="corMuted", Size="10", X="16", Y="52", Width="400", Height="40",
+          Visible=f"{vis(1)} && {n_eq} = 0"),
+        C("fecGalEq", GAL, variante="Vertical", Items="Sort(colEquipe, rlt_nome)", WrapCount="5", TemplateSize="50", TemplatePadding="0", ShowScrollbar="false",
+          X="12", Y="50", Width=f"{TW} - 24", Height=f"Max(1, RoundUp({n_eq} / 5, 0)) * 50", Visible=f"{vis(1)} && {n_eq} > 0",
+          filhos=[
+              cartao("fecEqPilula", 4, 4, "Parent.TemplateWidth - 12", 42, raio=21),
+              avatar("fecEqAvatar", "ThisItem.rlt_nome", 10, 11, d=28),
+              C("fecEqNome", LBL, Text="ThisItem.rlt_nome", Color="corTexto", Size="10", FontWeight="FontWeight.Bold", X="44", Y="7", Width="Parent.TemplateWidth - 60", Height="18"),
+              C("fecEqPerfil", LBL, Text="Text(ThisItem.rlt_perfil)", Color="corMuted", Size="8", X="44", Y="25", Width="Parent.TemplateWidth - 60", Height="16"),
+          ]),
+        C("fecEqNota", LBL, Text='"Para corrigir a equipe, volte ao Relatório."', Color="corTexto", Size="10",
+          X="16", Y=f"52 + Max(1, RoundUp({n_eq} / 5, 0)) * 50 + 4", Width="400", Height="22", Visible=vis(1),
+          OnSelect="Navigate(scrRelatorio, ScreenTransition.None)"),
+        espaco("fecE1", h1, 1),
+        # ---------- 2. Resumo
+        cartao("fecC2", 0, 0, TW, h2, Visible=vis(2)),
+        tit("fecT2", "RESUMO", 2),
+    ]
+    for i, (rotulo_kpi, conta) in enumerate([("Registros", "CountRows(colRegs)"), ("Passam ao próximo turno", n_abertos),
+                                             ("Fator Q sem SAP", f"CountRows({fq_sem_sap})")]):
+        x = f"16 + {i} * (({TW} - 32 - 24) / 3 + 12)"
+        w = f"({TW} - 32 - 24) / 3"
+        pagina += [
+            cartao(f"fecKpi{i}", x, 52, w, 76, Visible=vis(2)),
+            C(f"fecKpiNum{i}", LBL, Text=conta, Color="corAzul", Size="20", FontWeight="FontWeight.Bold", X=f"{x} + 14", Y="58", Width=f"{w} - 20", Height="34", Visible=vis(2)),
+            C(f"fecKpiRot{i}", LBL, Text=f'"{rotulo_kpi}"', Color="corMuted", Size="10", X=f"{x} + 14", Y="94", Width=f"{w} - 20", Height="24", Visible=vis(2)),
+        ]
+    pagina += [
+        cartao("fecTabSec", 16, 140, f"{TW} - 32", 8 * 38 + 2, raio=8, Visible=vis(2)),
+        C("fecGalSec", GAL, variante="Vertical", Items="tabSecoes", TemplateSize="38", TemplatePadding="0", ShowScrollbar="false",
+          X="17", Y="141", Width=f"{TW} - 34", Height=str(8 * 38), Visible=vis(2),
+          filhos=[
+              C("fecSecNome", LBL, Text="ThisItem.Nome", Color="corTexto", Size="10", X="12", Y="0", Width="Parent.TemplateWidth - 100", Height="38"),
+              C("fecSecQtd", LBL, Text="CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor))", Color="corTexto", Size="10", FontWeight="FontWeight.Bold",
+                Align="Align.Right", X="Parent.TemplateWidth - 92", Y="0", Width="80", Height="38"),
+              C("fecSecLinha", RET, Fill="corLinha", X="0", Y="37", Width="Parent.TemplateWidth", Height="1", Visible="ThisItem.Ordem < 8"),
+          ]),
+        espaco("fecE2", h2, 2),
+        # ---------- 3. Campos a conferir (RN-008)
+        cartao("fecC3", 0, 0, TW, h3, fill=f"If({n_avisos} = 0, RGBA(227, 242, 218, 1), RGBA(255, 246, 232, 1))",
+               borda=f"If({n_avisos} = 0, RGBA(191, 226, 168, 1), RGBA(247, 201, 140, 1))", Visible=f"{vis(3)} && {aberto_rel}"),
+        C("fecAvTit", LBL, Color=f"If({n_avisos} = 0, RGBA(47, 98, 20, 1), corLaranjaTxt)", Size="11", FontWeight="FontWeight.Bold",
+          X="16", Y="12", Width=f"{TW} - 32", Height="24", Visible=f"{vis(3)} && {aberto_rel}",
+          Text=f'If({n_avisos} = 0, "✓   Nenhum campo vazio encontrado.", "⚠   " & {n_avisos} & " campo(s) a conferir.")'),
+        C("fecAvSub", LBL, Text='"Campos vazios não impedem o fechamento (RN-008, a confirmar), mas o PDF sai assim:"', Color="corLaranjaTxt", Size="10",
+          X="44", Y="34", Width=f"{TW} - 60", Height="22", Visible=f"{vis(3)} && {aberto_rel} && {n_avisos} > 0"),
+        C("fecAvLista", LBL, Text=avisos, Color="corLaranjaTxt", Size="10", VerticalAlign="VerticalAlign.Top",
+          X="44", Y="58", Width=f"{TW} - 60", Height=f"{n_avisos} * 20 + 4", Visible=f"{vis(3)} && {aberto_rel} && {n_avisos} > 0"),
+        espaco("fecE3", h3, 3),
+        # ---------- 4. O que acontece ao confirmar
+        cartao("fecC4", 0, 0, TW, h4, Visible=f"{vis(4)} && {aberto_rel}"),
+        tit("fecT4", "O QUE ACONTECE AO CONFIRMAR", 4),
+        rot("fecRotPdf", "PDF", 50, 4),
+        C("fecPdf", LBL, Text='gblRel.rlt_nome & ".pdf"', Color="corTexto", Size="11", FontWeight="FontWeight.Bold", X="16", Y="70", Width=f"{TW} - 32", Height="24",
+          Visible=f"{vis(4)} && {aberto_rel}"),
+        rot("fecRotEmail", "E-MAIL PARA OS DESTINATÁRIOS DA RN-005", 104, 4),
+        cartao("fecEmail", 16, 126, f"{TW} - 32", 196, raio=8, Visible=f"{vis(4)} && {aberto_rel}"),
+        C("fecParaRot", LBL, Text='"Para"', Color="corMuted", Size="10", FontWeight="FontWeight.Bold", X="28", Y="134", Width="70", Height="22", Visible=f"{vis(4)} && {aberto_rel}"),
+        C("fecPara", LBL, Text=f'"{DESTINATARIOS_RN005}"', Color="corTexto", Size="10", VerticalAlign="VerticalAlign.Top",
+          X="100", Y="136", Width=f"{TW} - 32 - 96", Height="42", Visible=f"{vis(4)} && {aberto_rel}"),
+        C("fecEmailL1", RET, Fill="corLinha", X="17", Y="182", Width=f"{TW} - 34", Height="1", Visible=f"{vis(4)} && {aberto_rel}"),
+        C("fecAssuntoRot", LBL, Text='"Assunto"', Color="corMuted", Size="10", FontWeight="FontWeight.Bold", X="28", Y="186", Width="70", Height="30", Visible=f"{vis(4)} && {aberto_rel}"),
+        C("fecAssunto", LBL, Text=f'"Relatório de Passagem do Turno " & {turno_nome} & " do CCM - " & {data_ponto}', Color="corTexto", Size="10",
+          X="100", Y="186", Width=f"{TW} - 32 - 96", Height="30", Visible=f"{vis(4)} && {aberto_rel}"),
+        C("fecEmailL2", RET, Fill="corLinha", X="17", Y="218", Width=f"{TW} - 34", Height="1", Visible=f"{vis(4)} && {aberto_rel}"),
+        C("fecCorpo", LBL, Color="corTexto", Size="10", VerticalAlign="VerticalAlign.Top", X="28", Y="226", Width=f"{TW} - 56", Height="92",
+          Visible=f"{vis(4)} && {aberto_rel}",
+          Text=f'"Prezados," & Char(10) & Char(10) & "Encaminho, em anexo, o Relatório de Passagem do Turno " & {turno_nome} & " do CCM, referente ao dia " & {data_ponto} & "." & Char(10) & Char(10) & "Atenciosamente,"'),
+        C("fecNotaTeste", LBL, Text='"Nos testes, o e-mail vai só para quem está na variável de ambiente RLT – Destinatários do e-mail."',
+          Color="corMuted", Size="9", X="16", Y="326", Width=f"{TW} - 32", Height="20", Visible=f"{vis(4)} && {aberto_rel}"),
+        rot("fecRotArq", "ARQUIVO", 354, 4),
+        C("fecArq", LBL, Text='"Pasta RLT-CCM /" & Text(gblRel.rlt_data, "yyyy") & "/" & Text(gblRel.rlt_data, "mm") & "/ no OneDrive (PDF)"',
+          Color="corTexto", Size="11", X="16", Y="374", Width=f"{TW} - 32", Height="24", Visible=f"{vis(4)} && {aberto_rel}"),
+        rot("fecRotProx", "PRÓXIMO TURNO", 408, 4),
+        C("fecProx", LBL, Text=f'{prox} & " recebe " & {n_abertos} & " pendência(s) com a data de início original."',
+          Color="corTexto", Size="11", X="16", Y="428", Width=f"{TW} - 32", Height="24", Visible=f"{vis(4)} && {aberto_rel}"),
+        espaco("fecE4", h4, 4),
+        # ---------- 5. Confirmação (aberto) ou resultado do envio (fechado)
+        cartao("fecC5", 0, 0, TW, f"If({aberto_rel}, 100, 106)", Visible=f"{vis(5)} && {aberto_rel}"),
+        C("fecConf", CHK, Text='"Eu, " & Coalesce(gblUsuario.rlt_nome, User().FullName) & ", confirmo que revisei o relatório e quero fechar e enviar. Depois do envio o PDF não pode ser alterado."',
+          X="16", Y="12", Width=f"{TW} - 32", Height="36", Size="10", Visible=f"{vis(5)} && {aberto_rel}"),
+        botao("fecBtn", '"➤  Fechar e enviar"', fechar, f"{TW} - 16 - 170", 52, 170, 40, Visible=f"{vis(5)} && {aberto_rel}",
+              DisplayMode="If(fecConf.Value, DisplayMode.Edit, DisplayMode.Disabled)", DisabledFill="RGBA(153, 175, 193, 1)",
+              DisabledColor="Color.White", DisabledBorderColor="RGBA(153, 175, 193, 1)"),
+        cartao("fecFechadoFundo", 0, 0, TW, 106, fill=f"If({falhou}, corVerm20, corAzul10)", borda=f"If({falhou}, RGBA(231, 163, 179, 1), RGBA(204, 215, 224, 1))",
+               Visible=f"{vis(5)} && Not({aberto_rel})"),
+        C("fecFechado", LBL, Visible=f"{vis(5)} && Not({aberto_rel})", Size="11", PaddingLeft="16", PaddingTop="12", VerticalAlign="VerticalAlign.Top",
+          X="0", Y="0", Width=TW, Height="106", Color=f"If({falhou}, RGBA(138, 0, 33, 1), corAzul)", OnSelect=atualizar,
           Text='If(IsBlank(gblRel), "Nenhum relatório.", "Relatório fechado em " & Text(gblRel.rlt_fechadoem, "dd/mm/yyyy hh:mm") & " por " & Coalesce(gblRel.rlt_fechadopor.rlt_nome, "—") & "." & Char(10) & '
                'If(IsBlank(gblRel.rlt_resultadoenvio), "PDF e e-mail: envio em andamento. Toque aqui para atualizar.", '
                '"PDF e e-mail: " & gblRel.rlt_resultadoenvio) & Char(10) & "Abra o próximo plantão na tela Relatório.")'),
+        espaco("fecE5", h5, 5),
     ]
+    titulo_sub = '"Qualquer usuário pode fechar e enviar (RN-007, alteração de 19/11). O envio fica registrado com o nome de quem enviou."'
+    filhos = moldura(p, "scrFechar") + titulo(p, '"FECHAR RELATÓRIO"', titulo_sub)
+    filhos.append(C(f"{p}Pagina", GAL, variante="VariableHeight", Items="Table({b: 1}, {b: 2}, {b: 3}, {b: 4}, {b: 5})", TemplateSize="60", TemplatePadding="0",
+                    X="224", Y="146", Width="Parent.Width - 230", Height="Parent.Height - 150", filhos=pagina))
     return tela("scrFechar", {"Fill": "corFundo", "OnVisible": atualizar + ";\n" + REFRESH}, filhos)
 
 
@@ -580,11 +1181,11 @@ tabSecoes = Table(
   {Ordem: 7, Nome: "Preventiva (ZM02)", Valor: [@'Seção'].'Preventiva (ZM02)', Tipo: "prev", Cor: corVerde},
   {Ordem: 8, Nome: "IOS informados", Valor: [@'Seção'].'IOS informados', Tipo: "ios", Cor: RGBA(153, 175, 193, 1)}
 );''').replace(chr(10), chr(10) + '      ')}
-    OnStart: {bloco(f'''=Set(gblUsuario, LookUp(Pessoas, Lower(rlt_email) = Lower(User().Email)));
+    OnStart: {bloco(f'''=Set(gblUsuario, LookUp(Pessoas, rlt_email = User().Email));
 Set(gblRel, First(Sort(Filter(Relatórios, rlt_situacao = {SIT}.Aberto), createdon, SortOrder.Descending)));
 If(IsBlank(gblRel), Set(gblRel, First(Sort(Relatórios, createdon, SortOrder.Descending))));
 If(!IsBlank(gblUsuario) && {ABERTO_REL} &&
-   IsBlank(LookUp('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && rlt_pessoa.rlt_pessoaid = gblUsuario.rlt_pessoaid && IsBlank(rlt_retiradoem))),
+   IsBlank(LookUp('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && rlt_pessoa.rlt_pessoaid = gblUsuario.rlt_pessoaid && rlt_retiradoem = Blank())),
   Patch('Equipe do plantão', Defaults('Equipe do plantão'), {{rlt_nome: gblUsuario.rlt_nome, rlt_pessoa: gblUsuario, rlt_relatorio: gblRel,
     rlt_perfil: gblUsuario.rlt_perfil, rlt_entrouem: Now()}});
   {hist('"Entrou no plantão (login)"')}

@@ -38,40 +38,133 @@ Screens:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            ="RLT · CCM   Passagem de Turno"
+            ="RLT · CCM"
           Color: |-
             =Color.White
           Size: |-
-            =15
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =20
+          Y: |-
+            =7
+          Width: |-
+            =300
+          Height: |-
+            =24
+    - paiMarca2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =10
           FontWeight: |-
             =FontWeight.Semibold
           X: |-
             =20
           Y: |-
-            =0
+            =29
           Width: |-
-            =500
+            =300
           Height: |-
-            =56
+            =20
+          Font: |-
+            =Font.Arial
     - paiUsuario:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+            =Coalesce(gblUsuario.rlt_nome, User().FullName)
           Color: |-
             =Color.White
           Size: |-
-            =13
+            =12
+          FontWeight: |-
+            =FontWeight.Bold
           Align: |-
             =Align.Right
           X: |-
-            =Parent.Width - 620
+            =Parent.Width - 470
           Y: |-
-            =0
+            =8
           Width: |-
-            =600
+            =410
           Height: |-
-            =56
+            =22
+          Font: |-
+            =Font.Arial
+    - paiPerfil:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), "fora da lista de pessoas", Text(gblUsuario.rlt_perfil) & If(IsBlank(gblUsuario.rlt_cargo), "", " · " & Lower(gblUsuario.rlt_cargo)))
+          Color: |-
+            =Color.White
+          Size: |-
+            =9
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 470
+          Y: |-
+            =29
+          Width: |-
+            =410
+          Height: |-
+            =18
+          Font: |-
+            =Font.Arial
+    - paiAvatar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =Upper(Left(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), 1) & If(CountRows(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")) > 1, Left(Last(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")).Value, 1), ""))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =Parent.Width - 52
+          Y: |-
+            =10
+          Width: |-
+            =36
+          Height: |-
+            =36
+          Fill: |-
+            =corVerde
+          DisabledFill: |-
+            =corVerde
+          BorderColor: |-
+            =corVerde
+          DisabledBorderColor: |-
+            =corVerde
+          BorderThickness: |-
+            =0
+          RadiusTopLeft: |-
+            =18
+          RadiusTopRight: |-
+            =18
+          RadiusBottomLeft: |-
+            =18
+          RadiusBottomRight: |-
+            =18
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.Arial
     - paiMenuFundo:
         Control: Rectangle@2.3.0
         Properties:
@@ -93,13 +186,13 @@ Screens:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Relatório"
+            ="▤    Relatório"
           OnSelect: |-
             =Navigate(scrRelatorio, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -111,11 +204,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -132,17 +225,19 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - paiMenu1:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Chamados"
+            ="◔    Chamados"
           OnSelect: |-
             =Navigate(scrChamados, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -154,11 +249,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -175,17 +270,19 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - paiMenu2:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Histórico"
+            ="↺    Histórico"
           OnSelect: |-
-            =Navigate(scrHistorico, ScreenTransition.None)
+            =Navigate(scrHistorico, ScreenTransition.None, {locHistReg: Blank()})
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -197,11 +294,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -218,11 +315,13 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - paiMenu3:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Painel geral"
+            ="◈    Painel geral"
           OnSelect: |-
             =Navigate(scrPainel, ScreenTransition.None)
           Fill: |-
@@ -240,11 +339,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
-            =FontWeight.Semibold
+            =FontWeight.Bold
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -261,6 +360,8 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - paiMenuMarca:
         Control: Rectangle@2.3.0
         Properties:
@@ -271,20 +372,67 @@ Screens:
           Y: |-
             =226
           Width: |-
-            =5
+            =4
           Height: |-
             =46
+    - paiMenuBolha:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento)))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =166
+          Y: |-
+            =240
+          Width: |-
+            =22
+          Height: |-
+            =18
+          Fill: |-
+            =corVerm
+          DisabledFill: |-
+            =corVerm
+          BorderColor: |-
+            =corVerm
+          DisabledBorderColor: |-
+            =corVerm
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =12
+          RadiusTopRight: |-
+            =12
+          RadiusBottomLeft: |-
+            =12
+          RadiusBottomRight: |-
+            =12
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Visible: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0
+          Font: |-
+            =Font.Arial
     - paiMenu4:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Fechar"
+            ="➤    Fechar"
           OnSelect: |-
             =Navigate(scrFechar, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -296,11 +444,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -317,6 +465,21 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
+    - paiAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =224
+          Y: |-
+            =76
+          Width: |-
+            =36
+          Height: |-
+            =4
     - paiTit:
         Control: Label@2.5.1
         Properties:
@@ -328,14 +491,16 @@ Screens:
             =20
           FontWeight: |-
             =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
           X: |-
             =224
           Y: |-
-            =78
+            =82
           Width: |-
             =Parent.Width - 460
           Height: |-
-            =36
+            =34
     - paiSub:
         Control: Label@2.5.1
         Properties:
@@ -344,146 +509,618 @@ Screens:
           Color: |-
             =corMuted
           Size: |-
-            =11
+            =10
           X: |-
             =224
           Y: |-
-            =112
+            =116
           Width: |-
             =Parent.Width - 460
           Height: |-
-            =26
-    - paiT1:
-        Control: Label@2.5.1
+            =24
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          Font: |-
+            =Font.Arial
+    - paiPagina:
+        Control: Gallery@2.15.0
+        Variant: VariableHeight
         Properties:
-          Text: |-
-            ="FATOR Q SEM CÓDIGO SAP (" & CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) & ")"
-          Color: |-
-            =corAzul
-          Size: |-
-            =13
-          FontWeight: |-
-            =FontWeight.Bold
+          Items: |-
+            =Table({b: 1}, {b: 2}, {b: 3})
+          TemplateSize: |-
+            =100
+          TemplatePadding: |-
+            =0
           X: |-
             =224
           Y: |-
             =146
           Width: |-
-            =600
+            =Parent.Width - 230
           Height: |-
-            =28
-    - paiGal1:
-        Control: Gallery@2.15.0
-        Variant: Vertical
-        Properties:
-          Items: |-
-            =Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))
-          TemplateSize: |-
-            =64
-          TemplatePadding: |-
-            =4
-          X: |-
-            =218
-          Y: |-
-            =176
-          Width: |-
-            =Parent.Width - 236
-          Height: |-
-            =210
+            =Parent.Height - 150
         Children:
-          - paiFundo:
-              Control: Rectangle@2.3.0
-              Properties:
-                Fill: |-
-                  =Color.White
-                BorderColor: |-
-                  =corVerm
-                BorderThickness: |-
-                  =1
-                X: |-
-                  =0
-                Y: |-
-                  =0
-                Width: |-
-                  =Parent.TemplateWidth
-                Height: |-
-                  =Parent.TemplateHeight
-          - paiNome:
-              Control: Label@2.5.1
-              Properties:
-                Text: |-
-                  =Coalesce(ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo) & "  ·  Chamado " & ThisItem.rlt_numero
-                Color: |-
-                  =corTexto
-                Size: |-
-                  =11
-                FontWeight: |-
-                  =FontWeight.Semibold
-                X: |-
-                  =14
-                Y: |-
-                  =16
-                Width: |-
-                  =Parent.TemplateWidth - 560
-                Height: |-
-                  =28
-          - paiCbx:
-              Control: Classic/ComboBox@2.4.0
-              Properties:
-                Items: |-
-                  =Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem)
-                DisplayFields: |-
-                  =["rlt_nome"]
-                SearchFields: |-
-                  =["rlt_nome", "rlt_codigosap"]
-                SelectMultiple: |-
-                  =false
-                X: |-
-                  =Parent.TemplateWidth - 540
-                Y: |-
-                  =12
-                Width: |-
-                  =380
-                Height: |-
-                  =40
-                DisplayMode: |-
-                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          - paiCorrigir:
+          - paiC1:
               Control: Classic/Button@2.2.0
               Properties:
                 Text: |-
-                  ="Corrigir"
-                OnSelect: |-
-                  =If(IsBlank(paiCbx.Selected), Notify("Escolha o equipamento na lista.", NotificationType.Warning),
-                    Patch(Registros, LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid), {rlt_equipamento: paiCbx.Selected, rlt_equipamentolivre: ""});
-                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Código SAP corrigido: " & paiCbx.Selected.rlt_codigosap, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)});
-                    ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
-                    ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)));
-                    Notify("Corrigido.", NotificationType.Success))
+                  =""
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
                 X: |-
-                  =Parent.TemplateWidth - 150
+                  =0
                 Y: |-
-                  =12
+                  =0
                 Width: |-
-                  =130
+                  =Parent.TemplateWidth - 14
                 Height: |-
-                  =40
-                Size: |-
-                  =12
-                FontWeight: |-
-                  =FontWeight.Semibold
+                  =84 + If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) = 0, 40, CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) * 136)
                 Fill: |-
-                  =corAzul
-                Color: |-
+                  =Color.White
+                DisabledFill: |-
                   =Color.White
                 BorderColor: |-
-                  =corAzul
+                  =corLinha
+                DisabledBorderColor: |-
+                  =corLinha
                 BorderThickness: |-
                   =1
-                HoverFill: |-
-                  =corAzul80
-                HoverColor: |-
+                RadiusTopLeft: |-
+                  =10
+                RadiusTopRight: |-
+                  =10
+                RadiusBottomLeft: |-
+                  =10
+                RadiusBottomRight: |-
+                  =10
+                Visible: |-
+                  =ThisItem.b = 1
+                Font: |-
+                  =Font.Arial
+          - paiT1:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="FATOR Q SEM CÓDIGO SAP"
+                Color: |-
+                  =corAzul
+                Size: |-
+                  =13
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.'Open Sans Condensed'
+                X: |-
+                  =16
+                Y: |-
+                  =14
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 200
+                Height: |-
+                  =26
+                Visible: |-
+                  =ThisItem.b = 1
+          - paiTag1:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) & " PARA CORRIGIR", "TUDO CERTO")
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =Parent.TemplateWidth - 14 - 150
+                Y: |-
+                  =16
+                Width: |-
+                  =134
+                Height: |-
+                  =22
+                Fill: |-
+                  =If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, corVerm20, corAzul10)
+                DisabledFill: |-
+                  =If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, corVerm20, corAzul10)
+                BorderColor: |-
+                  =If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, corVerm20, corAzul10)
+                DisabledBorderColor: |-
+                  =If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, corVerm20, corAzul10)
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =4
+                RadiusTopRight: |-
+                  =4
+                RadiusBottomLeft: |-
+                  =4
+                RadiusBottomRight: |-
+                  =4
+                Color: |-
+                  =If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, RGBA(138, 0, 33, 1), corAzul)
+                DisabledColor: |-
+                  =If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0, RGBA(138, 0, 33, 1), corAzul)
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                Visible: |-
+                  =ThisItem.b = 1
+                Font: |-
+                  =Font.Arial
+          - paiD1:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Chamados registrados com equipamento fora da lista. Ficam sem tipo e fora da Tela 3 do dashboard até a correção (RN-017, RN-018)."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =10
+                X: |-
+                  =16
+                Y: |-
+                  =44
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 32
+                Height: |-
+                  =24
+                Visible: |-
+                  =ThisItem.b = 1
+                Font: |-
+                  =Font.Arial
+          - paiVazio1:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Nenhum chamado sem código SAP."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Center
+                X: |-
+                  =16
+                Y: |-
+                  =76
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 32
+                Height: |-
+                  =32
+                Visible: |-
+                  =ThisItem.b = 1 && CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) = 0
+                Font: |-
+                  =Font.Arial
+          - paiGal1:
+              Control: Gallery@2.15.0
+              Variant: Vertical
+              Properties:
+                Items: |-
+                  =Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))
+                TemplateSize: |-
+                  =136
+                TemplatePadding: |-
+                  =0
+                ShowScrollbar: |-
+                  =false
+                X: |-
+                  =16
+                Y: |-
+                  =76
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 32
+                Height: |-
+                  =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) * 136
+                Visible: |-
+                  =ThisItem.b = 1 && CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0
+              Children:
+                - paiBorda:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        =""
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =0
+                      Y: |-
+                        =0
+                      Width: |-
+                        =Parent.TemplateWidth
+                      Height: |-
+                        =126
+                      Fill: |-
+                        =corVerm
+                      DisabledFill: |-
+                        =corVerm
+                      BorderColor: |-
+                        =corVerm
+                      DisabledBorderColor: |-
+                        =corVerm
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =10
+                      RadiusTopRight: |-
+                        =10
+                      RadiusBottomLeft: |-
+                        =10
+                      RadiusBottomRight: |-
+                        =10
+                      Font: |-
+                        =Font.Arial
+                - paiFundo:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        =""
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =4
+                      Y: |-
+                        =0
+                      Width: |-
+                        =Parent.TemplateWidth - 4
+                      Height: |-
+                        =126
+                      Fill: |-
+                        =Color.White
+                      DisabledFill: |-
+                        =Color.White
+                      BorderColor: |-
+                        =corLinha
+                      DisabledBorderColor: |-
+                        =corLinha
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =10
+                      RadiusTopRight: |-
+                        =10
+                      RadiusBottomLeft: |-
+                        =10
+                      RadiusBottomRight: |-
+                        =10
+                      Font: |-
+                        =Font.Arial
+                - paiStatus:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        ="●  " & Upper(Text(ThisItem.rlt_status))
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =18
+                      Y: |-
+                        =12
+                      Width: |-
+                        =Len(Text(ThisItem.rlt_status)) * 8 + 44
+                      Height: |-
+                        =22
+                      Fill: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                      DisabledFill: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                      BorderColor: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                      DisabledBorderColor: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =12
+                      RadiusTopRight: |-
+                        =12
+                      RadiusBottomLeft: |-
+                        =12
+                      RadiusBottomRight: |-
+                        =12
+                      Color: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                      DisabledColor: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Font: |-
+                        =Font.Arial
+                - paiSemSap:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        ="SEM SAP"
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =18 + Len(Text(ThisItem.rlt_status)) * 8 + 44 + 8
+                      Y: |-
+                        =13
+                      Width: |-
+                        =70
+                      Height: |-
+                        =20
+                      Fill: |-
+                        =corVerm20
+                      DisabledFill: |-
+                        =corVerm20
+                      BorderColor: |-
+                        =corVerm20
+                      DisabledBorderColor: |-
+                        =corVerm20
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =4
+                      RadiusTopRight: |-
+                        =4
+                      RadiusBottomLeft: |-
+                        =4
+                      RadiusBottomRight: |-
+                        =4
+                      Color: |-
+                        =RGBA(138, 0, 33, 1)
+                      DisabledColor: |-
+                        =RGBA(138, 0, 33, 1)
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Font: |-
+                        =Font.Arial
+                - paiNome:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =Coalesce(ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo)
+                      Color: |-
+                        =corTexto
+                      Size: |-
+                        =11
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      X: |-
+                        =18
+                      Y: |-
+                        =38
+                      Width: |-
+                        =Parent.TemplateWidth - 36
+                      Height: |-
+                        =24
+                      Font: |-
+                        =Font.Arial
+                - paiMeta:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        ="Chamado " & ThisItem.rlt_numero & "     Início " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy hh:mm")
+                      Color: |-
+                        =corMuted
+                      Size: |-
+                        =9
+                      X: |-
+                        =18
+                      Y: |-
+                        =60
+                      Width: |-
+                        =Parent.TemplateWidth - 36
+                      Height: |-
+                        =20
+                      Font: |-
+                        =Font.Arial
+                - paiCbx:
+                    Control: Classic/ComboBox@2.4.0
+                    Properties:
+                      Items: |-
+                        =Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem)
+                      DisplayFields: |-
+                        =["rlt_nome"]
+                      SearchFields: |-
+                        =["rlt_nome", "rlt_codigosap"]
+                      SelectMultiple: |-
+                        =false
+                      InputTextPlaceholder: |-
+                        ="Escolher o equipamento correto…"
+                      X: |-
+                        =18
+                      Y: |-
+                        =84
+                      Width: |-
+                        =Parent.TemplateWidth - 36 - 112
+                      Height: |-
+                        =36
+                      DisplayMode: |-
+                        =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                      Font: |-
+                        =Font.Arial
+                - paiCorrigir:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        ="Corrigir"
+                      OnSelect: |-
+                        =If(IsBlank(paiCbx.Selected), Notify("Escolha o equipamento na lista.", NotificationType.Warning),
+                          Patch(Registros, LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid), {rlt_equipamento: paiCbx.Selected, rlt_equipamentolivre: ""});
+                          Patch(Histórico, Defaults(Histórico), {rlt_campo: "Código SAP corrigido: " & paiCbx.Selected.rlt_codigosap, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)});
+                          ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+                          ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)));
+                          Notify("Corrigido: " & paiCbx.Selected.rlt_nome, NotificationType.Success))
+                      X: |-
+                        =Parent.TemplateWidth - 18 - 100
+                      Y: |-
+                        =84
+                      Width: |-
+                        =100
+                      Height: |-
+                        =36
+                      Size: |-
+                        =10
+                      FontWeight: |-
+                        =FontWeight.Semibold
+                      Fill: |-
+                        =corAzul
+                      Color: |-
+                        =Color.White
+                      BorderColor: |-
+                        =corAzul
+                      BorderThickness: |-
+                        =1
+                      HoverFill: |-
+                        =corAzul80
+                      HoverColor: |-
+                        =Color.White
+                      RadiusTopLeft: |-
+                        =8
+                      RadiusTopRight: |-
+                        =8
+                      RadiusBottomLeft: |-
+                        =8
+                      RadiusBottomRight: |-
+                        =8
+                      Visible: |-
+                        =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                      Font: |-
+                        =Font.Arial
+          - paiE1:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =Color.Transparent
+                X: |-
+                  =0
+                Y: |-
+                  =84 + If(CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) = 0, 40, CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) * 136)
+                Width: |-
+                  =10
+                Height: |-
+                  =12
+                Visible: |-
+                  =ThisItem.b = 1
+          - paiC2:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =""
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =Parent.TemplateWidth - 14
+                Height: |-
+                  =64 + If(CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) = 0, 40, CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) * 44 + 2) + 14
+                Fill: |-
                   =Color.White
+                DisabledFill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corLinha
+                DisabledBorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =10
+                RadiusTopRight: |-
+                  =10
+                RadiusBottomLeft: |-
+                  =10
+                RadiusBottomRight: |-
+                  =10
+                Visible: |-
+                  =ThisItem.b = 2
+                Font: |-
+                  =Font.Arial
+          - paiT2:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="PENDÊNCIAS ABERTAS HÁ MAIS DE 7 DIAS"
+                Color: |-
+                  =corAzul
+                Size: |-
+                  =13
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.'Open Sans Condensed'
+                X: |-
+                  =16
+                Y: |-
+                  =14
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 200
+                Height: |-
+                  =26
+                Visible: |-
+                  =ThisItem.b = 2
+          - paiVazio2:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Nenhuma."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Center
+                X: |-
+                  =16
+                Y: |-
+                  =58
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 32
+                Height: |-
+                  =32
+                Visible: |-
+                  =ThisItem.b = 2 && CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) = 0
+                Font: |-
+                  =Font.Arial
+          - paiTab2:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =""
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =16
+                Y: |-
+                  =52
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 32
+                Height: |-
+                  =CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) * 44 + 2
+                Fill: |-
+                  =Color.White
+                DisabledFill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corLinha
+                DisabledBorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
                 RadiusTopLeft: |-
                   =8
                 RadiusTopRight: |-
@@ -493,80 +1130,625 @@ Screens:
                 RadiusBottomRight: |-
                   =8
                 Visible: |-
-                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
-    - paiT2:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            ="PENDÊNCIAS ABERTAS HÁ MAIS DE 7 DIAS"
-          Color: |-
-            =corAzul
-          Size: |-
-            =13
-          FontWeight: |-
-            =FontWeight.Bold
-          X: |-
-            =224
-          Y: |-
-            =396
-          Width: |-
-            =600
-          Height: |-
-            =28
-    - paiGal2:
-        Control: Gallery@2.15.0
-        Variant: Vertical
-        Properties:
-          Items: |-
-            =Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7)
-          TemplateSize: |-
-            =44
-          TemplatePadding: |-
-            =2
-          X: |-
-            =218
-          Y: |-
-            =426
-          Width: |-
-            =Parent.Width - 236
-          Height: |-
-            =Parent.Height - 520
-        Children:
-          - paiVelha:
-              Control: Label@2.5.1
+                  =ThisItem.b = 2 && CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) > 0
+                Font: |-
+                  =Font.Arial
+          - paiGal2:
+              Control: Gallery@2.15.0
+              Variant: Vertical
+              Properties:
+                Items: |-
+                  =Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)
+                TemplateSize: |-
+                  =44
+                TemplatePadding: |-
+                  =0
+                ShowScrollbar: |-
+                  =false
+                X: |-
+                  =17
+                Y: |-
+                  =53
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 34
+                Height: |-
+                  =CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) * 44
+                Visible: |-
+                  =ThisItem.b = 2 && CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) > 0
+              Children:
+                - paiVSecao:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome
+                      Color: |-
+                        =corTexto
+                      Size: |-
+                        =10
+                      X: |-
+                        =12
+                      Y: |-
+                        =0
+                      Width: |-
+                        =130
+                      Height: |-
+                        =44
+                      Font: |-
+                        =Font.Arial
+                - paiVTitulo:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =ThisItem.rlt_titulo
+                      Color: |-
+                        =corAzul
+                      Underline: |-
+                        =true
+                      Size: |-
+                        =10
+                      X: |-
+                        =150
+                      Y: |-
+                        =0
+                      Width: |-
+                        =Parent.TemplateWidth - 150 - 300
+                      Height: |-
+                        =44
+                      OnSelect: |-
+                        =Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})
+                      Font: |-
+                        =Font.Arial
+                - paiVDesde:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        ="desde " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy")
+                      Color: |-
+                        =corTexto
+                      Size: |-
+                        =10
+                      X: |-
+                        =Parent.TemplateWidth - 290
+                      Y: |-
+                        =0
+                      Width: |-
+                        =130
+                      Height: |-
+                        =44
+                      Font: |-
+                        =Font.Arial
+                - paiVStatus:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        ="●  " & Upper(Text(ThisItem.rlt_status))
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =Parent.TemplateWidth - 12 - (Len(Text(ThisItem.rlt_status)) * 8 + 44)
+                      Y: |-
+                        =11
+                      Width: |-
+                        =Len(Text(ThisItem.rlt_status)) * 8 + 44
+                      Height: |-
+                        =22
+                      Fill: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                      DisabledFill: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                      BorderColor: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                      DisabledBorderColor: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =12
+                      RadiusTopRight: |-
+                        =12
+                      RadiusBottomLeft: |-
+                        =12
+                      RadiusBottomRight: |-
+                        =12
+                      Color: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                      DisabledColor: |-
+                        =Switch(Upper(Text(ThisItem.rlt_status)), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Font: |-
+                        =Font.Arial
+                - paiVLinha:
+                    Control: Rectangle@2.3.0
+                    Properties:
+                      Fill: |-
+                        =corLinha
+                      X: |-
+                        =0
+                      Y: |-
+                        =Parent.TemplateHeight - 1
+                      Width: |-
+                        =Parent.TemplateWidth
+                      Height: |-
+                        =1
+          - paiE2:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =Color.Transparent
+                X: |-
+                  =0
+                Y: |-
+                  =64 + If(CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) = 0, 40, CountRows(Sort(Filter(colRegs, If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO') && DateDiff(rlt_inicio, Now(), TimeUnit.Days) > 7), rlt_inicio)) * 44 + 2) + 14
+                Width: |-
+                  =10
+                Height: |-
+                  =12
+                Visible: |-
+                  =ThisItem.b = 2
+          - paiC3:
+              Control: Classic/Button@2.2.0
               Properties:
                 Text: |-
-                  =Upper(LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome) & "  ·  " & ThisItem.rlt_titulo & "  ·  desde " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy")
-                Color: |-
-                  =corTexto
-                Size: |-
-                  =11
-                Fill: |-
-                  =Color.White
-                PaddingLeft: |-
-                  =12
+                  =""
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
                 X: |-
                   =0
                 Y: |-
                   =0
                 Width: |-
-                  =Parent.TemplateWidth
+                  =Parent.TemplateWidth - 14
                 Height: |-
-                  =40
-    - paiListas:
-        Control: Label@2.5.1
-        Properties:
-          Color: |-
-            =corMuted
-          Size: |-
-            =11
-          X: |-
-            =224
-          Y: |-
-            =Parent.Height - 84
-          Width: |-
-            =Parent.Width - 248
-          Height: |-
-            =60
-          Text: |-
-            ="Listas usadas pelo app:  " & CountRows(Equipamentos) & " equipamentos  ·  " & CountRows(Locais) & " locais  ·  " & CountRows(Pessoas) & " pessoas e perfis"
+                  =262
+                Fill: |-
+                  =Color.White
+                DisabledFill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corLinha
+                DisabledBorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =10
+                RadiusTopRight: |-
+                  =10
+                RadiusBottomLeft: |-
+                  =10
+                RadiusBottomRight: |-
+                  =10
+                Visible: |-
+                  =ThisItem.b = 3
+                Font: |-
+                  =Font.Arial
+          - paiT3:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="LISTAS USADAS PELO APP"
+                Color: |-
+                  =corAzul
+                Size: |-
+                  =13
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.'Open Sans Condensed'
+                X: |-
+                  =16
+                Y: |-
+                  =14
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 200
+                Height: |-
+                  =26
+                Visible: |-
+                  =ThisItem.b = 3
+          - paiTab3:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =""
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =16
+                Y: |-
+                  =52
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 32
+                Height: |-
+                  =148
+                Fill: |-
+                  =Color.White
+                DisabledFill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corLinha
+                DisabledBorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =ThisItem.b = 3
+                Font: |-
+                  =Font.Arial
+          - paiL00:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="LISTA"
+                X: |-
+                  =28
+                Y: |-
+                  =52
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =32
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =8
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.Arial
+          - paiL01:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="ITENS"
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.6
+                Y: |-
+                  =52
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =32
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =8
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.Arial
+          - paiL02:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="ORIGEM"
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.72
+                Y: |-
+                  =52
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =32
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =8
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.Arial
+          - paiL0Linha:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =corLinha
+                X: |-
+                  =17
+                Y: |-
+                  =84
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 34
+                Height: |-
+                  =2
+                Visible: |-
+                  =ThisItem.b = 3
+          - paiL10:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Equipamentos (Fator Q e Preventiva)"
+                X: |-
+                  =28
+                Y: |-
+                  =84
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL11:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =CountIf(Equipamentos, true)
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.6
+                Y: |-
+                  =84
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL12:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="aba codigo_sap_equipamento"
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.72
+                Y: |-
+                  =84
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL1Linha:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =corLinha
+                X: |-
+                  =17
+                Y: |-
+                  =122
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 34
+                Height: |-
+                  =1
+                Visible: |-
+                  =ThisItem.b = 3
+          - paiL20:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Locais"
+                X: |-
+                  =28
+                Y: |-
+                  =122
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL21:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =CountIf(Locais, true)
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.6
+                Y: |-
+                  =122
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL22:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="aba codigo_sap"
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.72
+                Y: |-
+                  =122
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL2Linha:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =corLinha
+                X: |-
+                  =17
+                Y: |-
+                  =160
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 34
+                Height: |-
+                  =1
+                Visible: |-
+                  =ThisItem.b = 3
+          - paiL30:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Pessoas e perfis"
+                X: |-
+                  =28
+                Y: |-
+                  =160
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL31:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =CountIf(Pessoas, true)
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.6
+                Y: |-
+                  =160
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiL32:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="aba tbl_rh"
+                X: |-
+                  =16 + (Parent.TemplateWidth - 14 - 32) * 0.72
+                Y: |-
+                  =160
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 32) * 0.3
+                Height: |-
+                  =38
+                Visible: |-
+                  =ThisItem.b = 3
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - paiAtualizar:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="Atualizar listas"
+                OnSelect: |-
+                  =Notify("As listas de equipamentos, locais e pessoas são atualizadas pela carga das planilhas (RF-021).", NotificationType.Information)
+                X: |-
+                  =16
+                Y: |-
+                  =212
+                Width: |-
+                  =140
+                Height: |-
+                  =34
+                Size: |-
+                  =10
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul10
+                HoverColor: |-
+                  =corAzul
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =ThisItem.b = 3
+                Font: |-
+                  =Font.Arial
+          - paiE3:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =Color.Transparent
+                X: |-
+                  =0
+                Y: |-
+                  =262
+                Width: |-
+                  =10
+                Height: |-
+                  =12
+                Visible: |-
+                  =ThisItem.b = 3

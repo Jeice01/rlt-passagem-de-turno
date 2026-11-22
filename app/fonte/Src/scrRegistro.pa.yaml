@@ -14,9 +14,11 @@ Screens:
         UpdateContext({locStatusIos: If(IsBlank(locReg.rlt_statusios), "Em andamento", Text(locReg.rlt_statusios))});
         UpdateContext({locArea: locReg.rlt_local.rlt_area});
         UpdateContext({locErro: ""});
-        Reset(regDesc); Reset(regNum); Reset(regMotivo); Reset(regEquipLivre); Reset(regForaLista); Reset(regLimpeza); Reset(regFalso); Reset(regNI);
-        Reset(regArea); Reset(regLocal); Reset(regEquip); Reset(regIniData); Reset(regIniH); Reset(regIniM); Reset(regFimData); Reset(regFimH); Reset(regFimM);
-        Reset(regStatus); Reset(regStatusIos)
+        UpdateContext({locAnexar: false});
+        UpdateContext({locFicar: false});
+        UpdateContext({locResetar: true});
+        UpdateContext({locResetar: false});
+        ResetForm(frmAnexo)
     Children:
     - regTopo:
         Control: Rectangle@2.3.0
@@ -48,40 +50,133 @@ Screens:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            ="RLT · CCM   Passagem de Turno"
+            ="RLT · CCM"
           Color: |-
             =Color.White
           Size: |-
-            =15
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =20
+          Y: |-
+            =7
+          Width: |-
+            =300
+          Height: |-
+            =24
+    - regMarca2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =10
           FontWeight: |-
             =FontWeight.Semibold
           X: |-
             =20
           Y: |-
-            =0
+            =29
           Width: |-
-            =500
+            =300
           Height: |-
-            =56
+            =20
+          Font: |-
+            =Font.Arial
     - regUsuario:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            =If(IsBlank(gblUsuario), User().FullName & "  (fora da lista de pessoas)", gblUsuario.rlt_nome & "  ·  " & Text(gblUsuario.rlt_perfil))
+            =Coalesce(gblUsuario.rlt_nome, User().FullName)
           Color: |-
             =Color.White
           Size: |-
-            =13
+            =12
+          FontWeight: |-
+            =FontWeight.Bold
           Align: |-
             =Align.Right
           X: |-
-            =Parent.Width - 620
+            =Parent.Width - 470
           Y: |-
-            =0
+            =8
           Width: |-
-            =600
+            =410
           Height: |-
-            =56
+            =22
+          Font: |-
+            =Font.Arial
+    - regPerfil:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), "fora da lista de pessoas", Text(gblUsuario.rlt_perfil) & If(IsBlank(gblUsuario.rlt_cargo), "", " · " & Lower(gblUsuario.rlt_cargo)))
+          Color: |-
+            =Color.White
+          Size: |-
+            =9
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 470
+          Y: |-
+            =29
+          Width: |-
+            =410
+          Height: |-
+            =18
+          Font: |-
+            =Font.Arial
+    - regAvatar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =Upper(Left(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), 1) & If(CountRows(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")) > 1, Left(Last(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")).Value, 1), ""))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =Parent.Width - 52
+          Y: |-
+            =10
+          Width: |-
+            =36
+          Height: |-
+            =36
+          Fill: |-
+            =corVerde
+          DisabledFill: |-
+            =corVerde
+          BorderColor: |-
+            =corVerde
+          DisabledBorderColor: |-
+            =corVerde
+          BorderThickness: |-
+            =0
+          RadiusTopLeft: |-
+            =18
+          RadiusTopRight: |-
+            =18
+          RadiusBottomLeft: |-
+            =18
+          RadiusBottomRight: |-
+            =18
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.Arial
     - regMenuFundo:
         Control: Rectangle@2.3.0
         Properties:
@@ -103,13 +198,13 @@ Screens:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Relatório"
+            ="▤    Relatório"
           OnSelect: |-
             =Navigate(scrRelatorio, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -121,11 +216,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -142,11 +237,13 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - regMenu1:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Chamados"
+            ="◔    Chamados"
           OnSelect: |-
             =Navigate(scrChamados, ScreenTransition.None)
           Fill: |-
@@ -164,11 +261,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
-            =FontWeight.Semibold
+            =FontWeight.Bold
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -185,6 +282,8 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - regMenuMarca:
         Control: Rectangle@2.3.0
         Properties:
@@ -195,20 +294,20 @@ Screens:
           Y: |-
             =126
           Width: |-
-            =5
+            =4
           Height: |-
             =46
     - regMenu2:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Histórico"
+            ="↺    Histórico"
           OnSelect: |-
-            =Navigate(scrHistorico, ScreenTransition.None)
+            =Navigate(scrHistorico, ScreenTransition.None, {locHistReg: Blank()})
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -220,11 +319,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -241,17 +340,19 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
     - regMenu3:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Painel geral"
+            ="◈    Painel geral"
           OnSelect: |-
             =Navigate(scrPainel, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -263,11 +364,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -284,17 +385,66 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
+    - regMenuBolha:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento)))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =166
+          Y: |-
+            =240
+          Width: |-
+            =22
+          Height: |-
+            =18
+          Fill: |-
+            =corVerm
+          DisabledFill: |-
+            =corVerm
+          BorderColor: |-
+            =corVerm
+          DisabledBorderColor: |-
+            =corVerm
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =12
+          RadiusTopRight: |-
+            =12
+          RadiusBottomLeft: |-
+            =12
+          RadiusBottomRight: |-
+            =12
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Visible: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0
+          Font: |-
+            =Font.Arial
     - regMenu4:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Fechar"
+            ="➤    Fechar"
           OnSelect: |-
             =Navigate(scrFechar, ScreenTransition.None)
           Fill: |-
             =Color.White
           Color: |-
-            =corAzul
+            =corMuted
           HoverFill: |-
             =corAzul10
           HoverColor: |-
@@ -306,11 +456,11 @@ Screens:
           Align: |-
             =Align.Left
           PaddingLeft: |-
-            =20
+            =22
           FontWeight: |-
             =FontWeight.Normal
           Size: |-
-            =13
+            =12
           X: |-
             =0
           Y: |-
@@ -327,899 +477,2580 @@ Screens:
             =0
           RadiusBottomRight: |-
             =0
+          Font: |-
+            =Font.Arial
+    - regVoltar:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="‹  " & LookUp(tabSecoes, Valor = locSecao).Nome
+          Color: |-
+            =corAzul
+          Size: |-
+            =10
+          Underline: |-
+            =true
+          X: |-
+            =224
+          Y: |-
+            =70
+          Width: |-
+            =300
+          Height: |-
+            =22
+          OnSelect: |-
+            =Back()
+          Font: |-
+            =Font.Arial
+    - regAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =224
+          Y: |-
+            =98
+          Width: |-
+            =36
+          Height: |-
+            =4
     - regTit:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            =If(IsBlank(locId), "NOVO REGISTRO", "REGISTRO") & "  ·  " & Upper(LookUp(tabSecoes, Valor = locSecao).Nome)
+            =If(IsBlank(locId), "NOVO REGISTRO", "REGISTRO")
           Color: |-
             =corAzul
           Size: |-
             =20
           FontWeight: |-
             =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
           X: |-
             =224
           Y: |-
-            =78
+            =104
           Width: |-
             =Parent.Width - 460
           Height: |-
-            =36
+            =34
     - regSub:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            =If(locReg.rlt_herdado, "Pendência herdada: a data de início original é mantida (RN-009).", "Campos com * são obrigatórios.")
+            =LookUp(tabSecoes, Valor = locSecao).Nome & If(locReg.rlt_herdado, "   ·   Pendência herdada: a data de início original é mantida (RN-009).", "")
           Color: |-
             =corMuted
           Size: |-
-            =11
+            =10
           X: |-
             =224
           Y: |-
-            =112
+            =138
           Width: |-
             =Parent.Width - 460
           Height: |-
-            =26
-    - regFundo:
-        Control: Rectangle@2.3.0
-        Properties:
-          Fill: |-
-            =Color.White
-          BorderColor: |-
-            =corLinha
-          BorderThickness: |-
-            =1
-          X: |-
-            =218
-          Y: |-
-            =146
-          Width: |-
-            =Parent.Width - 236
-          Height: |-
-            =Parent.Height - 216
-    - regRotDesc:
+            =24
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          Font: |-
+            =Font.Arial
+    - regVerHist:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            =If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", "ASSUNTO *", "DESCRIÇÃO DA ATIVIDADE *")
+            ="↺  Histórico deste chamado"
           Color: |-
-            =corMuted
+            =corAzul
           Size: |-
             =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =236
-          Y: |-
-            =156
-          Width: |-
-            =400
-          Height: |-
-            =22
+          Underline: |-
+            =true
+          Align: |-
+            =Align.Right
           Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"]
-    - regDesc:
-        Control: Classic/TextInput@2.3.2
-        Properties:
+            =!IsBlank(locId)
           X: |-
-            =236
+            =Parent.Width - 244
           Y: |-
-            =178
+            =112
           Width: |-
-            =Parent.Width - 272
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Mode: |-
-            =TextMode.MultiLine
-          Height: |-
-            =64
-          Default: |-
-            =locReg.rlt_descricao
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"]
-    - regRotArea:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            ="LOCAL – ÁREA"
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =236
-          Y: |-
-            =252
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "corretiva"
-    - regRotLocal:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            ="LOCAL – ESPECÍFICO *"
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =252
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "corretiva"
-    - regArea:
-        Control: Classic/DropDown@2.3.1
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =274
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Items: |-
-            =Sort(Distinct(Locais, rlt_area), Value)
-          Default: |-
-            =locArea
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "corretiva"
-    - regLocal:
-        Control: Classic/ComboBox@2.4.0
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =274
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Items: |-
-            =Filter(Locais, rlt_area = regArea.Selected.Value)
-          DisplayFields: |-
-            =["rlt_nome"]
-          SearchFields: |-
-            =["rlt_nome"]
-          SelectMultiple: |-
-            =false
-          DefaultSelectedItems: |-
-            =Filter(Locais, rlt_localid = locReg.rlt_local.rlt_localid)
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "corretiva"
-    - regRotEquip:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            ="EQUIPAMENTO *"
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =236
-          Y: |-
-            =252
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]
-    - regEquip:
-        Control: Classic/ComboBox@2.4.0
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =274
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Items: |-
-            =Equipamentos
-          DisplayFields: |-
-            =["rlt_nome"]
-          SearchFields: |-
-            =["rlt_nome", "rlt_codigosap"]
-          SelectMultiple: |-
-            =false
-          DefaultSelectedItems: |-
-            =Filter(Equipamentos, rlt_equipamentoid = locReg.rlt_equipamento.rlt_equipamentoid)
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"] && !regForaLista.Value
-    - regForaLista:
-        Control: Classic/CheckBox@2.1.0
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =270
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+            =220
           Height: |-
             =24
-          Text: |-
-            ="Equipamento fora da lista (vai para o Painel geral)"
-          Default: |-
-            =!IsBlank(locReg.rlt_equipamentolivre)
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "fq"
-          Size: |-
-            =11
-    - regEquipLivre:
-        Control: Classic/TextInput@2.3.2
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =274
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Default: |-
-            =locReg.rlt_equipamentolivre
-          HintText: |-
-            ="Descreva o equipamento"
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "fq" && regForaLista.Value
-    - regEquipSap:
-        Control: Label@2.5.1
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =296
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =24
-          Text: |-
-            =If(IsBlank(regEquip.Selected), "", "Código SAP " & regEquip.Selected.rlt_codigosap & "  ·  " & Text(regEquip.Selected.rlt_tipo))
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"] && !regForaLista.Value
-    - regRotNum:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            =Switch(LookUp(tabSecoes, Valor = locSecao).Tipo, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos)")
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =236
-          Y: |-
-            =324
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"]
-    - regNum:
-        Control: Classic/TextInput@2.3.2
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =346
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Default: |-
-            =locReg.rlt_numero
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"]
-    - regRotIni:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            ="INÍCIO (DATA E HORA) *"
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =236
-          Y: |-
-            =396
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =true
-    - regIniData:
-        Control: Classic/DatePicker@2.6.0
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =418
-          Width: |-
-            =200
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          DefaultDate: |-
-            =locIni
-          Format: |-
-            ="dd/mm/yyyy"
-    - regIniH:
-        Control: Classic/DropDown@2.3.1
-        Properties:
-          X: |-
-            =444
-          Y: |-
-            =418
-          Width: |-
-            =80
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Items: |-
-            =tabHoras
-          Default: |-
-            =Text(Hour(locIni), "00")
-    - regIniM:
-        Control: Classic/DropDown@2.3.1
-        Properties:
-          X: |-
-            =530
-          Y: |-
-            =418
-          Width: |-
-            =80
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Items: |-
-            =tabMinutos
-          Default: |-
-            =Text(Minute(locIni), "00")
-    - regNI:
-        Control: Classic/CheckBox@2.1.0
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =466
-          Width: |-
-            =300
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && IsBlank(locFim), DisplayMode.Edit, DisplayMode.Disabled)
-          Height: |-
-            =30
-          Text: |-
-            ="N/I – não informado"
-          Default: |-
-            =locNI
-          Size: |-
-            =12
-          OnCheck: |-
-            =UpdateContext({locNI: true})
-          OnUncheck: |-
-            =UpdateContext({locNI: false})
-    - regRotFim:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            ="HORA DE CONCLUSÃO"
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =396
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =true
-    - regFimData:
-        Control: Classic/DatePicker@2.6.0
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =418
-          Width: |-
-            =200
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          DefaultDate: |-
-            =locFim
-          Format: |-
-            ="dd/mm/yyyy"
-          OnChange: |-
-            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
-    - regFimH:
-        Control: Classic/DropDown@2.3.1
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12) + 208
-          Y: |-
-            =418
-          Width: |-
-            =80
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Items: |-
-            =tabHoras
-          Default: |-
-            =If(IsBlank(locFim), "", Text(Hour(locFim), "00"))
-          AllowEmptySelection: |-
-            =true
-          OnChange: |-
-            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
-    - regFimM:
-        Control: Classic/DropDown@2.3.1
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12) + 294
-          Y: |-
-            =418
-          Width: |-
-            =80
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Items: |-
-            =tabMinutos
-          Default: |-
-            =If(IsBlank(locFim), "", Text(Minute(locFim), "00"))
-          AllowEmptySelection: |-
-            =true
-          OnChange: |-
-            =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
-    - regAgora:
-        Control: Classic/Button@2.2.0
-        Properties:
-          Text: |-
-            ="Agora"
           OnSelect: |-
-            =UpdateContext({locFim: Now(), locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"})
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12) + 382
-          Y: |-
-            =418
-          Width: |-
-            =80
-          Height: |-
-            =40
-          Size: |-
-            =12
-          FontWeight: |-
-            =FontWeight.Semibold
-          Fill: |-
-            =Color.White
-          Color: |-
-            =corAzul
-          BorderColor: |-
-            =corAzul
-          BorderThickness: |-
-            =1
-          HoverFill: |-
-            =corAzul10
-          HoverColor: |-
-            =corAzul
-          RadiusTopLeft: |-
-            =8
-          RadiusTopRight: |-
-            =8
-          RadiusBottomLeft: |-
-            =8
-          RadiusBottomRight: |-
-            =8
-          Visible: |-
-            =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
-    - regLimpar:
-        Control: Classic/Button@2.2.0
+            =Navigate(scrHistorico, ScreenTransition.None, {locHistReg: locId})
+          Font: |-
+            =Font.Arial
+    - regPagina:
+        Control: Gallery@2.15.0
+        Variant: VariableHeight
         Properties:
-          Text: |-
-            ="Limpar"
-          OnSelect: |-
-            =UpdateContext({locFim: Blank(), locStatus: If(locStatus = "CONCLUÍDO", "EM ANDAMENTO", locStatus), locStatusIos: If(locStatusIos = "Concluído", "Em andamento", locStatusIos)}); Reset(regFimData); Reset(regFimH); Reset(regFimM)
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12) + 468
-          Y: |-
-            =418
-          Width: |-
-            =80
-          Height: |-
-            =40
-          Size: |-
-            =12
-          FontWeight: |-
-            =FontWeight.Semibold
-          Fill: |-
-            =Color.White
-          Color: |-
-            =corAzul
-          BorderColor: |-
-            =corAzul
-          BorderThickness: |-
-            =1
-          HoverFill: |-
-            =corAzul10
-          HoverColor: |-
-            =corAzul
-          RadiusTopLeft: |-
-            =8
-          RadiusTopRight: |-
-            =8
-          RadiusBottomLeft: |-
-            =8
-          RadiusBottomRight: |-
-            =8
-          Visible: |-
-            =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
-    - regAjudaFim:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            =If(IsBlank(locFim), "Preencha quando o chamado for concluído. O status muda sozinho.", "")
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =462
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          Height: |-
-            =22
-    - regRotStatus:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            =If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", "STATUS DO IOS *", "STATUS *")
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =236
-          Y: |-
-            =506
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =true
-    - regStatus:
-        Control: Classic/DropDown@2.3.1
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =528
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !regFalso.Value && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)
-          Height: |-
-            =40
-          Default: |-
-            =locStatus
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios"
           Items: |-
-            =Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")
-          OnChange: |-
-            =UpdateContext({locStatus: Self.Selected.Value})
-    - regStatusIos:
-        Control: Classic/DropDown@2.3.1
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =528
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)
-          Height: |-
-            =40
-          Default: |-
-            =locStatusIos
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios"
-          Items: |-
-            =Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !IsBlank(locFim) || Value <> "Concluído")
-          OnChange: |-
-            =UpdateContext({locStatusIos: Self.Selected.Value})
-    - regAjudaStatus:
-        Control: Label@2.5.1
-        Properties:
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          X: |-
-            =236
-          Y: |-
-            =572
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          Height: |-
-            =22
-          Text: |-
-            =If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", !IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
-    - regRotMotivo:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            ="MOTIVO DO CANCELAMENTO *"
-          Color: |-
-            =corMuted
-          Size: |-
-            =10
-          FontWeight: |-
-            =FontWeight.Semibold
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =506
-          Width: |-
-            =300
-          Height: |-
-            =22
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
-    - regMotivo:
-        Control: Classic/TextInput@2.3.2
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =528
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =40
-          Default: |-
-            =locReg.rlt_motivocancelamento
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
-    - regFalso:
-        Control: Classic/CheckBox@2.1.0
-        Properties:
-          X: |-
-            =236
-          Y: |-
-            =600
-          Width: |-
+            =Table({b: 1})
+          TemplateSize: |-
             =400
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =30
-          Text: |-
-            ="Chamado falso"
-          Default: |-
-            =locFalso
-          Size: |-
-            =12
-          OnCheck: |-
-            =UpdateContext({locFalso: true})
-          OnUncheck: |-
-            =UpdateContext({locFalso: false})
-          Visible: |-
-            =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"]
-    - regLimpeza:
-        Control: Classic/CheckBox@2.1.0
-        Properties:
-          X: |-
-            =(224 + (Parent.Width - 248) / 2 + 12)
-          Y: |-
-            =600
-          Width: |-
-            =((Parent.Width - 248) / 2 - 12)
-          DisplayMode: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
-          Height: |-
-            =30
-          Text: |-
-            ="Limpeza técnica (fora de preventiva x corretiva)"
-          Default: |-
-            =Coalesce(locReg.rlt_limpezatecnica, false)
-          Size: |-
-            =12
-          Visible: |-
-            =locSecao = [@'Seção'].Outros
-    - regErro:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
-            =locErro
-          Visible: |-
-            =!IsBlank(locErro)
-          Color: |-
-            =corVerm
-          Fill: |-
-            =corVerm20
-          Size: |-
-            =11
-          FontWeight: |-
-            =FontWeight.Semibold
-          PaddingLeft: |-
-            =12
+          TemplatePadding: |-
+            =0
           X: |-
             =224
           Y: |-
-            =Parent.Height - 62
+            =168
           Width: |-
-            =Parent.Width - 600
+            =Parent.Width - 230
           Height: |-
-            =48
-    - regCancelar:
+            =Parent.Height - 172
+        Children:
+          - regCartao:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =""
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =0
+                Y: |-
+                  =0
+                Width: |-
+                  =Parent.TemplateWidth - 14
+                Height: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10
+                Fill: |-
+                  =Color.White
+                DisabledFill: |-
+                  =Color.White
+                BorderColor: |-
+                  =corLinha
+                DisabledBorderColor: |-
+                  =corLinha
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =10
+                RadiusTopRight: |-
+                  =10
+                RadiusBottomLeft: |-
+                  =10
+                RadiusBottomRight: |-
+                  =10
+                Font: |-
+                  =Font.Arial
+          - regRotDesc:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", "ASSUNTO *", "DESCRIÇÃO DA ATIVIDADE *")
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =18
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"]
+                Font: |-
+                  =Font.Arial
+          - regDesc:
+              Control: Classic/TextInput@2.3.2
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =40
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 36)
+                Height: |-
+                  =80
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                PaddingLeft: |-
+                  =12
+                Mode: |-
+                  =TextMode.MultiLine
+                Default: |-
+                  =locReg.rlt_descricao
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"]
+                Font: |-
+                  =Font.Arial
+          - regRotArea:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="LOCAL – ÁREA"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva"]
+                Font: |-
+                  =Font.Arial
+          - regRotLocal:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="LOCAL – ESPECÍFICO *"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva"]
+                Font: |-
+                  =Font.Arial
+          - regArea:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Items: |-
+                  =Sort(Distinct(Locais, rlt_area), Value)
+                Default: |-
+                  =locArea
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva"]
+                Font: |-
+                  =Font.Arial
+          - regLocal:
+              Control: Classic/ComboBox@2.4.0
+              Properties:
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Items: |-
+                  =Filter(Locais, rlt_area = regArea.Selected.Value)
+                DisplayFields: |-
+                  =["rlt_nome"]
+                SearchFields: |-
+                  =["rlt_nome"]
+                SelectMultiple: |-
+                  =false
+                DefaultSelectedItems: |-
+                  =Filter(Locais, rlt_localid = locReg.rlt_local.rlt_localid)
+                InputTextPlaceholder: |-
+                  ="Escolha a área primeiro"
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva"]
+                Font: |-
+                  =Font.Arial
+          - regAjudaLocal:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Lista de " & CountIf(Locais, true) & " locais (código SAP), escolhida em dois passos."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 66
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva"]
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regRotEquip:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="EQUIPAMENTO *"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]
+                Font: |-
+                  =Font.Arial
+          - regEquip:
+              Control: Classic/ComboBox@2.4.0
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Items: |-
+                  =Equipamentos
+                DisplayFields: |-
+                  =["rlt_nome"]
+                SearchFields: |-
+                  =["rlt_nome", "rlt_codigosap"]
+                SelectMultiple: |-
+                  =false
+                DefaultSelectedItems: |-
+                  =Filter(Equipamentos, rlt_equipamentoid = locReg.rlt_equipamento.rlt_equipamentoid)
+                InputTextPlaceholder: |-
+                  ="Buscar por nome ou código"
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"] && !regForaLista.Value
+                Font: |-
+                  =Font.Arial
+          - regEquipLivre:
+              Control: Classic/TextInput@2.3.2
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                PaddingLeft: |-
+                  =12
+                Default: |-
+                  =locReg.rlt_equipamentolivre
+                HintText: |-
+                  ="Descreva o equipamento"
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq"] && regForaLista.Value
+                Font: |-
+                  =Font.Arial
+          - regEquipSap:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(IsBlank(regEquip.Selected), "Buscar por nome ou código SAP.", "SAP " & regEquip.Selected.rlt_codigosap & "  ·  " & Text(regEquip.Selected.rlt_tipo) & "   (o código aparece no app, não no PDF – RF-018)")
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 66
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"] && !regForaLista.Value
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regForaLista:
+              Control: Classic/CheckBox@2.1.0
+              Properties:
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 24
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =36
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                CheckboxBorderColor: |-
+                  =RGBA(91, 104, 118, 1)
+                CheckboxSize: |-
+                  =20
+                CheckmarkFill: |-
+                  =Color.White
+                CheckboxBackgroundFill: |-
+                  =Color.White
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Reset: |-
+                  =locResetar
+                Text: |-
+                  ="Equipamento fora da lista"
+                Default: |-
+                  =!IsBlank(locReg.rlt_equipamentolivre)
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq"]
+                Font: |-
+                  =Font.Arial
+          - regAjudaFora:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Não bloqueia: vai para o Painel geral de informações (RN-017)."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12) + 30
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0)) + 60
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 30
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq"]
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regRotNum:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Switch(LookUp(tabSecoes, Valor = locSecao).Tipo, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos: ano + número)")
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0)
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"]
+                Font: |-
+                  =Font.Arial
+          - regNum:
+              Control: Classic/TextInput@2.3.2
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0)) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                PaddingLeft: |-
+                  =12
+                Default: |-
+                  =locReg.rlt_numero
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"]
+                Font: |-
+                  =Font.Arial
+          - regRotIni:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="INÍCIO (DATA E HORA) *"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =true
+                Font: |-
+                  =Font.Arial
+          - regIniData:
+              Control: Classic/DatePicker@2.6.0
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 172
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                IconBackground: |-
+                  =Color.White
+                IconFill: |-
+                  =corTexto
+                DefaultDate: |-
+                  =locIni
+                Format: |-
+                  ="dd/mm/yyyy"
+                Font: |-
+                  =Font.Arial
+          - regIniH:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =18 + ((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 164
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =78
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Items: |-
+                  =tabHoras
+                Default: |-
+                  =Text(Hour(locIni), "00")
+                Font: |-
+                  =Font.Arial
+          - regIniM:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =18 + ((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 80
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =80
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !locReg.rlt_herdado, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Items: |-
+                  =tabMinutos
+                Default: |-
+                  =Text(Minute(locIni), "00")
+                Font: |-
+                  =Font.Arial
+          - regNI:
+              Control: Classic/CheckBox@2.1.0
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 68
+                Width: |-
+                  =300
+                Height: |-
+                  =30
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && IsBlank(locFim), DisplayMode.Edit, DisplayMode.Disabled)
+                CheckboxBorderColor: |-
+                  =RGBA(91, 104, 118, 1)
+                CheckboxSize: |-
+                  =20
+                CheckmarkFill: |-
+                  =Color.White
+                CheckboxBackgroundFill: |-
+                  =Color.White
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Reset: |-
+                  =locResetar
+                Text: |-
+                  ="N/I – não informado"
+                Default: |-
+                  =locNI
+                OnCheck: |-
+                  =UpdateContext({locNI: true})
+                OnUncheck: |-
+                  =UpdateContext({locNI: false})
+                Font: |-
+                  =Font.Arial
+          - regRotFim:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="HORA DE CONCLUSÃO"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =true
+                Font: |-
+                  =Font.Arial
+          - regFimData:
+              Control: Classic/DatePicker@2.6.0
+              Properties:
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 340
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar || locResetFim
+                IconBackground: |-
+                  =Color.White
+                IconFill: |-
+                  =corTexto
+                DefaultDate: |-
+                  =locFim
+                Format: |-
+                  ="dd/mm/yyyy"
+                OnChange: |-
+                  =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
+                Font: |-
+                  =Font.Arial
+          - regFimH:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12) + ((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 332
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =78
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar || locResetFim
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Items: |-
+                  =tabHoras
+                Default: |-
+                  =If(IsBlank(locFim), "", Text(Hour(locFim), "00"))
+                AllowEmptySelection: |-
+                  =true
+                OnChange: |-
+                  =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
+                Font: |-
+                  =Font.Arial
+          - regFimM:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12) + ((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 248
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =78
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar || locResetFim
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Items: |-
+                  =tabMinutos
+                Default: |-
+                  =If(IsBlank(locFim), "", Text(Minute(locFim), "00"))
+                AllowEmptySelection: |-
+                  =true
+                OnChange: |-
+                  =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
+                Font: |-
+                  =Font.Arial
+          - regAgora:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="Agora"
+                OnSelect: |-
+                  =UpdateContext({locFim: Now(), locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"})
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12) + ((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 162
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =76
+                Height: |-
+                  =40
+                Size: |-
+                  =10
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul10
+                HoverColor: |-
+                  =corAzul
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                Font: |-
+                  =Font.Arial
+          - regLimpar:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="Limpar"
+                OnSelect: |-
+                  =UpdateContext({locFim: Blank(), locStatus: If(locStatus = "CONCLUÍDO", "EM ANDAMENTO", locStatus), locStatusIos: If(locStatusIos = "Concluído", "Em andamento", locStatusIos)});
+                  UpdateContext({locResetFim: true});
+                  UpdateContext({locResetFim: false})
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12) + ((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 78
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 22
+                Width: |-
+                  =78
+                Height: |-
+                  =40
+                Size: |-
+                  =10
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul10
+                HoverColor: |-
+                  =corAzul
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                Font: |-
+                  =Font.Arial
+          - regAjudaFim:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(IsBlank(locFim), "Preencha quando o chamado for concluído. O status muda sozinho.", "")
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 68
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =20
+                Visible: |-
+                  =true
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regRotStatus:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", "STATUS DO IOS *", "STATUS *")
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =true
+                Font: |-
+                  =Font.Arial
+          - regStatus:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !regFalso.Value && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Default: |-
+                  =locStatus
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios"
+                Items: |-
+                  =Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")
+                OnChange: |-
+                  =UpdateContext({locStatus: Self.Selected.Value})
+                Font: |-
+                  =Font.Arial
+          - regStatusIos:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                Default: |-
+                  =locStatusIos
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios"
+                Items: |-
+                  =Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !IsBlank(locFim) || Value <> "Concluído")
+                OnChange: |-
+                  =UpdateContext({locStatusIos: Self.Selected.Value})
+                Font: |-
+                  =Font.Arial
+          - regAjudaStatus:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", !IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =18
+                Y: |-
+                  =((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 66
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =20
+                Visible: |-
+                  =true
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regRotMotivo:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="MOTIVO DO CANCELAMENTO *"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =(18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
+                Font: |-
+                  =Font.Arial
+          - regMotivo:
+              Control: Classic/TextInput@2.3.2
+              Properties:
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 22
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                PaddingLeft: |-
+                  =12
+                Default: |-
+                  =locReg.rlt_motivocancelamento
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
+                Font: |-
+                  =Font.Arial
+          - regAjudaMotivo:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Obrigatório para IOS cancelado (RN-014)."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 66
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regLimpeza:
+              Control: Classic/CheckBox@2.1.0
+              Properties:
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 24
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =36
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                CheckboxBorderColor: |-
+                  =RGBA(91, 104, 118, 1)
+                CheckboxSize: |-
+                  =20
+                CheckmarkFill: |-
+                  =Color.White
+                CheckboxBackgroundFill: |-
+                  =Color.White
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Reset: |-
+                  =locResetar
+                Text: |-
+                  ="Limpeza técnica (fora de preventiva x corretiva)"
+                Default: |-
+                  =Coalesce(locReg.rlt_limpezatecnica, false)
+                Visible: |-
+                  =locSecao = [@'Seção'].Outros
+                Font: |-
+                  =Font.Arial
+          - regFalso:
+              Control: Classic/CheckBox@2.1.0
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96
+                Width: |-
+                  =300
+                Height: |-
+                  =30
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                CheckboxBorderColor: |-
+                  =RGBA(91, 104, 118, 1)
+                CheckboxSize: |-
+                  =20
+                CheckmarkFill: |-
+                  =Color.White
+                CheckboxBackgroundFill: |-
+                  =Color.White
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =11
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Reset: |-
+                  =locResetar
+                Text: |-
+                  ="Chamado falso"
+                Default: |-
+                  =locFalso
+                OnCheck: |-
+                  =UpdateContext({locFalso: true})
+                OnUncheck: |-
+                  =UpdateContext({locFalso: false})
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"]
+                Font: |-
+                  =Font.Arial
+          - regAjudaFalso:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Status CHAMADO FALSO: conta como encerrado, não vira pendência e fica fora de preventiva x corretiva (RN-011" & If(LookUp(tabSecoes, Valor = locSecao).Tipo = "fq", ").", "; nesta seção, conforme a proposta do PRD 1.2).")
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =18 + 30
+                Y: |-
+                  =(((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + 28
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 36) - 30
+                Height: |-
+                  =20
+                Visible: |-
+                  =LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"]
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regRotFotos:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="FOTOS E ARQUIVOS  (opcional)"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =(((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)
+                Width: |-
+                  =400
+                Height: |-
+                  =20
+                Font: |-
+                  =Font.Arial
+          - regGalAnexos:
+              Control: Gallery@2.15.0
+              Variant: Vertical
+              Properties:
+                Items: |-
+                  =Filter(Anexos, rlt_registro.rlt_registroid = locId)
+                TemplateSize: |-
+                  =46
+                TemplatePadding: |-
+                  =0
+                ShowScrollbar: |-
+                  =false
+                X: |-
+                  =18
+                Y: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 24
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 36)
+                Height: |-
+                  =If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46
+                Visible: |-
+                  =If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0
+              Children:
+                - regAnxFundo:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        =""
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =0
+                      Y: |-
+                        =3
+                      Width: |-
+                        =Parent.TemplateWidth
+                      Height: |-
+                        =40
+                      Fill: |-
+                        =Color.White
+                      DisabledFill: |-
+                        =Color.White
+                      BorderColor: |-
+                        =corLinha
+                      DisabledBorderColor: |-
+                        =corLinha
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =8
+                      RadiusTopRight: |-
+                        =8
+                      RadiusBottomLeft: |-
+                        =8
+                      RadiusBottomRight: |-
+                        =8
+                      Font: |-
+                        =Font.Arial
+                - regAnxIcone:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =If(Lower(Coalesce(ThisItem.rlt_tipo, "")) in ["jpg", "jpeg", "png", "gif", "bmp", "webp", "heic"], "▣", "▤")
+                      Color: |-
+                        =corAzul
+                      Size: |-
+                        =14
+                      Align: |-
+                        =Align.Center
+                      X: |-
+                        =8
+                      Y: |-
+                        =3
+                      Width: |-
+                        =30
+                      Height: |-
+                        =40
+                      Font: |-
+                        =Font.Arial
+                - regAnxNome:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =ThisItem.rlt_nome & If(IsBlank(ThisItem.rlt_tamanho), "", "   ·   " & Round(ThisItem.rlt_tamanho / 1024, 0) & " KB")
+                      Color: |-
+                        =corTexto
+                      Size: |-
+                        =10
+                      X: |-
+                        =42
+                      Y: |-
+                        =3
+                      Width: |-
+                        =Parent.TemplateWidth - 240
+                      Height: |-
+                        =40
+                      Font: |-
+                        =Font.Arial
+                - regAnxAbrir:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        ="Abrir"
+                      Color: |-
+                        =corAzul
+                      Underline: |-
+                        =true
+                      Size: |-
+                        =10
+                      Align: |-
+                        =Align.Right
+                      X: |-
+                        =Parent.TemplateWidth - 190
+                      Y: |-
+                        =3
+                      Width: |-
+                        =80
+                      Height: |-
+                        =40
+                      OnSelect: |-
+                        =Download(ThisItem.rlt_arquivo.Value)
+                      Font: |-
+                        =Font.Arial
+                - regAnxExcluir:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        ="Excluir"
+                      Color: |-
+                        =RGBA(138, 0, 33, 1)
+                      Underline: |-
+                        =true
+                      Size: |-
+                        =10
+                      Align: |-
+                        =Align.Right
+                      Visible: |-
+                        =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                      X: |-
+                        =Parent.TemplateWidth - 100
+                      Y: |-
+                        =3
+                      Width: |-
+                        =86
+                      Height: |-
+                        =40
+                      OnSelect: |-
+                        =Remove(Anexos, LookUp(Anexos, rlt_anexoid = ThisItem.rlt_anexoid));
+                        Patch(Histórico, Defaults(Histórico), {rlt_campo: "Anexo excluído: " & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: locReg});
+                        Notify("Anexo excluído.", NotificationType.Success)
+                      Font: |-
+                        =Font.Arial
+          - regAnexar:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =If(IsBlank(locId), "＋  Salvar e anexar foto ou arquivo", "＋  Anexar foto ou arquivo")
+                OnSelect: |-
+                  =If(IsBlank(locId), UpdateContext({locFicar: true}); With({vIni: DateTime(Year(regIniData.SelectedDate), Month(regIniData.SelectedDate), Day(regIniData.SelectedDate), Value(regIniH.Selected.Value), Value(regIniM.Selected.Value), 0), vFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0)), vTipo: LookUp(tabSecoes, Valor = locSecao).Tipo},
+                    UpdateContext({locErro: Concat(Filter(Table(
+                      {m: If(vTipo in ["corretiva", "ios"] && IsBlank(Trim(regDesc.Text)), "Informe a descrição.", "")},
+                      {m: If(vTipo = "corretiva" && IsBlank(regLocal.Selected), "Escolha o local.", "")},
+                      {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
+                      {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
+                      {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
+                      {m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
+                      {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},
+                      {m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}
+                    ), !IsBlank(m)), m, "  ")});
+                    If(IsBlank(locErro),
+                      Set(gblSalvo, Patch(Registros, If(IsBlank(locId), Defaults(Registros), locReg), {
+                        rlt_titulo: Left(Coalesce(If(vTipo in ["fq", "prev"], Coalesce(regEquip.Selected.rlt_nome, regEquipLivre.Text), regDesc.Text), "(sem descrição)"), 200),
+                        rlt_secao: locSecao,
+                        rlt_relatorio: If(IsBlank(locId), gblRel, locReg.rlt_relatorio),
+                        rlt_descricao: regDesc.Text,
+                        rlt_local: If(vTipo = "corretiva", regLocal.Selected, Blank()),
+                        rlt_equipamento: If(vTipo in ["fq", "prev"] && !regForaLista.Value, regEquip.Selected, Blank()),
+                        rlt_equipamentolivre: If(regForaLista.Value, regEquipLivre.Text, ""),
+                        rlt_numero: regNum.Text,
+                        rlt_inicio: vIni,
+                        rlt_conclusao: vFim,
+                        rlt_ni: regNI.Value && IsBlank(vFim),
+                        rlt_chamadofalso: regFalso.Value,
+                        rlt_limpezatecnica: regLimpeza.Value,
+                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, [@'Status da atividade'].'EM ANDAMENTO')),
+                        rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
+                        rlt_motivocancelamento: regMotivo.Text
+                      }));
+                      If(IsBlank(locId),
+                        Patch(Histórico, Defaults(Histórico), {rlt_campo: "Registro criado", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}),
+                        ForAll(Filter(Table(
+                            {c: "Descrição", m: Coalesce(locReg.rlt_descricao, "") <> regDesc.Text},
+                            {c: "Local", m: locReg.rlt_local.rlt_localid <> regLocal.Selected.rlt_localid},
+                            {c: "Equipamento", m: locReg.rlt_equipamento.rlt_equipamentoid <> gblSalvo.rlt_equipamento.rlt_equipamentoid || Coalesce(locReg.rlt_equipamentolivre, "") <> Coalesce(gblSalvo.rlt_equipamentolivre, "")},
+                            {c: "Número", m: Coalesce(locReg.rlt_numero, "") <> regNum.Text},
+                            {c: "Início", m: locReg.rlt_inicio <> vIni},
+                            {c: "Hora de conclusão", m: locReg.rlt_conclusao <> vFim},
+                            {c: "N/I", m: locReg.rlt_ni <> gblSalvo.rlt_ni},
+                            {c: "Status", m: locReg.rlt_status <> gblSalvo.rlt_status || locReg.rlt_statusios <> gblSalvo.rlt_statusios},
+                            {c: "Chamado falso", m: locReg.rlt_chamadofalso <> regFalso.Value},
+                            {c: "Limpeza técnica", m: locReg.rlt_limpezatecnica <> regLimpeza.Value},
+                            {c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text}
+                          ), m),
+                          Patch(Histórico, Defaults(Histórico), {rlt_campo: c, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}))
+                      );
+                      Notify(If(vTipo = "fq" && IsBlank(gblSalvo.rlt_equipamento), "Salvo sem código SAP: aparece no Painel Geral de informações.", "Registro salvo."), NotificationType.Success);
+                      If(locFicar,
+                        UpdateContext({locId: gblSalvo.rlt_registroid});
+                        UpdateContext({locReg: gblSalvo});
+                        UpdateContext({locFicar: false});
+                        UpdateContext({locAnexar: true}),
+                        Back())
+                    )
+                  ), UpdateContext({locAnexar: true}))
+                X: |-
+                  =18
+                Y: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0)
+                Width: |-
+                  =If(IsBlank(locId), 280, 220)
+                Height: |-
+                  =40
+                Size: |-
+                  =10
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul10
+                HoverColor: |-
+                  =corAzul
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                Font: |-
+                  =Font.Arial
+          - regAjudaFotos:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Fotos aparecem no PDF, no fim do relatório. Outros arquivos ficam guardados com o chamado e são listados no PDF."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =18
+                Y: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 46
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 36)
+                Height: |-
+                  =20
+                Visible: |-
+                  =true
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
+          - regErro:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =locErro
+                Visible: |-
+                  =!IsBlank(locErro)
+                Color: |-
+                  =RGBA(138, 0, 33, 1)
+                Fill: |-
+                  =corVerm20
+                Size: |-
+                  =10
+                FontWeight: |-
+                  =FontWeight.Semibold
+                PaddingLeft: |-
+                  =12
+                X: |-
+                  =0
+                Y: |-
+                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 380
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - regCancelar:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, "Cancelar", "Voltar")
+                OnSelect: |-
+                  =Back()
+                X: |-
+                  =Parent.TemplateWidth - 14 - 190 - 108
+                Y: |-
+                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
+                Width: |-
+                  =100
+                Height: |-
+                  =44
+                Size: |-
+                  =12
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul10
+                HoverColor: |-
+                  =corAzul
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Font: |-
+                  =Font.Arial
+          - regSalvar:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="Salvar"
+                OnSelect: |-
+                  =UpdateContext({locFicar: false});
+                  With({vIni: DateTime(Year(regIniData.SelectedDate), Month(regIniData.SelectedDate), Day(regIniData.SelectedDate), Value(regIniH.Selected.Value), Value(regIniM.Selected.Value), 0), vFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0)), vTipo: LookUp(tabSecoes, Valor = locSecao).Tipo},
+                    UpdateContext({locErro: Concat(Filter(Table(
+                      {m: If(vTipo in ["corretiva", "ios"] && IsBlank(Trim(regDesc.Text)), "Informe a descrição.", "")},
+                      {m: If(vTipo = "corretiva" && IsBlank(regLocal.Selected), "Escolha o local.", "")},
+                      {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
+                      {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
+                      {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
+                      {m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
+                      {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},
+                      {m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}
+                    ), !IsBlank(m)), m, "  ")});
+                    If(IsBlank(locErro),
+                      Set(gblSalvo, Patch(Registros, If(IsBlank(locId), Defaults(Registros), locReg), {
+                        rlt_titulo: Left(Coalesce(If(vTipo in ["fq", "prev"], Coalesce(regEquip.Selected.rlt_nome, regEquipLivre.Text), regDesc.Text), "(sem descrição)"), 200),
+                        rlt_secao: locSecao,
+                        rlt_relatorio: If(IsBlank(locId), gblRel, locReg.rlt_relatorio),
+                        rlt_descricao: regDesc.Text,
+                        rlt_local: If(vTipo = "corretiva", regLocal.Selected, Blank()),
+                        rlt_equipamento: If(vTipo in ["fq", "prev"] && !regForaLista.Value, regEquip.Selected, Blank()),
+                        rlt_equipamentolivre: If(regForaLista.Value, regEquipLivre.Text, ""),
+                        rlt_numero: regNum.Text,
+                        rlt_inicio: vIni,
+                        rlt_conclusao: vFim,
+                        rlt_ni: regNI.Value && IsBlank(vFim),
+                        rlt_chamadofalso: regFalso.Value,
+                        rlt_limpezatecnica: regLimpeza.Value,
+                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, [@'Status da atividade'].'EM ANDAMENTO')),
+                        rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
+                        rlt_motivocancelamento: regMotivo.Text
+                      }));
+                      If(IsBlank(locId),
+                        Patch(Histórico, Defaults(Histórico), {rlt_campo: "Registro criado", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}),
+                        ForAll(Filter(Table(
+                            {c: "Descrição", m: Coalesce(locReg.rlt_descricao, "") <> regDesc.Text},
+                            {c: "Local", m: locReg.rlt_local.rlt_localid <> regLocal.Selected.rlt_localid},
+                            {c: "Equipamento", m: locReg.rlt_equipamento.rlt_equipamentoid <> gblSalvo.rlt_equipamento.rlt_equipamentoid || Coalesce(locReg.rlt_equipamentolivre, "") <> Coalesce(gblSalvo.rlt_equipamentolivre, "")},
+                            {c: "Número", m: Coalesce(locReg.rlt_numero, "") <> regNum.Text},
+                            {c: "Início", m: locReg.rlt_inicio <> vIni},
+                            {c: "Hora de conclusão", m: locReg.rlt_conclusao <> vFim},
+                            {c: "N/I", m: locReg.rlt_ni <> gblSalvo.rlt_ni},
+                            {c: "Status", m: locReg.rlt_status <> gblSalvo.rlt_status || locReg.rlt_statusios <> gblSalvo.rlt_statusios},
+                            {c: "Chamado falso", m: locReg.rlt_chamadofalso <> regFalso.Value},
+                            {c: "Limpeza técnica", m: locReg.rlt_limpezatecnica <> regLimpeza.Value},
+                            {c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text}
+                          ), m),
+                          Patch(Histórico, Defaults(Histórico), {rlt_campo: c, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}))
+                      );
+                      Notify(If(vTipo = "fq" && IsBlank(gblSalvo.rlt_equipamento), "Salvo sem código SAP: aparece no Painel Geral de informações.", "Registro salvo."), NotificationType.Success);
+                      If(locFicar,
+                        UpdateContext({locId: gblSalvo.rlt_registroid});
+                        UpdateContext({locReg: gblSalvo});
+                        UpdateContext({locFicar: false});
+                        UpdateContext({locAnexar: true}),
+                        Back())
+                    )
+                  )
+                X: |-
+                  =Parent.TemplateWidth - 14 - 190
+                Y: |-
+                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
+                Width: |-
+                  =190
+                Height: |-
+                  =44
+                Size: |-
+                  =12
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =corAzul
+                Color: |-
+                  =Color.White
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul80
+                HoverColor: |-
+                  =Color.White
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                Font: |-
+                  =Font.Arial
+          - regEspaco:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =Color.Transparent
+                X: |-
+                  =0
+                Y: |-
+                  =((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16) + 44
+                Width: |-
+                  =10
+                Height: |-
+                  =24
+    - regJanFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =RGBA(0, 0, 0, 0.45)
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =Parent.Height
+          Visible: |-
+            =locAnexar
+    - regJanCartao:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, "Cancelar", "Voltar")
-          OnSelect: |-
-            =Back()
+            =""
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
           X: |-
-            =Parent.Width - 360
+            =(Parent.Width - 560) / 2
           Y: |-
-            =Parent.Height - 58
+            =(Parent.Height - 330) / 2
           Width: |-
-            =160
+            =560
           Height: |-
-            =44
-          Size: |-
-            =12
-          FontWeight: |-
-            =FontWeight.Semibold
+            =330
           Fill: |-
             =Color.White
-          Color: |-
-            =corAzul
+          DisabledFill: |-
+            =Color.White
           BorderColor: |-
-            =corAzul
+            =corLinha
+          DisabledBorderColor: |-
+            =corLinha
           BorderThickness: |-
             =1
-          HoverFill: |-
-            =corAzul10
-          HoverColor: |-
-            =corAzul
           RadiusTopLeft: |-
-            =8
+            =12
           RadiusTopRight: |-
-            =8
+            =12
           RadiusBottomLeft: |-
-            =8
+            =12
           RadiusBottomRight: |-
-            =8
-    - regSalvar:
+            =12
+          Visible: |-
+            =locAnexar
+          Font: |-
+            =Font.Arial
+    - regJanAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =(Parent.Width - 560) / 2 + 24
+          Y: |-
+            =(Parent.Height - 330) / 2 + 20
+          Width: |-
+            =36
+          Height: |-
+            =4
+          Visible: |-
+            =locAnexar
+    - regJanTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="ANEXAR FOTO OU ARQUIVO"
+          Color: |-
+            =corAzul
+          Size: |-
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =(Parent.Width - 560) / 2 + 24
+          Y: |-
+            =(Parent.Height - 330) / 2 + 28
+          Width: |-
+            =560 - 48
+          Height: |-
+            =30
+          Visible: |-
+            =locAnexar
+    - regJanSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =Coalesce(locReg.rlt_titulo, "")
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          X: |-
+            =(Parent.Width - 560) / 2 + 24
+          Y: |-
+            =(Parent.Height - 330) / 2 + 58
+          Width: |-
+            =560 - 48
+          Height: |-
+            =22
+          Visible: |-
+            =locAnexar
+          Font: |-
+            =Font.Arial
+    - frmAnexo:
+        Control: Form@2.4.4
+        Variant: Classic
+        Layout: Vertical
+        Properties:
+          DataSource: |-
+            =Anexos
+          DefaultMode: |-
+            =FormMode.New
+          BorderColor: |-
+            =Color.Transparent
+          Visible: |-
+            =locAnexar
+          X: |-
+            =(Parent.Width - 560) / 2 + 24
+          Y: |-
+            =(Parent.Height - 330) / 2 + 88
+          Width: |-
+            =560 - 48
+          Height: |-
+            =170
+          OnSuccess: |-
+            =Patch(Anexos, LookUp(Anexos, rlt_anexoid = frmAnexo.LastSubmit.rlt_anexoid), {rlt_registro: locReg});
+            Patch(Histórico, Defaults(Histórico), {rlt_campo: "Anexo incluído: " & frmAnexo.LastSubmit.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: locReg});
+            UpdateContext({locAnexar: false});
+            ResetForm(frmAnexo);
+            Notify("Anexo salvo.", NotificationType.Success)
+          OnFailure: |-
+            =Notify("Não foi possível salvar o anexo: " & frmAnexo.Error, NotificationType.Error)
+        Children:
+          - anxArquivoCard:
+              Control: TypedDataCard@1.0.8
+              Variant: ClassicFileEdit
+              IsLocked: true
+              Properties:
+                DataField: |-
+                  ="rlt_arquivo"
+                Default: |-
+                  =If(!IsBlank(ThisItem.Arquivo.FileName), Table({DisplayName: ThisItem.Arquivo.FileName, Value: ThisItem.Arquivo.Value}), Blank())
+                DisplayName: |-
+                  ="FOTO OU ARQUIVO"
+                Required: |-
+                  =false
+                Update: |-
+                  =anxArquivo.Attachments
+                Width: |-
+                  =500
+                X: |-
+                  =0
+                Y: |-
+                  =0
+              Children:
+                - anxChave1:
+                    Control: Label@2.5.1
+                    MetadataKey: FieldName
+                    Properties:
+                      AutoHeight: |-
+                        =true
+                      Color: |-
+                        =corMuted
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Height: |-
+                        =24
+                      Text: |-
+                        =Parent.DisplayName
+                      Width: |-
+                        =Parent.Width - 30
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =0
+                      Y: |-
+                        =4
+                      Font: |-
+                        =Font.Arial
+                - anxArquivo:
+                    Control: Attachments@2.3.0
+                    MetadataKey: FieldValue
+                    Properties:
+                      AddAttachmentText: |-
+                        ="＋  Escolher foto ou arquivo"
+                      NoAttachmentsText: |-
+                        ="Nenhum arquivo escolhido."
+                      MaxAttachments: |-
+                        =1
+                      MaxAttachmentsText: |-
+                        =""
+                      BorderColor: |-
+                        =If(IsBlank(Parent.Error), RGBA(197, 206, 215, 1), corVerm)
+                      DisplayMode: |-
+                        =Parent.DisplayMode
+                      Font: |-
+                        =Font.Arial
+                      Size: |-
+                        =11
+                      Color: |-
+                        =corAzul
+                      Fill: |-
+                        =Color.White
+                      HoverFill: |-
+                        =corAzul10
+                      ItemColor: |-
+                        =Color.White
+                      ItemFill: |-
+                        =corAzul
+                      ItemHoverFill: |-
+                        =corAzul80
+                      PressedColor: |-
+                        =Color.White
+                      PressedFill: |-
+                        =corAzul
+                      Items: |-
+                        =Parent.Default
+                      Height: |-
+                        =96
+                      PaddingBottom: |-
+                        =6
+                      PaddingLeft: |-
+                        =8
+                      PaddingRight: |-
+                        =8
+                      PaddingTop: |-
+                        =6
+                      Tooltip: |-
+                        =Parent.DisplayName
+                      Width: |-
+                        =Parent.Width
+                      X: |-
+                        =0
+                      Y: |-
+                        =anxChave1.Y + anxChave1.Height + 4
+                - anxErro1:
+                    Control: Label@2.5.1
+                    MetadataKey: ErrorMessage
+                    Properties:
+                      AutoHeight: |-
+                        =true
+                      Color: |-
+                        =RGBA(138, 0, 33, 1)
+                      Size: |-
+                        =10
+                      FontWeight: |-
+                        =FontWeight.Semibold
+                      Height: |-
+                        =10
+                      Live: |-
+                        =Live.Assertive
+                      PaddingBottom: |-
+                        =0
+                      PaddingLeft: |-
+                        =0
+                      PaddingRight: |-
+                        =0
+                      PaddingTop: |-
+                        =0
+                      Text: |-
+                        =Parent.Error
+                      Visible: |-
+                        =Parent.DisplayMode = DisplayMode.Edit
+                      Width: |-
+                        =Parent.Width
+                      X: |-
+                        =0
+                      Y: |-
+                        =anxArquivo.Y + anxArquivo.Height
+                      Font: |-
+                        =Font.Arial
+                - anxObrig1:
+                    Control: Label@2.5.1
+                    MetadataKey: FieldRequired
+                    Properties:
+                      Align: |-
+                        =Align.Center
+                      Color: |-
+                        =corVerm
+                      Height: |-
+                        =anxChave1.Height
+                      Text: |-
+                        ="*"
+                      Visible: |-
+                        =false
+                      Width: |-
+                        =20
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =Parent.Width - 24
+                      Y: |-
+                        =anxChave1.Y
+                      Font: |-
+                        =Font.Arial
+          - anxNomeCard:
+              Control: TypedDataCard@1.0.8
+              Variant: ClassicTextualEdit
+              IsLocked: true
+              Properties:
+                DataField: |-
+                  ="rlt_nome"
+                Default: |-
+                  =ThisItem.rlt_nome
+                DisplayName: |-
+                  ="Nome"
+                MaxLength: |-
+                  =DataSourceInfo([@Anexos], DataSourceInfo.MaxLength, rlt_nome)
+                Required: |-
+                  =false
+                Update: |-
+                  =If(IsEmpty(anxArquivo.Attachments), "", First(anxArquivo.Attachments).Name)
+                Visible: |-
+                  =false
+                Width: |-
+                  =500
+                X: |-
+                  =0
+                Y: |-
+                  =1
+              Children:
+                - anxChave2:
+                    Control: Label@2.5.1
+                    MetadataKey: FieldName
+                    Properties:
+                      AutoHeight: |-
+                        =true
+                      Color: |-
+                        =corMuted
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Height: |-
+                        =24
+                      Text: |-
+                        =Parent.DisplayName
+                      Width: |-
+                        =Parent.Width - 30
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =0
+                      Y: |-
+                        =4
+                      Font: |-
+                        =Font.Arial
+                - anxValor2:
+                    Control: Classic/TextInput@2.3.2
+                    MetadataKey: FieldValue
+                    Properties:
+                      Default: |-
+                        =Parent.Default
+                      DelayOutput: |-
+                        =true
+                      DisplayMode: |-
+                        =Parent.DisplayMode
+                      MaxLength: |-
+                        =Parent.MaxLength
+                      Width: |-
+                        =Parent.Width
+                      X: |-
+                        =0
+                      Y: |-
+                        =anxChave2.Y + anxChave2.Height + 4
+                      Font: |-
+                        =Font.Arial
+                - anxErro2:
+                    Control: Label@2.5.1
+                    MetadataKey: ErrorMessage
+                    Properties:
+                      AutoHeight: |-
+                        =true
+                      Color: |-
+                        =RGBA(138, 0, 33, 1)
+                      Size: |-
+                        =10
+                      FontWeight: |-
+                        =FontWeight.Semibold
+                      Height: |-
+                        =10
+                      Live: |-
+                        =Live.Assertive
+                      PaddingBottom: |-
+                        =0
+                      PaddingLeft: |-
+                        =0
+                      PaddingRight: |-
+                        =0
+                      PaddingTop: |-
+                        =0
+                      Text: |-
+                        =Parent.Error
+                      Visible: |-
+                        =Parent.DisplayMode = DisplayMode.Edit
+                      Width: |-
+                        =Parent.Width
+                      X: |-
+                        =0
+                      Y: |-
+                        =anxValor2.Y + anxValor2.Height
+                      Font: |-
+                        =Font.Arial
+                - anxObrig2:
+                    Control: Label@2.5.1
+                    MetadataKey: FieldRequired
+                    Properties:
+                      Align: |-
+                        =Align.Center
+                      Color: |-
+                        =corVerm
+                      Height: |-
+                        =anxChave2.Height
+                      Text: |-
+                        ="*"
+                      Visible: |-
+                        =false
+                      Width: |-
+                        =20
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =Parent.Width - 24
+                      Y: |-
+                        =anxChave2.Y
+                      Font: |-
+                        =Font.Arial
+          - anxTipoCard:
+              Control: TypedDataCard@1.0.8
+              Variant: ClassicTextualEdit
+              IsLocked: true
+              Properties:
+                DataField: |-
+                  ="rlt_tipo"
+                Default: |-
+                  =ThisItem.rlt_tipo
+                DisplayName: |-
+                  ="Tipo"
+                MaxLength: |-
+                  =DataSourceInfo([@Anexos], DataSourceInfo.MaxLength, rlt_tipo)
+                Required: |-
+                  =false
+                Update: |-
+                  =If(IsEmpty(anxArquivo.Attachments), "", Lower(Last(Split(First(anxArquivo.Attachments).Name, ".")).Value))
+                Visible: |-
+                  =false
+                Width: |-
+                  =500
+                X: |-
+                  =0
+                Y: |-
+                  =2
+              Children:
+                - anxChave3:
+                    Control: Label@2.5.1
+                    MetadataKey: FieldName
+                    Properties:
+                      AutoHeight: |-
+                        =true
+                      Color: |-
+                        =corMuted
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Height: |-
+                        =24
+                      Text: |-
+                        =Parent.DisplayName
+                      Width: |-
+                        =Parent.Width - 30
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =0
+                      Y: |-
+                        =4
+                      Font: |-
+                        =Font.Arial
+                - anxValor3:
+                    Control: Classic/TextInput@2.3.2
+                    MetadataKey: FieldValue
+                    Properties:
+                      Default: |-
+                        =Parent.Default
+                      DelayOutput: |-
+                        =true
+                      DisplayMode: |-
+                        =Parent.DisplayMode
+                      MaxLength: |-
+                        =Parent.MaxLength
+                      Width: |-
+                        =Parent.Width
+                      X: |-
+                        =0
+                      Y: |-
+                        =anxChave3.Y + anxChave3.Height + 4
+                      Font: |-
+                        =Font.Arial
+                - anxErro3:
+                    Control: Label@2.5.1
+                    MetadataKey: ErrorMessage
+                    Properties:
+                      AutoHeight: |-
+                        =true
+                      Color: |-
+                        =RGBA(138, 0, 33, 1)
+                      Size: |-
+                        =10
+                      FontWeight: |-
+                        =FontWeight.Semibold
+                      Height: |-
+                        =10
+                      Live: |-
+                        =Live.Assertive
+                      PaddingBottom: |-
+                        =0
+                      PaddingLeft: |-
+                        =0
+                      PaddingRight: |-
+                        =0
+                      PaddingTop: |-
+                        =0
+                      Text: |-
+                        =Parent.Error
+                      Visible: |-
+                        =Parent.DisplayMode = DisplayMode.Edit
+                      Width: |-
+                        =Parent.Width
+                      X: |-
+                        =0
+                      Y: |-
+                        =anxValor3.Y + anxValor3.Height
+                      Font: |-
+                        =Font.Arial
+                - anxObrig3:
+                    Control: Label@2.5.1
+                    MetadataKey: FieldRequired
+                    Properties:
+                      Align: |-
+                        =Align.Center
+                      Color: |-
+                        =corVerm
+                      Height: |-
+                        =anxChave3.Height
+                      Text: |-
+                        ="*"
+                      Visible: |-
+                        =false
+                      Width: |-
+                        =20
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =Parent.Width - 24
+                      Y: |-
+                        =anxChave3.Y
+                      Font: |-
+                        =Font.Arial
+    - regJanSalvar:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Salvar"
+            ="Salvar anexo"
           OnSelect: |-
-            =With({vIni: DateTime(Year(regIniData.SelectedDate), Month(regIniData.SelectedDate), Day(regIniData.SelectedDate), Value(regIniH.Selected.Value), Value(regIniM.Selected.Value), 0), vFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0)), vTipo: LookUp(tabSecoes, Valor = locSecao).Tipo},
-              UpdateContext({locErro: Concat(Filter(Table(
-                {m: If(vTipo in ["corretiva", "ios"] && IsBlank(Trim(regDesc.Text)), "Informe a descrição.", "")},
-                {m: If(vTipo = "corretiva" && IsBlank(regLocal.Selected), "Escolha o local.", "")},
-                {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
-                {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
-                {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
-                {m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
-                {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},
-                {m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}
-              ), !IsBlank(m)), m, "  ")});
-              If(IsBlank(locErro),
-                Set(gblSalvo, Patch(Registros, If(IsBlank(locId), Defaults(Registros), locReg), {
-                  rlt_titulo: Left(Coalesce(If(vTipo in ["fq", "prev"], Coalesce(regEquip.Selected.rlt_nome, regEquipLivre.Text), regDesc.Text), "(sem descrição)"), 200),
-                  rlt_secao: locSecao,
-                  rlt_relatorio: If(IsBlank(locId), gblRel, locReg.rlt_relatorio),
-                  rlt_descricao: regDesc.Text,
-                  rlt_local: If(vTipo = "corretiva", regLocal.Selected, Blank()),
-                  rlt_equipamento: If(vTipo in ["fq", "prev"] && !regForaLista.Value, regEquip.Selected, Blank()),
-                  rlt_equipamentolivre: If(regForaLista.Value, regEquipLivre.Text, ""),
-                  rlt_numero: regNum.Text,
-                  rlt_inicio: vIni,
-                  rlt_conclusao: vFim,
-                  rlt_ni: regNI.Value && IsBlank(vFim),
-                  rlt_chamadofalso: regFalso.Value,
-                  rlt_limpezatecnica: regLimpeza.Value,
-                  rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, [@'Status da atividade'].'EM ANDAMENTO')),
-                  rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
-                  rlt_motivocancelamento: regMotivo.Text
-                }));
-                If(IsBlank(locId),
-                  Patch(Histórico, Defaults(Histórico), {rlt_campo: "Registro criado", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}),
-                  ForAll(Filter(Table(
-                      {c: "Descrição", m: Coalesce(locReg.rlt_descricao, "") <> regDesc.Text},
-                      {c: "Local", m: locReg.rlt_local.rlt_localid <> regLocal.Selected.rlt_localid},
-                      {c: "Equipamento", m: locReg.rlt_equipamento.rlt_equipamentoid <> gblSalvo.rlt_equipamento.rlt_equipamentoid || Coalesce(locReg.rlt_equipamentolivre, "") <> Coalesce(gblSalvo.rlt_equipamentolivre, "")},
-                      {c: "Número", m: Coalesce(locReg.rlt_numero, "") <> regNum.Text},
-                      {c: "Início", m: locReg.rlt_inicio <> vIni},
-                      {c: "Hora de conclusão", m: locReg.rlt_conclusao <> vFim},
-                      {c: "N/I", m: locReg.rlt_ni <> gblSalvo.rlt_ni},
-                      {c: "Status", m: locReg.rlt_status <> gblSalvo.rlt_status || locReg.rlt_statusios <> gblSalvo.rlt_statusios},
-                      {c: "Chamado falso", m: locReg.rlt_chamadofalso <> regFalso.Value},
-                      {c: "Limpeza técnica", m: locReg.rlt_limpezatecnica <> regLimpeza.Value},
-                      {c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text}
-                    ), m),
-                    Patch(Histórico, Defaults(Histórico), {rlt_campo: c, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}))
-                );
-                Notify(If(vTipo = "fq" && IsBlank(gblSalvo.rlt_equipamento), "Salvo sem código SAP: aparece no Painel Geral de informações.", "Registro salvo."), NotificationType.Success);
-                Back()
-              )
-            )
+            =If(IsEmpty(anxArquivo.Attachments), Notify("Escolha uma foto ou arquivo.", NotificationType.Warning), SubmitForm(frmAnexo))
           X: |-
-            =Parent.Width - 190
+            =(Parent.Width - 560) / 2 + 560 - 24 - 150
           Y: |-
-            =Parent.Height - 58
+            =(Parent.Height - 330) / 2 + 330 - 64
           Width: |-
-            =170
+            =150
           Height: |-
-            =44
+            =40
           Size: |-
             =12
           FontWeight: |-
@@ -1245,4 +3076,49 @@ Screens:
           RadiusBottomRight: |-
             =8
           Visible: |-
-            =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+            =locAnexar
+          Font: |-
+            =Font.Arial
+    - regJanFechar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Cancelar"
+          OnSelect: |-
+            =UpdateContext({locAnexar: false}); ResetForm(frmAnexo)
+          X: |-
+            =(Parent.Width - 560) / 2 + 560 - 24 - 150 - 8 - 110
+          Y: |-
+            =(Parent.Height - 330) / 2 + 330 - 64
+          Width: |-
+            =110
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =locAnexar
+          Font: |-
+            =Font.Arial
