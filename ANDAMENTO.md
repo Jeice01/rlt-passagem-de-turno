@@ -1,6 +1,6 @@
 # Andamento – RLT Passagem de Turno (CCM)
 
-Situação em 22/11/2026. Piloto previsto para 30/11/2026 (PRD).
+Situação em 25/11/2026. Piloto previsto para 30/11/2026 (PRD).
 
 ## Pronto
 
@@ -11,6 +11,24 @@ Situação em 22/11/2026. Piloto previsto para 30/11/2026 (PRD).
 | Anexos (RF-007): fotos e arquivos no formulário do chamado, janela "Anexar foto ou arquivo", Abrir e Excluir | idem | Publicado e testado |
 | Fluxo "RLT – Fechar e enviar": PDF no layout do protótipo, OneDrive `RLT-CCM/ano/mês`, e-mail da RN-005, resultado na tela Fechar | `ferramentas/fluxos/gerar_fluxo_fechar.py` → `solution/RLT_Fluxos` | Testado com PDF e e-mail |
 | Fluxo: seção "Anexos dos chamados" no PDF e cópia dos anexos no OneDrive (RF-016) | idem | Importado; **falta testar** fechando um relatório com foto |
+
+## Versão 1.4.0.0 (25/11/2026): gerada, falta importar e testar
+
+| Mudança | O que faz |
+|---|---|
+| Status **CANCELADO** nas atividades (corretivas, Fator Q e Preventiva) | Nova opção na escolha "Status da atividade". Conta como encerrado (não passa para o próximo turno). Motivo do cancelamento obrigatório, como no IOS (RN-014 ampliada). Aviso na tela Fechar e motivo impresso no PDF. |
+| **Atualizar listas** (RF-021), tela `scrListas` | Botão no Painel geral só para o perfil **Líder**. Abas Equipamentos, Locais e Pessoas e perfis: busca, Incluir, Alterar, Desativar/Reativar (coluna de sistema Status). Nada é excluído; item desativado some das listas do app. |
+| **Avisos** no fim do Painel geral | Tabela nova `rlt_aviso` (título, texto, publicado em, publicado por). O líder publica, atualiza e exclui (com confirmação); todos leem. Único caso de exclusão no perfil "RLT - Usuário". |
+| Hora de conclusão vazia | Mostrava a data de exemplo 31/12/2001; agora mostra "dd/mm/aaaa". |
+
+Pacotes (fora do Git): `solution/RLT_CCM/out/RLT_CCM_1_4_0_0.zip` e `ferramentas/fluxos/saida/RLT_Fluxos_1_0_1_0.zip`.
+
+**Para colocar no ar (quem usa o portal/Studio):**
+1. Importar `RLT_CCM_1_4_0_0.zip` e depois `RLT_Fluxos_1_0_1_0.zip` (Soluções > Importar).
+2. Abrir o app no Studio > Dados > Adicionar dados > **Avisos** (tabela nova; até isso, o Painel acusa erro em "Avisos").
+3. Corrigir o que o verificador apontar (ver `app/LEIA-ME.md`, passo 5), salvar e publicar.
+4. Para testar como líder: na tabela Pessoa, pôr o perfil **Líder** no cadastro de quem testa.
+5. Exportar a solução e sincronizar `solution/RLT_CCM/src`.
 
 Como montar e importar o app: `app/LEIA-ME.md`. O fluxo é importado pelo portal (Soluções > Importar) a partir do zip gerado em `ferramentas/fluxos/saida/` (fora do Git).
 
@@ -38,7 +56,7 @@ Como montar e importar o app: `app/LEIA-ME.md`. O fluxo é importado pelo portal
 Cartão "Observações do plantão" na tela Relatório (aparece também em Fechar), gravado em `rlt_observacoes` e impresso no PDF depois da equipe.
 
 ### 3. Editar as listas (RF-021)
-"Atualizar listas" no Painel geral abre uma tela com abas Equipamentos, Locais e Pessoas: busca, incluir, alterar e desativar.
+Feito na 1.4.0.0 (ver acima).
 
 ### 4. Outros
 - Tela Abrir plantão no visual novo.

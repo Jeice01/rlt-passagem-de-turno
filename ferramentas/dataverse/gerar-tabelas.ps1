@@ -25,7 +25,7 @@ function Grava($caminho, $texto) { New-Item -ItemType Directory -Force (Split-Pa
 $ESCOLHAS = [ordered]@{
   rlt_turno             = @("Turno", @("ALFA", "BRAVO"))
   rlt_secao             = @("Seção", @("Eletromecânica", "Eletroeletrônica", "BHS", "Civil", "Outros", "Fator Q (Z9)", "Preventiva (ZM02)", "IOS informados"))
-  rlt_statusatividade   = @("Status da atividade", @("PENDENTE", "EM ANDAMENTO", "CONCLUÍDO", "CHAMADO FALSO"))
+  rlt_statusatividade   = @("Status da atividade", @("PENDENTE", "EM ANDAMENTO", "CONCLUÍDO", "CHAMADO FALSO", "CANCELADO"))   # CANCELADO: 25/11/2026
   rlt_statusios         = @("Status do IOS", @("Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"))
   rlt_perfil            = @("Perfil", @("Líder", "Técnico(a)", "Operador(a)", "Gestão"))
   rlt_situacaorelatorio = @("Situação do relatório", @("Aberto", "Fechado"))
@@ -54,6 +54,8 @@ $TABELAS = @(
      cols = @(@("rlt_arquivo", "Arquivo", "arquivo", 10240), @("rlt_tipo", "Tipo do arquivo", "texto", 100), @("rlt_tamanho", "Tamanho (bytes)", "inteiro", $null)) }
   @{ n = "rlt_historico"; s = "Histórico"; p = "Histórico"; d = "Cada alteração: quem, quando e o campo (RN-021)"; dono = "UserOwned"; prim = @("rlt_campo", "Campo alterado", 200)
      cols = @(, @("rlt_quando", "Quando", "datahora", $null)) }   # vírgula: evita que a lista de uma coluna só seja achatada
+  @{ n = "rlt_aviso"; s = "Aviso"; p = "Avisos"; d = "Avisos do Painel geral de informações, publicados pelo líder"; dono = "UserOwned"; prim = @("rlt_titulo", "Título", 200)
+     cols = @(@("rlt_texto", "Texto", "memo", 4000), @("rlt_publicadoem", "Publicado em", "datahora", $null)) }
 )
 # relação: tabela filha, coluna, rótulo, tabela mãe, nome da relação
 $RELACOES = @(
@@ -68,7 +70,8 @@ $RELACOES = @(
   @("rlt_historico", "rlt_relatorio", "Relatório", "rlt_relatorio", "rlt_relatorio_historico"),
   @("rlt_historico", "rlt_registro", "Registro", "rlt_registro", "rlt_registro_historico"),
   @("rlt_historico", "rlt_quem", "Quem", "rlt_pessoa", "rlt_pessoa_historico"),
-  @("rlt_relatorio", "rlt_fechadopor", "Fechado por", "rlt_pessoa", "rlt_pessoa_relatorio_fechadopor")
+  @("rlt_relatorio", "rlt_fechadopor", "Fechado por", "rlt_pessoa", "rlt_pessoa_relatorio_fechadopor"),
+  @("rlt_aviso", "rlt_autor", "Publicado por", "rlt_pessoa", "rlt_pessoa_aviso")
 )
 
 # ================= XML =================

@@ -52,4 +52,5 @@
   <EntityRelationship Name="user_rlt_historico" />
   <EntityRelationship Name="user_rlt_registro" />
   <EntityRelationship Name="user_rlt_relatorio" />
+  <EntityRelationship Name="rlt_pessoa_aviso" />
 </EntityRelationships>

@@ -8,7 +8,7 @@
     <Descriptions>
       <Description description="Fluxos do RLT – Passagem de Turno do CCM (Fechar e enviar: PDF e e-mail)." languagecode="1046" />
     </Descriptions>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.1.0</Version>
     <Managed>0</Managed>
     <Publisher>
       <UniqueName>InframericaRLT</UniqueName>

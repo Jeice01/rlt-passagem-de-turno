@@ -22,6 +22,13 @@ O app é gerado a partir do protótipo validado (`prototipo/index.html`, PRD 1.3
    e cópia do resultado. A pasta `src/CanvasApps` guarda o app como foi publicado no Studio.
    - O `pac` vem com a extensão Power Platform Tools do VS Code: `%APPDATA%\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools\pac.exe`.
 
+## Tabela nova = fonte de dados nova
+
+O `pac canvas pack` não acrescenta fontes de dados. Quando o gerador passa a usar uma tabela nova (ex.: **Avisos**, na 1.4.0.0),
+importe a solução, abra o app no Studio e adicione a tabela em **Dados > Adicionar dados** antes de publicar.
+
+O "ativo/desativado" das listas usa a coluna de sistema **Status** (`statecode`, opções `'Status (Equipamentos)'.Ativo` e `.Inativo`).
+
 ## Coisas que só o Studio confirma
 
 O `pac canvas pack` não valida os controles (aceita até nome inexistente). Quando o formato de um controle não está documentado, ele foi copiado do Studio

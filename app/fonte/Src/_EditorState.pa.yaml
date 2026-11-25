@@ -6,5 +6,6 @@ EditorState:
     - scrRegistro
     - scrHistorico
     - scrPainel
+    - scrListas
     - scrFechar
     - scrAbrir

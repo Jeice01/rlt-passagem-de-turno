@@ -800,7 +800,7 @@ Screens:
                 HoverFill: |-
                   =corAzul10
                 Items: |-
-                  =Sort(Distinct(Locais, rlt_area), Value)
+                  =Sort(Distinct(Filter(Locais, statecode = 'Status (Locais)'.Ativo), rlt_area), Value)
                 Default: |-
                   =locArea
                 Visible: |-
@@ -851,7 +851,7 @@ Screens:
                 HoverFill: |-
                   =corAzul10
                 Items: |-
-                  =Filter(Locais, rlt_area = regArea.Selected.Value)
+                  =Filter(Locais, rlt_area = regArea.Selected.Value && statecode = 'Status (Locais)'.Ativo)
                 DisplayFields: |-
                   =["rlt_nome"]
                 SearchFields: |-
@@ -870,7 +870,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  ="Lista de " & CountIf(Locais, true) & " locais (código SAP), escolhida em dois passos."
+                  ="Lista de " & CountIf(Locais, statecode = 'Status (Locais)'.Ativo) & " locais (código SAP), escolhida em dois passos."
                 Color: |-
                   =corMuted
                 Size: |-
@@ -956,7 +956,7 @@ Screens:
                 HoverFill: |-
                   =corAzul10
                 Items: |-
-                  =Equipamentos
+                  =Filter(Equipamentos, statecode = 'Status (Equipamentos)'.Ativo)
                 DisplayFields: |-
                   =["rlt_nome"]
                 SearchFields: |-
@@ -1426,6 +1426,8 @@ Screens:
                   ="dd/mm/yyyy"
                 OnChange: |-
                   =UpdateContext({locFim: If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), Value(Coalesce(regFimH.Selected.Value, "0")), Value(Coalesce(regFimM.Selected.Value, "0")), 0))}); If(!IsBlank(locFim), UpdateContext({locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"}))
+                InputTextPlaceholder: |-
+                  ="dd/mm/aaaa"
                 Font: |-
                   =Font.Arial
           - regFimH:
@@ -1716,7 +1718,7 @@ Screens:
                 Visible: |-
                   =LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios"
                 Items: |-
-                  =Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")
+                  =Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO", "CANCELADO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")
                 OnChange: |-
                   =UpdateContext({locStatus: Self.Selected.Value})
                 Font: |-
@@ -1778,7 +1780,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", !IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
+                  =If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado" || LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && locStatus = "CANCELADO", "Cancelado: conta como encerrado e não passa para o próximo turno.", !IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
                 Color: |-
                   =corMuted
                 Size: |-
@@ -1817,7 +1819,7 @@ Screens:
                 Height: |-
                   =20
                 Visible: |-
-                  =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
+                  =(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")
                 Font: |-
                   =Font.Arial
           - regMotivo:
@@ -1862,14 +1864,14 @@ Screens:
                 Default: |-
                   =locReg.rlt_motivocancelamento
                 Visible: |-
-                  =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
+                  =(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")
                 Font: |-
                   =Font.Arial
           - regAjudaMotivo:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  ="Obrigatório para IOS cancelado (RN-014)."
+                  =If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", "Obrigatório para IOS cancelado (RN-014).", "Obrigatório para chamado cancelado (RN-014).")
                 Color: |-
                   =corMuted
                 Size: |-
@@ -1883,7 +1885,7 @@ Screens:
                 Height: |-
                   =20
                 Visible: |-
-                  =LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado"
+                  =(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")
                 VerticalAlign: |-
                   =VerticalAlign.Top
                 Font: |-
@@ -1922,7 +1924,7 @@ Screens:
                 Default: |-
                   =Coalesce(locReg.rlt_limpezatecnica, false)
                 Visible: |-
-                  =locSecao = [@'Seção'].Outros
+                  =locSecao = [@'Seção'].Outros && !((LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO"))
                 Font: |-
                   =Font.Arial
           - regFalso:
@@ -2177,7 +2179,7 @@ Screens:
                       {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
                       {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
                       {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
-                      {m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
+                      {m: If(((LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")) && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
                       {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},
                       {m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}
                     ), !IsBlank(m)), m, "  ")});
@@ -2196,7 +2198,7 @@ Screens:
                         rlt_ni: regNI.Value && IsBlank(vFim),
                         rlt_chamadofalso: regFalso.Value,
                         rlt_limpezatecnica: regLimpeza.Value,
-                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, [@'Status da atividade'].'EM ANDAMENTO')),
+                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
                         rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
                         rlt_motivocancelamento: regMotivo.Text
                       }));
@@ -2367,7 +2369,7 @@ Screens:
                       {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
                       {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
                       {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
-                      {m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
+                      {m: If(((LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")) && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
                       {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},
                       {m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}
                     ), !IsBlank(m)), m, "  ")});
@@ -2386,7 +2388,7 @@ Screens:
                         rlt_ni: regNI.Value && IsBlank(vFim),
                         rlt_chamadofalso: regFalso.Value,
                         rlt_limpezatecnica: regLimpeza.Value,
-                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, [@'Status da atividade'].'EM ANDAMENTO')),
+                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
                         rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
                         rlt_motivocancelamento: regMotivo.Text
                       }));

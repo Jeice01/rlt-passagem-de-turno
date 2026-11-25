@@ -82,6 +82,17 @@ REFRESH = ("ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioi
 ORDEM_SEC = (f"Switch(rlt_secao, {SEC}.Eletromecânica, 1, {SEC}.Eletroeletrônica, 2, {SEC}.BHS, 3, {SEC}.Civil, 4, {SEC}.Outros, 5, "
              f"{SEC}.'Fator Q (Z9)', 6, {SEC}.'Preventiva (ZM02)', 7, 8)")
 ABERTO_REL = f"!IsBlank(gblRel) && gblRel.rlt_situacao = {SIT}.Aberto"
+# Só o líder edita as listas e os avisos (RF-021; decisão de 25/11/2026)
+LIDER = "(!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder)"
+
+
+def ativo(tabela, ativo=True):
+    """Condição de item ativo (coluna de sistema Status). Itens das listas não se excluem: o líder desativa."""
+    return f"statecode = 'Status ({tabela})'.{'Ativo' if ativo else 'Inativo'}"
+
+
+def ativos(tabela):
+    return f"Filter({tabela}, {ativo(tabela)})"
 
 
 def hist(campo, registro="Blank()"):
@@ -449,6 +460,9 @@ def tela_registro():
         "UpdateContext({locResetar: true});\n"
         "UpdateContext({locResetar: false});\n"
         "ResetForm(frmAnexo)")
+    # Cancelamento (RN-014, ampliada em 25/11/2026): IOS "Cancelado" ou atividade "CANCELADO"; o motivo é obrigatório nos dois
+    CANCELADO = (f'({tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado") || '
+                 f'({tipo} <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")')
     v_ini = "DateTime(Year(regIniData.SelectedDate), Month(regIniData.SelectedDate), Day(regIniData.SelectedDate), Value(regIniH.Selected.Value), Value(regIniM.Selected.Value), 0)"
     v_fim = ("If(IsBlank(regFimData.SelectedDate), Blank(), DateTime(Year(regFimData.SelectedDate), Month(regFimData.SelectedDate), Day(regFimData.SelectedDate), "
              "Value(Coalesce(regFimH.Selected.Value, \"0\")), Value(Coalesce(regFimM.Selected.Value, \"0\")), 0))")
@@ -459,7 +473,7 @@ def tela_registro():
     {{m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")}},
     {{m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")}},
     {{m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\\d{{8}}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")}},
-    {{m: If(vTipo = "ios" && regStatusIos.Selected.Value = "Cancelado" && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")}},
+    {{m: If(({CANCELADO}) && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")}},
     {{m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")}},
     {{m: If(!IsBlank(vFim) && vFim < vIni, "A hora de conclusão está antes do início.", "")}}
   ), !IsBlank(m)), m, "  ")}});
@@ -478,7 +492,7 @@ def tela_registro():
       rlt_ni: regNI.Value && IsBlank(vFim),
       rlt_chamadofalso: regFalso.Value,
       rlt_limpezatecnica: regLimpeza.Value,
-      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && IsBlank(vFim), {ST}.'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, {ST}.'EM ANDAMENTO')),
+      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && IsBlank(vFim), {ST}.'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, "CANCELADO", {ST}.CANCELADO, {ST}.'EM ANDAMENTO')),
       rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), {SI}.'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", {SI}.Agendado, "Suspenso", {SI}.Suspenso, "Concluído", {SI}.Concluído, "Cancelado", {SI}.Cancelado, "Não informado (NI)", {SI}.'Não informado (NI)', {SI}.'Em andamento')),
       rlt_motivocancelamento: regMotivo.Text
     }}));
@@ -576,14 +590,14 @@ def tela_registro():
         # local (corretivas): área e local específico
         rot("regRotArea", '"LOCAL – ÁREA"', xl, y_row2, vis=em("corretiva")),
         rot("regRotLocal", '"LOCAL – ESPECÍFICO *"', xr, y_row2, vis=em("corretiva")),
-        ent("regArea", DDL, xl, f"({y_row2}) + 22", w, Items="Sort(Distinct(Locais, rlt_area), Value)", Default="locArea", Visible=em("corretiva")),
-        ent("regLocal", CBX, xr, f"({y_row2}) + 22", w, Items="Filter(Locais, rlt_area = regArea.Selected.Value)", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome"]',
+        ent("regArea", DDL, xl, f"({y_row2}) + 22", w, Items=f"Sort(Distinct({ativos('Locais')}, rlt_area), Value)", Default="locArea", Visible=em("corretiva")),
+        ent("regLocal", CBX, xr, f"({y_row2}) + 22", w, Items=f"Filter(Locais, rlt_area = regArea.Selected.Value && {ativo('Locais')})", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome"]',
             SelectMultiple="false", DefaultSelectedItems="Filter(Locais, rlt_localid = locReg.rlt_local.rlt_localid)", InputTextPlaceholder='"Escolha a área primeiro"',
             Visible=em("corretiva")),
-        ajuda("regAjudaLocal", f'"Lista de " & CountIf(Locais, true) & " locais (código SAP), escolhida em dois passos."', xr, f"({y_row2}) + 66", w, em("corretiva")),
+        ajuda("regAjudaLocal", f'"Lista de " & CountIf(Locais, {ativo("Locais")}) & " locais (código SAP), escolhida em dois passos."', xr, f"({y_row2}) + 66", w, em("corretiva")),
         # equipamento (Fator Q e Preventiva)
         rot("regRotEquip", '"EQUIPAMENTO *"', xl, y_row2, vis=em("fq", "prev")),
-        ent("regEquip", CBX, xl, f"({y_row2}) + 22", w, Items="Equipamentos", DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome", "rlt_codigosap"]',
+        ent("regEquip", CBX, xl, f"({y_row2}) + 22", w, Items=ativos("Equipamentos"), DisplayFields='["rlt_nome"]', SearchFields='["rlt_nome", "rlt_codigosap"]',
             SelectMultiple="false", DefaultSelectedItems="Filter(Equipamentos, rlt_equipamentoid = locReg.rlt_equipamento.rlt_equipamentoid)",
             InputTextPlaceholder='"Buscar por nome ou código"', Visible=f"{em('fq', 'prev')} && !regForaLista.Value"),
         ent("regEquipLivre", TXT, xl, f"({y_row2}) + 22", w, Default="locReg.rlt_equipamentolivre", HintText='"Descreva o equipamento"',
@@ -606,7 +620,9 @@ def tela_registro():
             DisplayMode=f"If({ABERTO_REL} && IsBlank(locFim), DisplayMode.Edit, DisplayMode.Disabled)"),
         # conclusão
         rot("regRotFim", '"HORA DE CONCLUSÃO"', xr, y_ini),
-        ent("regFimData", DTP, xr, f"({y_ini}) + 22", f"{w} - 340", DefaultDate="locFim", Format='"dd/mm/yyyy"', OnChange=status_fim, Reset="locResetar || locResetFim"),
+        ent("regFimData", DTP, xr, f"({y_ini}) + 22", f"{w} - 340", DefaultDate="locFim", Format='"dd/mm/yyyy"', OnChange=status_fim,
+            Reset="locResetar || locResetFim",
+            InputTextPlaceholder='"dd/mm/aaaa"'),  # o padrão do controle mostra a data de exemplo 31/12/2001
         ent("regFimH", DDL, f"{xr} + {w} - 332", f"({y_ini}) + 22", "78", Items="tabHoras", Default='If(IsBlank(locFim), "", Text(Hour(locFim), "00"))',
             AllowEmptySelection="true", OnChange=status_fim, Reset="locResetar || locResetFim"),
         ent("regFimM", DDL, f"{xr} + {w} - 248", f"({y_ini}) + 22", "78", Items="tabMinutos", Default='If(IsBlank(locFim), "", Text(Minute(locFim), "00"))',
@@ -617,7 +633,7 @@ def tela_registro():
         # status
         rot("regRotStatus", f'If({tipo} = "ios", "STATUS DO IOS *", "STATUS *")', xl, y_st),
         ent("regStatus", DDL, xl, f"({y_st}) + 22", w, Default="locStatus", Visible=f'{tipo} <> "ios"',
-            Items='Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")',
+            Items='Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO", "CANCELADO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")',
             OnChange="UpdateContext({locStatus: Self.Selected.Value})",
             DisplayMode=f"If({ABERTO_REL} && !regFalso.Value && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
         ent("regStatusIos", DDL, xl, f"({y_st}) + 22", w, Default="locStatusIos", Visible=f'{tipo} = "ios"',
@@ -625,14 +641,14 @@ def tela_registro():
             OnChange="UpdateContext({locStatusIos: Self.Selected.Value})",
             DisplayMode=f"If({ABERTO_REL} && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
         ajuda("regAjudaStatus", f'If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", '
+                                f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado" || {tipo} <> "ios" && locStatus = "CANCELADO", "Cancelado: conta como encerrado e não passa para o próximo turno.", '
                                 f'!IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
                                 f'"Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")', xl, f"({y_st}) + 66", w),
-        rot("regRotMotivo", '"MOTIVO DO CANCELAMENTO *"', xr, y_st, vis=f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
-        ent("regMotivo", TXT, xr, f"({y_st}) + 22", w, Default="locReg.rlt_motivocancelamento",
-            Visible=f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
-        ajuda("regAjudaMotivo", '"Obrigatório para IOS cancelado (RN-014)."', xr, f"({y_st}) + 66", w, f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado"'),
+        rot("regRotMotivo", '"MOTIVO DO CANCELAMENTO *"', xr, y_st, vis=CANCELADO),
+        ent("regMotivo", TXT, xr, f"({y_st}) + 22", w, Default="locReg.rlt_motivocancelamento", Visible=CANCELADO),
+        ajuda("regAjudaMotivo", f'If({tipo} = "ios", "Obrigatório para IOS cancelado (RN-014).", "Obrigatório para chamado cancelado (RN-014).")', xr, f"({y_st}) + 66", w, CANCELADO),
         ent("regLimpeza", CHK, xr, f"({y_st}) + 24", w, Height="36", Text='"Limpeza técnica (fora de preventiva x corretiva)"',
-            Default="Coalesce(locReg.rlt_limpezatecnica, false)", Visible=f"locSecao = {SEC}.Outros"),
+            Default="Coalesce(locReg.rlt_limpezatecnica, false)", Visible=f"locSecao = {SEC}.Outros && !({CANCELADO})"),
         # chamado falso
         ent("regFalso", CHK, xl, y_falso, "300", Height="30", Text='"Chamado falso"', Default="locFalso",
             OnCheck="UpdateContext({locFalso: true})", OnUncheck="UpdateContext({locFalso: false})", Visible=em("corretiva", "fq")),
@@ -879,7 +895,7 @@ def tela_painel():
                 X="18", Y="38", Width="Parent.TemplateWidth - 36", Height="24"),
               C("paiMeta", LBL, Text='"Chamado " & ThisItem.rlt_numero & "     Início " & Text(ThisItem.rlt_inicio, "dd/mm/yyyy hh:mm")',
                 Color="corMuted", Size="9", X="18", Y="60", Width="Parent.TemplateWidth - 36", Height="20"),
-              C("paiCbx", CBX, Items="Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem)", DisplayFields='["rlt_nome"]',
+              C("paiCbx", CBX, Items=f"Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem && {ativo('Equipamentos')})", DisplayFields='["rlt_nome"]',
                 SearchFields='["rlt_nome", "rlt_codigosap"]', SelectMultiple="false", InputTextPlaceholder='"Escolher o equipamento correto…"',
                 X="18", Y="84", Width="Parent.TemplateWidth - 36 - 112", Height="36",
                 DisplayMode=f"If({ABERTO_REL}, DisplayMode.Edit, DisplayMode.View)"),
@@ -915,9 +931,9 @@ def tela_painel():
     # tabela das listas: cabeçalho e 3 linhas
     linhas = [("LISTA", "ITENS", "ORIGEM", True),
               # CountIf(..., true) conta no Dataverse; CountRows pode devolver um valor em cache (aviso do Studio)
-              ('"Equipamentos (Fator Q e Preventiva)"', "CountIf(Equipamentos, true)", '"aba codigo_sap_equipamento"', False),
-              ('"Locais"', "CountIf(Locais, true)", '"aba codigo_sap"', False),
-              ('"Pessoas e perfis"', "CountIf(Pessoas, true)", '"aba tbl_rh"', False)]
+              ('"Equipamentos (Fator Q e Preventiva)"', f"CountIf(Equipamentos, {ativo('Equipamentos')})", '"aba codigo_sap_equipamento"', False),
+              ('"Locais"', f"CountIf(Locais, {ativo('Locais')})", '"aba codigo_sap"', False),
+              ('"Pessoas e perfis"', f"CountIf(Pessoas, {ativo('Pessoas')})", '"aba tbl_rh"', False)]
     for i, (a, b, c, cab) in enumerate(linhas):
         yl = 52 + (0 if i == 0 else 32 + (i - 1) * 38)
         hl = 32 if cab else 38
@@ -928,14 +944,102 @@ def tela_painel():
         if i < 3:
             pagina.append(C(f"paiL{i}Linha", RET, Fill="corLinha", X="17", Y=str(yl + hl), Width=f"{TW} - 34", Height="2" if cab else "1", Visible=vis(3)))
     pagina += [
-        botao("paiAtualizar", '"Atualizar listas"', 'Notify("As listas de equipamentos, locais e pessoas são atualizadas pela carga das planilhas (RF-021).", NotificationType.Information)',
-              16, 52 + 32 + 3 * 38 + 14, 140, 34, primario=False, Size="10", Visible=vis(3)),
+        botao("paiAtualizar", '"Atualizar listas"', 'Navigate(scrListas, ScreenTransition.None)',
+              16, 52 + 32 + 3 * 38 + 14, 140, 34, primario=False, Size="10", Visible=f"{vis(3)} && {LIDER}"),
+        C("paiSoLider", LBL, Text='"Só o líder atualiza as listas."', Color="corMuted", Size="9",
+          X="16", Y=str(52 + 32 + 3 * 38 + 14), Width="300", Height="34", Visible=f"{vis(3)} && !{LIDER}"),
         espaco("paiE3", h3, 3),
     ]
-    filhos = moldura(p, "scrPainel") + titulo(p, '"PAINEL GERAL DE INFORMAÇÕES"', '"Correções, pendências antigas e listas do app. Todos os usuários podem ver."')
-    filhos.append(C(f"{p}Pagina", GAL, variante="VariableHeight", Items="Table({b: 1}, {b: 2}, {b: 3})", TemplateSize="100", TemplatePadding="0",
+    pagina += cartao_avisos(TW, vis, tit, espaco)
+    filhos = moldura(p, "scrPainel") + titulo(p, '"PAINEL GERAL DE INFORMAÇÕES"', '"Correções, pendências antigas, listas do app e avisos. Todos os usuários podem ver."')
+    filhos.append(C(f"{p}Pagina", GAL, variante="VariableHeight", Items="Table({b: 1}, {b: 2}, {b: 3}, {b: 4})", TemplateSize="100", TemplatePadding="0",
                     X="224", Y="146", Width="Parent.Width - 230", Height="Parent.Height - 150", filhos=pagina))
-    return tela("scrPainel", {"Fill": "corFundo", "OnVisible": REFRESH}, filhos)
+    filhos += janela_aviso()
+    return tela("scrPainel", {"Fill": "corFundo", "OnVisible": REFRESH + ";\nUpdateContext({locJanAviso: \"\"})"}, filhos)
+
+
+# ---------- Avisos do Painel geral (decisão de 25/11/2026): o líder publica, atualiza e exclui
+AVISOS = "Sort(Avisos, rlt_publicadoem, SortOrder.Descending)"
+N_AVISOS = "CountIf(Avisos, true)"
+
+
+def cartao_avisos(TW, vis, tit, espaco):
+    ALT = 132
+    n = N_AVISOS
+    h4 = f"64 + If({n} = 0, 40, {n} * {ALT}) + 14"
+    abrir_novo = 'UpdateContext({locAviso: Blank(), locJanAviso: "editar"}); Reset(avTitulo); Reset(avTexto)'
+    return [
+        cartao("paiC4", 0, 0, TW, h4, Visible=vis(4)),
+        tit("paiT4", "AVISOS", 4),
+        botao("paiNovoAviso", '"＋  Novo aviso"', abrir_novo, f"{TW} - 16 - 140", 12, 140, 32, primario=False, Size="10",
+              Visible=f"{vis(4)} && {LIDER}"),
+        C("paiVazio4", LBL, Text='"Nenhum aviso."', Color="corMuted", Size="10", Align="Align.Center",
+          X="16", Y="58", Width=f"{TW} - 32", Height="32", Visible=f"{vis(4)} && {n} = 0"),
+        C("paiGal4", GAL, variante="Vertical", Items=AVISOS, TemplateSize=str(ALT), TemplatePadding="0", ShowScrollbar="false",
+          X="16", Y="52", Width=f"{TW} - 32", Height=f"{n} * {ALT}", Visible=f"{vis(4)} && {n} > 0",
+          filhos=[
+              cartao("paiAvBorda", 0, 0, "Parent.TemplateWidth", ALT - 10, fill="corLaranja", borda="corLaranja"),
+              cartao("paiAvFundo", 4, 0, "Parent.TemplateWidth - 4", ALT - 10),
+              C("paiAvTit", LBL, Text="ThisItem.rlt_titulo", Color="corTexto", Size="11", FontWeight="FontWeight.Bold",
+                X="18", Y="8", Width="Parent.TemplateWidth - 36 - 190", Height="26"),
+              C("paiAvTexto", LBL, Text="ThisItem.rlt_texto", Color="corTexto", Size="10", VerticalAlign="VerticalAlign.Top",
+                X="18", Y="36", Width="Parent.TemplateWidth - 36", Height="56"),
+              C("paiAvMeta", LBL, Color="corMuted", Size="9", X="18", Y=str(ALT - 10 - 28), Width="Parent.TemplateWidth - 36", Height="22",
+                Text=('"Publicado por " & Coalesce(ThisItem.rlt_autor.rlt_nome, "—") & " em " & Text(ThisItem.rlt_publicadoem, "dd/mm/yyyy hh:mm") & '
+                      'If(DateDiff(ThisItem.rlt_publicadoem, ThisItem.modifiedon, TimeUnit.Minutes) > 1, "   ·   atualizado em " & Text(ThisItem.modifiedon, "dd/mm/yyyy hh:mm"), "")')),
+              C("paiAvEditar", LBL, Text='"Atualizar"', Color="corAzul", Underline="true", Size="10", Align="Align.Right", Visible=LIDER,
+                X="Parent.TemplateWidth - 200", Y="8", Width="90", Height="26",
+                OnSelect='UpdateContext({locAviso: ThisItem, locJanAviso: "editar"}); Reset(avTitulo); Reset(avTexto)'),
+              C("paiAvExcluir", LBL, Text='"Excluir"', Color="RGBA(138, 0, 33, 1)", Underline="true", Size="10", Align="Align.Right", Visible=LIDER,
+                X="Parent.TemplateWidth - 100", Y="8", Width="84", Height="26",
+                OnSelect='UpdateContext({locAviso: ThisItem, locJanAviso: "excluir"})'),
+          ]),
+        espaco("paiE4", h4, 4),
+    ]
+
+
+def janela_aviso():
+    """Janela por cima do Painel: publicar/atualizar (locJanAviso = "editar") ou confirmar a exclusão ("excluir")."""
+    ed, ex = 'locJanAviso = "editar"', 'locJanAviso = "excluir"'
+    vis = f"{ed} || {ex}"
+    W = "620"
+    H = f'If({ex}, 230, 420)'
+    x, y = f"(Parent.Width - {W}) / 2", f"(Parent.Height - ({H})) / 2"
+    registro = "LookUp(Avisos, rlt_avisoid = locAviso.rlt_avisoid)"
+    salvar = (
+        'If(IsBlank(Trim(avTitulo.Text)), Notify("Informe o título do aviso.", NotificationType.Warning),\n'
+        '  If(IsBlank(locAviso),\n'
+        '    Patch(Avisos, Defaults(Avisos), {rlt_titulo: Trim(avTitulo.Text), rlt_texto: avTexto.Text, rlt_publicadoem: Now(), rlt_autor: gblUsuario}),\n'
+        f'    Patch(Avisos, {registro}, {{rlt_titulo: Trim(avTitulo.Text), rlt_texto: avTexto.Text}}));\n'
+        '  ' + hist('"Aviso " & If(IsBlank(locAviso), "publicado", "atualizado") & ": " & Trim(avTitulo.Text)') + ';\n'
+        '  Notify(If(IsBlank(locAviso), "Aviso publicado.", "Aviso atualizado."), NotificationType.Success);\n'
+        '  UpdateContext({locJanAviso: ""}))')
+    excluir = (f'Remove(Avisos, {registro});\n'
+               + hist('"Aviso excluído: " & locAviso.rlt_titulo') + ';\n'
+               'Notify("Aviso excluído.", NotificationType.Success);\nUpdateContext({locJanAviso: ""})')
+    campo = dict(BorderColor="RGBA(197, 206, 215, 1)", BorderThickness="1", FocusedBorderColor="corVerde", FocusedBorderThickness="2",
+                 Size="11", Color="corTexto", PaddingLeft="12", RadiusTopLeft="8", RadiusTopRight="8", RadiusBottomLeft="8", RadiusBottomRight="8")
+    return [
+        C("avJanFundo", RET, Fill="RGBA(0, 0, 0, 0.45)", X="0", Y="0", Width="Parent.Width", Height="Parent.Height", Visible=vis),
+        cartao("avJanCartao", x, y, W, H, raio=12, Visible=vis),
+        C("avJanAcento", RET, Fill="corVerde", X=f"{x} + 24", Y=f"{y} + 20", Width="36", Height="4", Visible=vis),
+        C("avJanTit", LBL, Text=f'If({ex}, "EXCLUIR AVISO", IsBlank(locAviso), "NOVO AVISO", "ATUALIZAR AVISO")', Color="corAzul", Size="14",
+          FontWeight="FontWeight.Bold", Font=FONTE_TIT, X=f"{x} + 24", Y=f"{y} + 28", Width=f"{W} - 48", Height="30", Visible=vis),
+        # editar
+        rotulo("avRotTitulo", '"TÍTULO *"', f"{x} + 24", f"{y} + 72", vis=ed),
+        C("avTitulo", TXT, Default="locAviso.rlt_titulo", MaxLength="200", X=f"{x} + 24", Y=f"{y} + 96", Width=f"{W} - 48", Height="40", Visible=ed, **campo),
+        rotulo("avRotTexto", '"TEXTO"', f"{x} + 24", f"{y} + 146", vis=ed),
+        C("avTexto", TXT, Default="locAviso.rlt_texto", Mode="TextMode.MultiLine", MaxLength="4000", X=f"{x} + 24", Y=f"{y} + 170",
+          Width=f"{W} - 48", Height="150", Visible=ed, **campo),
+        botao("avSalvar", 'If(IsBlank(locAviso), "Publicar", "Salvar")', salvar, f"{x} + {W} - 24 - 150", f"{y} + ({H}) - 64", 150, 40, Visible=ed),
+        # excluir
+        C("avExTexto", LBL, Text='"Excluir o aviso “" & locAviso.rlt_titulo & "”? Ele sai do Painel para todos."', Color="corTexto", Size="11",
+          X=f"{x} + 24", Y=f"{y} + 72", Width=f"{W} - 48", Height="60", Visible=ex),
+        botao("avExcluir", '"Excluir"', excluir, f"{x} + {W} - 24 - 150", f"{y} + ({H}) - 64", 150, 40, Visible=ex,
+              Fill="RGBA(138, 0, 33, 1)", BorderColor="RGBA(138, 0, 33, 1)", HoverFill="corVerm"),
+        botao("avCancelar", '"Cancelar"', 'UpdateContext({locJanAviso: ""})', f"{x} + {W} - 24 - 150 - 8 - 120", f"{y} + ({H}) - 64", 120, 40,
+              primario=False, Visible=vis),
+    ]
 
 
 # ================================================================== TELA FECHAR
@@ -957,7 +1061,8 @@ def tela_fechar():
     corretiva = 'LookUp(tabSecoes, Valor = rlt_secao).Tipo = "corretiva"'
     sem_local = f"Filter(colRegs, {corretiva} && IsBlank(rlt_local))"
     fq_sem_sap = f"Filter(colRegs, rlt_secao = {SEC}.'Fator Q (Z9)' && IsBlank(rlt_equipamento))"
-    ios_sem_motivo = f"Filter(colRegs, rlt_secao = {SEC}.'IOS informados' && rlt_statusios = {SI}.Cancelado && IsBlank(Trim(rlt_motivocancelamento)))"
+    ios_sem_motivo = (f"Filter(colRegs, (If(rlt_secao = {SEC}.'IOS informados', rlt_statusios = {SI}.Cancelado, rlt_status = {ST}.CANCELADO)) "
+                      f"&& IsBlank(Trim(rlt_motivocancelamento)))")
     sem_tec = "CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Técnico(a)')) = 0"
     sem_op = "CountRows(Filter(colEquipe, rlt_perfil = [@Perfil].'Operador(a)')) = 0"
     n_avisos = (f"(If({sem_tec}, 1, 0) + If({sem_op}, 1, 0) + CountRows({sem_local}) + CountRows({fq_sem_sap}) + CountRows({ios_sem_motivo}))")
@@ -965,7 +1070,8 @@ def tela_fechar():
               f'If({sem_op}, "•  Nenhum operador fez login neste plantão." & Char(10), "") & '
               f'Concat({sem_local}, "•  " & LookUp(tabSecoes, Valor = rlt_secao).Nome & ": “" & Left(rlt_titulo, 50) & "” sem local." & Char(10)) & '
               f'Concat({fq_sem_sap}, "•  Fator Q: chamado " & rlt_numero & " sem código SAP (vai sem tipo para o dashboard)." & Char(10)) & '
-              f'Concat({ios_sem_motivo}, "•  IOS " & rlt_numero & " cancelado sem motivo." & Char(10))')
+              f'Concat({ios_sem_motivo}, "•  " & If(rlt_secao = {SEC}.\'IOS informados\', "IOS " & rlt_numero, '
+              f'LookUp(tabSecoes, Valor = rlt_secao).Nome & ": “" & Left(rlt_titulo, 50) & "”") & " cancelado sem motivo." & Char(10))')
     # ---- ações (mesma lógica de antes)
     fechar = (f"Patch(Relatórios, LookUp(Relatórios, rlt_relatorioid = gblRel.rlt_relatorioid), {{rlt_situacao: {SIT}.Fechado, rlt_fechadoem: Now(), rlt_fechadopor: gblUsuario}});\n"
               + hist('"Relatório fechado e enviado"') + ";\n"
@@ -1151,6 +1257,183 @@ def tela_abrir():
     return tela("scrAbrir", {"Fill": "corFundo", "OnVisible": ao_abrir}, filhos)
 
 
+# ================================================================== TELA LISTAS (RF-021)
+# Abas: tabela do Dataverse, rótulo, coluna da chave e colunas da grade (rótulo, fórmula, largura relativa)
+ABAS = [
+    ("eq", "Equipamentos", "Equipamentos", "rlt_equipamentoid", "locEq",
+     [("DESCRIÇÃO", "ThisItem.rlt_nome", 0.46), ("CÓDIGO SAP", "ThisItem.rlt_codigosap", 0.16), ("TIPO", "Text(ThisItem.rlt_tipo)", 0.16)]),
+    ("loc", "Locais", "Locais", "rlt_localid", "locLoc",
+     [("LOCAL ESPECÍFICO", "ThisItem.rlt_nome", 0.34), ("CÓDIGO SAP", "ThisItem.rlt_codigosap", 0.14), ("ÁREA", "ThisItem.rlt_area", 0.2),
+      ("LADO", "ThisItem.rlt_lado", 0.1)]),
+    ("pes", "Pessoas e perfis", "Pessoas", "rlt_pessoaid", "locPes",
+     [("NOME", "ThisItem.rlt_nome", 0.28), ("CARGO", "ThisItem.rlt_cargo", 0.2), ("PERFIL", "Text(ThisItem.rlt_perfil)", 0.12),
+      ("E-MAIL DO LOGIN", "ThisItem.rlt_email", 0.18)]),
+]
+
+
+def tela_listas():
+    """Atualizar listas (RF-021): o líder inclui, altera, desativa e reativa equipamentos, locais e pessoas.
+    Nada se exclui: chamados e relatórios antigos apontam para esses itens. Item desativado some das listas do app."""
+    p = "lis"
+    X0, LARG = "224", "Parent.Width - 248"
+    ALT = 44
+    y_abas, y_busca, y_cab = 150, 204, 258
+    filhos = moldura(p, "scrPainel") + [
+        C(f"{p}Voltar", LBL, Text='"‹  Painel geral"', Color="corAzul", Size="10", Underline="true", X="224", Y="70", Width="300", Height="22",
+          OnSelect="Back()"),
+    ] + titulo(p, '"ATUALIZAR LISTAS"', '"Inclua, altere ou desative itens. Item desativado some das listas do app, mas continua nos relatórios antigos (RF-021)."', y=100)
+    # abas
+    for i, (aba, rot, tab, *_r) in enumerate(ABAS):
+        on = f'locAba = "{aba}"'
+        filhos.append(C(f"{p}Aba{i}", BTN, Text=f'"{rot}  (" & CountIf({tab}, {ativo(tab)}) & ")"', OnSelect=f'UpdateContext({{locAba: "{aba}"}}); Reset(lisBusca)',
+                        X=f"224 + {i} * 214", Y=str(y_abas), Width="206", Height="40", Size="11",
+                        FontWeight=f"If({on}, FontWeight.Bold, FontWeight.Normal)", Fill=f"If({on}, corAzul, Color.White)", Color=f"If({on}, Color.White, corAzul)",
+                        HoverFill=f"If({on}, corAzul80, corAzul10)", HoverColor=f"If({on}, Color.White, corAzul)", BorderColor="corAzul", BorderThickness="1",
+                        RadiusTopLeft="8", RadiusTopRight="8", RadiusBottomLeft="8", RadiusBottomRight="8"))
+    # busca, desativados e incluir
+    filhos += [
+        C("lisBusca", TXT, Default='""', HintText='"Buscar por nome ou código SAP"', X=X0, Y=str(y_busca), Width="360", Height="40",
+          BorderColor="RGBA(197, 206, 215, 1)", FocusedBorderColor="corVerde", FocusedBorderThickness="2", Size="11", PaddingLeft="12",
+          RadiusTopLeft="8", RadiusTopRight="8", RadiusBottomLeft="8", RadiusBottomRight="8"),
+        C("lisInativos", CHK, Text='"Mostrar desativados"', Default="false", X="600", Y=str(y_busca + 4), Width="240", Height="32", Size="11",
+          CheckboxBorderColor="RGBA(91, 104, 118, 1)", CheckboxSize="20", CheckmarkFill="Color.White", Color="corTexto"),
+        botao(f"{p}Incluir", '"＋  Incluir"', 'UpdateContext({locNovo: true, locJan: true, locErroLista: ""}); Reset(ediT1); Reset(ediT2); Reset(ediT3); Reset(ediT4); Reset(ediTipo); Reset(ediPerfil)',
+              "Parent.Width - 24 - 150", y_busca, 150, 40),
+        cartao(f"{p}Grade", X0, y_cab, LARG, f"Parent.Height - {y_cab} - 16", raio=8),
+    ]
+    for aba, rot, tab, chave, var, cols in ABAS:
+        on = f'locAba = "{aba}"'
+        busca = " || ".join(f"lisBusca.Text in {c}" for c in (["rlt_nome", "rlt_codigosap"] if aba != "pes" else ["rlt_nome", "rlt_email", "rlt_cargo"]))
+        itens = f"Sort(Filter({tab}, (lisInativos.Value || {ativo(tab)}) && (IsBlank(Trim(lisBusca.Text)) || {busca})), rlt_nome)"
+        reg = f"LookUp({tab}, {chave} = ThisItem.{chave})"
+        eh_ativo = f"ThisItem.{ativo(tab)}"
+        proprio = f"{eh_ativo} && ThisItem.rlt_pessoaid = gblUsuario.rlt_pessoaid" if aba == "pes" else "false"
+        alternar = (f"If({proprio}, "
+                    f"Notify(\"Você não pode desativar o seu próprio cadastro.\", NotificationType.Warning),\n"
+                    f"  Patch({tab}, {reg}, {{statecode: If({eh_ativo}, 'Status ({tab})'.Inativo, 'Status ({tab})'.Ativo)}});\n  "
+                    + hist(f'"Lista {rot}: " & If({eh_ativo}, "desativado ", "reativado ") & ThisItem.rlt_nome')
+                    + f";\n  Notify(ThisItem.rlt_nome & If({eh_ativo}, \" desativado.\", \" reativado.\"), NotificationType.Success))")
+        alterar = (f'UpdateContext({{{var}: ThisItem, locNovo: false, locJan: true, locErroLista: ""}}); '
+                   "Reset(ediT1); Reset(ediT2); Reset(ediT3); Reset(ediT4); Reset(ediTipo); Reset(ediPerfil)")
+        # cabeçalho da grade
+        xs, acc = [], 0.0
+        for c in cols:
+            xs.append(acc)
+            acc += c[2]
+        for j, (cab, _f, larg) in enumerate(cols):
+            filhos.append(C(f"{p}Cab{aba}{j}", LBL, Text=f'"{cab}"', Color="corMuted", Size="8", FontWeight="FontWeight.Bold",
+                            X=f"{X0} + 12 + ({LARG} - 24) * {xs[j]}", Y=str(y_cab), Width=f"({LARG} - 24) * {larg}", Height="34", Visible=on))
+        filhos.append(C(f"{p}CabSit{aba}", LBL, Text='"SITUAÇÃO"', Color="corMuted", Size="8", FontWeight="FontWeight.Bold",
+                        X=f"{X0} + 12 + ({LARG} - 24) * {acc}", Y=str(y_cab), Width="100", Height="34", Visible=on))
+        filhos.append(C(f"{p}CabLinha{aba}", RET, Fill="corLinha", X=f"{X0} + 1", Y=str(y_cab + 34), Width=f"{LARG} - 2", Height="2", Visible=on))
+        celulas = [C(f"{p}C{aba}{j}", LBL, Text=f, Color="corTexto", Size="10", X=f"12 + (Parent.TemplateWidth - 24) * {xs[j]}", Y="0",
+                     Width=f"(Parent.TemplateWidth - 24) * {larg} - 8", Height=str(ALT))
+                   for j, (_c, f, larg) in enumerate(cols)]
+        celulas += [
+            chip(f"{p}Sit{aba}", f'If({eh_ativo}, "ATIVO", "DESATIVADO")', f"12 + (Parent.TemplateWidth - 24) * {acc}", 11, 96,
+                 f"If({eh_ativo}, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))", f"If({eh_ativo}, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))",
+                 f"If({eh_ativo}, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))", h=22),
+            C(f"{p}Alt{aba}", LBL, Text='"Alterar"', Color="corAzul", Underline="true", Size="10", Align="Align.Right",
+              X="Parent.TemplateWidth - 190", Y="0", Width="76", Height=str(ALT), OnSelect=alterar),
+            C(f"{p}Des{aba}", LBL, Text=f'If({eh_ativo}, "Desativar", "Reativar")', Color=f"If({eh_ativo}, RGBA(138, 0, 33, 1), corAzul)",
+              Underline="true", Size="10", Align="Align.Right", X="Parent.TemplateWidth - 104", Y="0", Width="92", Height=str(ALT), OnSelect=alternar),
+            C(f"{p}Linha{aba}", RET, Fill="corLinha", X="0", Y=f"Parent.TemplateHeight - 1", Width="Parent.TemplateWidth", Height="1"),
+        ]
+        filhos.append(C(f"{p}Gal{aba}", GAL, variante="Vertical", Items=itens, TemplateSize=str(ALT), TemplatePadding="0",
+                        X=f"{X0} + 1", Y=str(y_cab + 36), Width=f"{LARG} - 2", Height=f"Parent.Height - {y_cab + 36} - 18", Visible=on, filhos=celulas))
+    filhos += janela_lista()
+    ao_abrir = ('If(!' + LIDER + ', Notify("Só o líder atualiza as listas.", NotificationType.Warning); Back());\n'
+                'UpdateContext({locAba: Coalesce(locAba, "eq"), locJan: false, locErroLista: ""})')
+    return tela("scrListas", {"Fill": "corFundo", "OnVisible": ao_abrir}, filhos)
+
+
+def janela_lista():
+    """Janela de inclusão/alteração de um item da aba atual (locAba). Os campos de texto são os mesmos nas três abas:
+         eq:  ediT1 Descrição | ediT2 Código SAP | ediTipo Tipo
+         loc: ediT1 Local específico | ediT2 Código SAP | ediT3 Área | ediT4 Lado
+         pes: ediT1 Nome | ediT2 Cargo | ediPerfil Perfil | ediT3 E-mail do login"""
+    vis = "locJan"
+    W, H = "680", "440"
+    x, y = f"(Parent.Width - {W}) / 2", f"(Parent.Height - {H}) / 2"
+    meio = f"({W} - 48 - 16) / 2"
+    xe, xd = f"{x} + 24", f"{x} + 24 + {meio} + 16"
+    ya, yb, yc = f"{y} + 76", f"{y} + 152", f"{y} + 228"
+    aba = lambda *a: "locAba in [" + ", ".join(f'"{s}"' for s in a) + "]"
+    sw = lambda eq, loc, pes: f'Switch(locAba, "eq", {eq}, "loc", {loc}, {pes})'
+    campo = dict(BorderColor="RGBA(197, 206, 215, 1)", BorderThickness="1", FocusedBorderColor="corVerde", FocusedBorderThickness="2",
+                 Size="11", Color="corTexto")
+    txt = dict(campo, PaddingLeft="12", RadiusTopLeft="8", RadiusTopRight="8", RadiusBottomLeft="8", RadiusBottomRight="8")
+    lista = dict(campo, ChevronBackground="Color.White", ChevronFill="corTexto", SelectionFill="corAzul", HoverFill="corAzul10")
+    t1, t2, t3, t4 = "Trim(ediT1.Text)", "Trim(ediT2.Text)", "Trim(ediT3.Text)", "Trim(ediT4.Text)"
+    # registros a gravar (Defaults quando é inclusão)
+    alvo = lambda tab, chave, var: f"If(locNovo, Defaults({tab}), LookUp({tab}, {chave} = {var}.{chave}))"
+    dup_eq = f"LookUp(Equipamentos, rlt_codigosap = {t2})"
+    dup_pes = f"LookUp(Pessoas, rlt_email = Lower({t3}))"
+    validar = (f"UpdateContext({{locErroLista: Concat(Filter(Table(\n"
+               f"  {{m: If(IsBlank({t1}), \"Preencha o \" & {sw(chr(34)+'campo Descrição'+chr(34), chr(34)+'campo Local específico'+chr(34), chr(34)+'campo Nome'+chr(34))} & \".\", \"\")}},\n"
+               f"  {{m: If(locAba <> \"pes\" && IsBlank({t2}), \"Preencha o código SAP.\", \"\")}},\n"
+               f"  {{m: If(locAba = \"loc\" && IsBlank({t3}), \"Preencha a área.\", \"\")}},\n"
+               f"  {{m: If(locAba = \"eq\" && !IsBlank({t2}) && !IsBlank({dup_eq}) && (locNovo || {dup_eq}.rlt_equipamentoid <> locEq.rlt_equipamentoid), "
+               f"\"Já existe um equipamento com esse código SAP: \" & {dup_eq}.rlt_nome & \".\", \"\")}},\n"
+               f"  {{m: If(locAba = \"pes\" && !IsBlank({t3}) && !IsMatch({t3}, Match.Email), \"E-mail inválido.\", \"\")}},\n"
+               f"  {{m: If(locAba = \"pes\" && !IsBlank({t3}) && !IsBlank({dup_pes}) && (locNovo || {dup_pes}.rlt_pessoaid <> locPes.rlt_pessoaid), "
+               f"\"Esse e-mail já é de \" & {dup_pes}.rlt_nome & \".\", \"\")}},\n"
+               f"  {{m: If(locAba = \"pes\" && IsBlank(ediPerfil.Selected), \"Escolha o perfil.\", \"\")}}\n"
+               f"), !IsBlank(m)), m, \"  \")}})")
+    gravar = (f"Switch(locAba,\n"
+              f"  \"eq\", Patch(Equipamentos, {alvo('Equipamentos', 'rlt_equipamentoid', 'locEq')}, {{rlt_nome: {t1}, rlt_codigosap: {t2}, rlt_tipo: ediTipo.Selected.Value}}),\n"
+              f"  \"loc\", Patch(Locais, {alvo('Locais', 'rlt_localid', 'locLoc')}, {{rlt_nome: {t1}, rlt_codigosap: {t2}, rlt_area: {t3}, rlt_lado: {t4}}}),\n"
+              f"  Patch(Pessoas, {alvo('Pessoas', 'rlt_pessoaid', 'locPes')}, {{rlt_nome: {t1}, rlt_cargo: {t2}, rlt_email: Lower({t3}), rlt_perfil: ediPerfil.Selected.Value}}))")
+    rotulo_aba = sw('"Equipamentos"', '"Locais"', '"Pessoas"')
+    salvar = (validar + ";\nIf(IsBlank(locErroLista),\n  " + gravar + ";\n  "
+              + hist(f'"Lista " & {rotulo_aba} & If(locNovo, ": incluído ", ": alterado ") & {t1}')
+              + f";\n  Notify(If(locNovo, \"Incluído: \", \"Alterado: \") & {t1}, NotificationType.Success);\n  UpdateContext({{locJan: false}}))")
+    dflt = lambda eq, loc, pes: f'If(locNovo, "", {sw(eq, loc, pes)})'
+
+    def rot(nome, texto, xx, yy, v):
+        return C(nome, LBL, Text=texto, Color="corMuted", Size="9", FontWeight="FontWeight.Bold", X=xx, Y=yy, Width=meio, Height="20", Visible=f"{vis} && ({v})")
+
+    return [
+        C("ediFundo", RET, Fill="RGBA(0, 0, 0, 0.45)", X="0", Y="0", Width="Parent.Width", Height="Parent.Height", Visible=vis),
+        cartao("ediCartao", x, y, W, H, raio=12, Visible=vis),
+        C("ediAcento", RET, Fill="corVerde", X=f"{x} + 24", Y=f"{y} + 20", Width="36", Height="4", Visible=vis),
+        C("ediTit", LBL, Text=f'If(locNovo, "INCLUIR – ", "ALTERAR – ") & Upper({rotulo_aba})', Color="corAzul", Size="14", FontWeight="FontWeight.Bold",
+          Font=FONTE_TIT, X=f"{x} + 24", Y=f"{y} + 28", Width=f"{W} - 48", Height="30", Visible=vis),
+        # linha A: nome (largura toda)
+        rot("ediRot1", sw('"DESCRIÇÃO *"', '"LOCAL ESPECÍFICO *"', '"NOME *"'), xe, ya, "true"),
+        C("ediT1", TXT, Default=dflt("locEq.rlt_nome", "locLoc.rlt_nome", "locPes.rlt_nome"), X=xe, Y=f"{ya} + 22", Width=f"{W} - 48", Height="40",
+          Visible=vis, **txt),
+        # linha B: código SAP ou cargo | tipo, área ou perfil
+        rot("ediRot2", sw('"CÓDIGO SAP *"', '"CÓDIGO SAP *"', '"CARGO"'), xe, yb, "true"),
+        C("ediT2", TXT, Default=dflt("locEq.rlt_codigosap", "locLoc.rlt_codigosap", "locPes.rlt_cargo"), X=xe, Y=f"{yb} + 22", Width=meio, Height="40",
+          Visible=vis, **txt),
+        rot("ediRotTipo", '"TIPO"', xd, yb, aba("eq")),
+        C("ediTipo", DDL, Items="Choices([@'Tipo de equipamento'])", Default='If(locNovo, "Outro", Text(locEq.rlt_tipo))', X=xd, Y=f"{yb} + 22", Width=meio,
+          Height="40", Visible=f"{vis} && {aba('eq')}", **lista),
+        rot("ediRotPerfil", '"PERFIL *"', xd, yb, aba("pes")),
+        C("ediPerfil", DDL, Items="Choices([@Perfil])", Default='If(locNovo, "Técnico(a)", Text(locPes.rlt_perfil))', X=xd, Y=f"{yb} + 22", Width=meio,
+          Height="40", Visible=f"{vis} && {aba('pes')}", **lista),
+        # ediT3: área (loc, linha B à direita) ou e-mail (pes, linha C)
+        rot("ediRot3", 'If(locAba = "loc", "ÁREA *", "E-MAIL DO LOGIN")', f'If(locAba = "loc", {xd}, {xe})', f'If(locAba = "loc", {yb}, {yc})', aba("loc", "pes")),
+        C("ediT3", TXT, Default=dflt('""', "locLoc.rlt_area", "locPes.rlt_email"), X=f'If(locAba = "loc", {xd}, {xe})', Y=f'If(locAba = "loc", {yb}, {yc}) + 22',
+          Width=f'If(locAba = "loc", {meio}, {W} - 48)', Height="40", Visible=f"{vis} && {aba('loc', 'pes')}",
+          HintText='If(locAba = "loc", "Mesma grafia das áreas que já existem", "nome@inframerica.aero")', **txt),
+        # ediT4: lado (loc, linha C)
+        rot("ediRot4", '"LADO"', xe, yc, aba("loc")),
+        C("ediT4", TXT, Default=dflt('""', "locLoc.rlt_lado", '""'), X=xe, Y=f"{yc} + 22", Width=meio, Height="40", Visible=f"{vis} && {aba('loc')}", **txt),
+        C("ediAjuda", LBL, Color="corMuted", Size="9", X=f"{x} + 24", Y=f"{yc} + 70", Width=f"{W} - 48", Height="36", Visible=vis,
+          VerticalAlign="VerticalAlign.Top",
+          Text=sw('"O tipo define a Tela 3 do dashboard (Fator Q por tipo de equipamento)."',
+                  '"O app agrupa os locais pela área: use a mesma grafia das áreas que já existem."',
+                  '"O e-mail liga a pessoa ao login no app. O perfil Líder libera esta tela e os avisos do Painel."')),
+        C("ediErro", LBL, Text="locErroLista", Visible=f"{vis} && !IsBlank(locErroLista)", Color="RGBA(138, 0, 33, 1)", Fill="corVerm20", Size="10",
+          FontWeight="FontWeight.Semibold", PaddingLeft="12", X=f"{x} + 24", Y=f"{y} + {H} - 64", Width=f"{W} - 48 - 150 - 8 - 120 - 8", Height="40"),
+        botao("ediSalvar", '"Salvar"', salvar, f"{x} + {W} - 24 - 150", f"{y} + {H} - 64", 150, 40, Visible=vis),
+        botao("ediCancelar", '"Cancelar"', "UpdateContext({locJan: false})", f"{x} + {W} - 24 - 150 - 8 - 120", f"{y} + {H} - 64", 120, 40,
+              primario=False, Visible=vis),
+    ]
+
+
 # ================================================================== APP
 APP = f"""App:
   Properties:
@@ -1181,7 +1464,7 @@ tabSecoes = Table(
   {Ordem: 7, Nome: "Preventiva (ZM02)", Valor: [@'Seção'].'Preventiva (ZM02)', Tipo: "prev", Cor: corVerde},
   {Ordem: 8, Nome: "IOS informados", Valor: [@'Seção'].'IOS informados', Tipo: "ios", Cor: RGBA(153, 175, 193, 1)}
 );''').replace(chr(10), chr(10) + '      ')}
-    OnStart: {bloco(f'''=Set(gblUsuario, LookUp(Pessoas, rlt_email = User().Email));
+    OnStart: {bloco(f'''=Set(gblUsuario, LookUp(Pessoas, rlt_email = User().Email && {ativo("Pessoas")}));
 Set(gblRel, First(Sort(Filter(Relatórios, rlt_situacao = {SIT}.Aberto), createdon, SortOrder.Descending)));
 If(IsBlank(gblRel), Set(gblRel, First(Sort(Relatórios, createdon, SortOrder.Descending))));
 If(!IsBlank(gblUsuario) && {ABERTO_REL} &&
@@ -1199,6 +1482,7 @@ EDITOR = """EditorState:
     - scrRegistro
     - scrHistorico
     - scrPainel
+    - scrListas
     - scrFechar
     - scrAbrir
 """
@@ -1211,7 +1495,7 @@ def main(src):
         "App.pa.yaml": APP, "_EditorState.pa.yaml": EDITOR,
         "scrRelatorio.pa.yaml": tela_relatorio(), "scrChamados.pa.yaml": tela_chamados(), "scrRegistro.pa.yaml": tela_registro(),
         "scrHistorico.pa.yaml": tela_historico(), "scrPainel.pa.yaml": tela_painel(), "scrFechar.pa.yaml": tela_fechar(),
-        "scrAbrir.pa.yaml": tela_abrir(),
+        "scrAbrir.pa.yaml": tela_abrir(), "scrListas.pa.yaml": tela_listas(),
     }
     velho = os.path.join(src, "Screen1.pa.yaml")
     if os.path.exists(velho):

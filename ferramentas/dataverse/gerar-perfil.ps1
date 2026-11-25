@@ -5,7 +5,8 @@
   Regra (decisão de 19/11/2026): acesso igual para todos os perfis.
     - Tabelas de operação e listas: criar, ler, alterar, anexar e ser anexado, no ambiente inteiro (Global).
     - Histórico: só criar e ler (ninguém altera nem apaga o histórico - RN-021).
-    - Nenhuma exclusão: engano vira cancelamento ou chamado falso.
+    - Nenhuma exclusão: engano vira cancelamento ou chamado falso. Exceção: avisos do Painel (25/11/2026).
+    - Listas (equipamentos, locais, pessoas): não se excluem; o líder desativa (Status = Inativo).
   O perfil "Usuário Básico" da Microsoft continua sendo atribuído a todos automaticamente.
 
   Uso: powershell -File ferramentas\dataverse\gerar-perfil.ps1 -Src solution\RLT_CCM\src
@@ -20,6 +21,7 @@ $tabelas = [ordered]@{
   rlt_relatorio = $completo; rlt_registro = $completo; rlt_equipe = $completo; rlt_anexo = $completo
   rlt_pessoa = $completo; rlt_local = $completo; rlt_equipamento = $completo
   rlt_historico = @("Create", "Read", "Append", "AppendTo")
+  rlt_aviso = @("Create", "Read", "Write", "Delete", "Append", "AppendTo")   # avisos do Painel: o líder exclui (25/11/2026)
 }
 $linhas = foreach ($t in $tabelas.Keys) { foreach ($p in $tabelas[$t]) { "    <RolePrivilege name=`"prv$p$t`" level=`"Global`" />" } }
 

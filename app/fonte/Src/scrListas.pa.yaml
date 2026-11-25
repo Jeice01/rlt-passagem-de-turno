@@ -1,0 +1,2400 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+Screens:
+  scrListas:
+    Properties:
+      Fill: |-
+        =corFundo
+      OnVisible: |-
+        =If(!(!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder), Notify("Só o líder atualiza as listas.", NotificationType.Warning); Back());
+        UpdateContext({locAba: Coalesce(locAba, "eq"), locJan: false, locErroLista: ""})
+    Children:
+    - lisTopo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =56
+    - lisFaixa:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =56
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =5
+    - lisMarca:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RLT · CCM"
+          Color: |-
+            =Color.White
+          Size: |-
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =20
+          Y: |-
+            =7
+          Width: |-
+            =300
+          Height: |-
+            =24
+    - lisMarca2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =20
+          Y: |-
+            =29
+          Width: |-
+            =300
+          Height: |-
+            =20
+          Font: |-
+            =Font.Arial
+    - lisUsuario:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =Coalesce(gblUsuario.rlt_nome, User().FullName)
+          Color: |-
+            =Color.White
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Bold
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 470
+          Y: |-
+            =8
+          Width: |-
+            =410
+          Height: |-
+            =22
+          Font: |-
+            =Font.Arial
+    - lisPerfil:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), "fora da lista de pessoas", Text(gblUsuario.rlt_perfil) & If(IsBlank(gblUsuario.rlt_cargo), "", " · " & Lower(gblUsuario.rlt_cargo)))
+          Color: |-
+            =Color.White
+          Size: |-
+            =9
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 470
+          Y: |-
+            =29
+          Width: |-
+            =410
+          Height: |-
+            =18
+          Font: |-
+            =Font.Arial
+    - lisAvatar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =Upper(Left(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), 1) & If(CountRows(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")) > 1, Left(Last(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")).Value, 1), ""))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =Parent.Width - 52
+          Y: |-
+            =10
+          Width: |-
+            =36
+          Height: |-
+            =36
+          Fill: |-
+            =corVerde
+          DisabledFill: |-
+            =corVerde
+          BorderColor: |-
+            =corVerde
+          DisabledBorderColor: |-
+            =corVerde
+          BorderThickness: |-
+            =0
+          RadiusTopLeft: |-
+            =18
+          RadiusTopRight: |-
+            =18
+          RadiusBottomLeft: |-
+            =18
+          RadiusBottomRight: |-
+            =18
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.Arial
+    - lisMenuFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =0
+          Y: |-
+            =61
+          Width: |-
+            =200
+          Height: |-
+            =Parent.Height - 61
+    - lisMenu0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="▤    Relatório"
+          OnSelect: |-
+            =Navigate(scrRelatorio, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - lisMenu1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="◔    Chamados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - lisMenu2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="↺    Histórico"
+          OnSelect: |-
+            =Navigate(scrHistorico, ScreenTransition.None, {locHistReg: Blank()})
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =176
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - lisMenu3:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="◈    Painel geral"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =corAzul10
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Bold
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - lisMenuMarca:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =4
+          Height: |-
+            =46
+    - lisMenuBolha:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento)))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =166
+          Y: |-
+            =240
+          Width: |-
+            =22
+          Height: |-
+            =18
+          Fill: |-
+            =corVerm
+          DisabledFill: |-
+            =corVerm
+          BorderColor: |-
+            =corVerm
+          DisabledBorderColor: |-
+            =corVerm
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =12
+          RadiusTopRight: |-
+            =12
+          RadiusBottomLeft: |-
+            =12
+          RadiusBottomRight: |-
+            =12
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Visible: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0
+          Font: |-
+            =Font.Arial
+    - lisMenu4:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="➤    Fechar"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - lisVoltar:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="‹  Painel geral"
+          Color: |-
+            =corAzul
+          Size: |-
+            =10
+          Underline: |-
+            =true
+          X: |-
+            =224
+          Y: |-
+            =70
+          Width: |-
+            =300
+          Height: |-
+            =22
+          OnSelect: |-
+            =Back()
+          Font: |-
+            =Font.Arial
+    - lisAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =224
+          Y: |-
+            =98
+          Width: |-
+            =36
+          Height: |-
+            =4
+    - lisTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="ATUALIZAR LISTAS"
+          Color: |-
+            =corAzul
+          Size: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =224
+          Y: |-
+            =104
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =34
+    - lisSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Inclua, altere ou desative itens. Item desativado some das listas do app, mas continua nos relatórios antigos (RF-021)."
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          X: |-
+            =224
+          Y: |-
+            =138
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =24
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          Font: |-
+            =Font.Arial
+    - lisAba0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Equipamentos  (" & CountIf(Equipamentos, statecode = 'Status (Equipamentos)'.Ativo) & ")"
+          OnSelect: |-
+            =UpdateContext({locAba: "eq"}); Reset(lisBusca)
+          X: |-
+            =224 + 0 * 214
+          Y: |-
+            =150
+          Width: |-
+            =206
+          Height: |-
+            =40
+          Size: |-
+            =11
+          FontWeight: |-
+            =If(locAba = "eq", FontWeight.Bold, FontWeight.Normal)
+          Fill: |-
+            =If(locAba = "eq", corAzul, Color.White)
+          Color: |-
+            =If(locAba = "eq", Color.White, corAzul)
+          HoverFill: |-
+            =If(locAba = "eq", corAzul80, corAzul10)
+          HoverColor: |-
+            =If(locAba = "eq", Color.White, corAzul)
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - lisAba1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Locais  (" & CountIf(Locais, statecode = 'Status (Locais)'.Ativo) & ")"
+          OnSelect: |-
+            =UpdateContext({locAba: "loc"}); Reset(lisBusca)
+          X: |-
+            =224 + 1 * 214
+          Y: |-
+            =150
+          Width: |-
+            =206
+          Height: |-
+            =40
+          Size: |-
+            =11
+          FontWeight: |-
+            =If(locAba = "loc", FontWeight.Bold, FontWeight.Normal)
+          Fill: |-
+            =If(locAba = "loc", corAzul, Color.White)
+          Color: |-
+            =If(locAba = "loc", Color.White, corAzul)
+          HoverFill: |-
+            =If(locAba = "loc", corAzul80, corAzul10)
+          HoverColor: |-
+            =If(locAba = "loc", Color.White, corAzul)
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - lisAba2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Pessoas e perfis  (" & CountIf(Pessoas, statecode = 'Status (Pessoas)'.Ativo) & ")"
+          OnSelect: |-
+            =UpdateContext({locAba: "pes"}); Reset(lisBusca)
+          X: |-
+            =224 + 2 * 214
+          Y: |-
+            =150
+          Width: |-
+            =206
+          Height: |-
+            =40
+          Size: |-
+            =11
+          FontWeight: |-
+            =If(locAba = "pes", FontWeight.Bold, FontWeight.Normal)
+          Fill: |-
+            =If(locAba = "pes", corAzul, Color.White)
+          Color: |-
+            =If(locAba = "pes", Color.White, corAzul)
+          HoverFill: |-
+            =If(locAba = "pes", corAzul80, corAzul10)
+          HoverColor: |-
+            =If(locAba = "pes", Color.White, corAzul)
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - lisBusca:
+        Control: Classic/TextInput@2.3.2
+        Properties:
+          Default: |-
+            =""
+          HintText: |-
+            ="Buscar por nome ou código SAP"
+          X: |-
+            =224
+          Y: |-
+            =204
+          Width: |-
+            =360
+          Height: |-
+            =40
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          PaddingLeft: |-
+            =12
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - lisInativos:
+        Control: Classic/CheckBox@2.1.0
+        Properties:
+          Text: |-
+            ="Mostrar desativados"
+          Default: |-
+            =false
+          X: |-
+            =600
+          Y: |-
+            =208
+          Width: |-
+            =240
+          Height: |-
+            =32
+          Size: |-
+            =11
+          CheckboxBorderColor: |-
+            =RGBA(91, 104, 118, 1)
+          CheckboxSize: |-
+            =20
+          CheckmarkFill: |-
+            =Color.White
+          Color: |-
+            =corTexto
+          Font: |-
+            =Font.Arial
+    - lisIncluir:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="＋  Incluir"
+          OnSelect: |-
+            =UpdateContext({locNovo: true, locJan: true, locErroLista: ""}); Reset(ediT1); Reset(ediT2); Reset(ediT3); Reset(ediT4); Reset(ediTipo); Reset(ediPerfil)
+          X: |-
+            =Parent.Width - 24 - 150
+          Y: |-
+            =204
+          Width: |-
+            =150
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =corAzul
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - lisGrade:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =""
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =224
+          Y: |-
+            =258
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =Parent.Height - 258 - 16
+          Fill: |-
+            =Color.White
+          DisabledFill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          DisabledBorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - lisCabeq0:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="DESCRIÇÃO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.0
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.46
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "eq"
+          Font: |-
+            =Font.Arial
+    - lisCabeq1:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="CÓDIGO SAP"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.46
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.16
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "eq"
+          Font: |-
+            =Font.Arial
+    - lisCabeq2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="TIPO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.62
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.16
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "eq"
+          Font: |-
+            =Font.Arial
+    - lisCabSiteq:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="SITUAÇÃO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.78
+          Y: |-
+            =258
+          Width: |-
+            =100
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "eq"
+          Font: |-
+            =Font.Arial
+    - lisCabLinhaeq:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corLinha
+          X: |-
+            =224 + 1
+          Y: |-
+            =292
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =2
+          Visible: |-
+            =locAba = "eq"
+    - lisGaleq:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =Sort(Filter(Equipamentos, (lisInativos.Value || statecode = 'Status (Equipamentos)'.Ativo) && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_codigosap)), rlt_nome)
+          TemplateSize: |-
+            =44
+          TemplatePadding: |-
+            =0
+          X: |-
+            =224 + 1
+          Y: |-
+            =294
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =Parent.Height - 294 - 18
+          Visible: |-
+            =locAba = "eq"
+        Children:
+          - lisCeq0:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_nome
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.0
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.46 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCeq1:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_codigosap
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.46
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.16 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCeq2:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Text(ThisItem.rlt_tipo)
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.62
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.16 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisSiteq:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, "ATIVO", "DESATIVADO")
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.78
+                Y: |-
+                  =11
+                Width: |-
+                  =96
+                Height: |-
+                  =22
+                Fill: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                DisabledFill: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                BorderColor: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                DisabledBorderColor: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =12
+                RadiusTopRight: |-
+                  =12
+                RadiusBottomLeft: |-
+                  =12
+                RadiusBottomRight: |-
+                  =12
+                Color: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                DisabledColor: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.Arial
+          - lisAlteq:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Alterar"
+                Color: |-
+                  =corAzul
+                Underline: |-
+                  =true
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Right
+                X: |-
+                  =Parent.TemplateWidth - 190
+                Y: |-
+                  =0
+                Width: |-
+                  =76
+                Height: |-
+                  =44
+                OnSelect: |-
+                  =UpdateContext({locEq: ThisItem, locNovo: false, locJan: true, locErroLista: ""}); Reset(ediT1); Reset(ediT2); Reset(ediT3); Reset(ediT4); Reset(ediTipo); Reset(ediPerfil)
+                Font: |-
+                  =Font.Arial
+          - lisDeseq:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, "Desativar", "Reativar")
+                Color: |-
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(138, 0, 33, 1), corAzul)
+                Underline: |-
+                  =true
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Right
+                X: |-
+                  =Parent.TemplateWidth - 104
+                Y: |-
+                  =0
+                Width: |-
+                  =92
+                Height: |-
+                  =44
+                OnSelect: |-
+                  =If(false, Notify("Você não pode desativar o seu próprio cadastro.", NotificationType.Warning),
+                    Patch(Equipamentos, LookUp(Equipamentos, rlt_equipamentoid = ThisItem.rlt_equipamentoid), {statecode: If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, 'Status (Equipamentos)'.Inativo, 'Status (Equipamentos)'.Ativo)});
+                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Equipamentos: " & If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, " desativado.", " reativado."), NotificationType.Success))
+                Font: |-
+                  =Font.Arial
+          - lisLinhaeq:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =corLinha
+                X: |-
+                  =0
+                Y: |-
+                  =Parent.TemplateHeight - 1
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =1
+    - lisCabloc0:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="LOCAL ESPECÍFICO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.0
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.34
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "loc"
+          Font: |-
+            =Font.Arial
+    - lisCabloc1:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="CÓDIGO SAP"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.34
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.14
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "loc"
+          Font: |-
+            =Font.Arial
+    - lisCabloc2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="ÁREA"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.48000000000000004
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.2
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "loc"
+          Font: |-
+            =Font.Arial
+    - lisCabloc3:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="LADO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.68
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.1
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "loc"
+          Font: |-
+            =Font.Arial
+    - lisCabSitloc:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="SITUAÇÃO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.78
+          Y: |-
+            =258
+          Width: |-
+            =100
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "loc"
+          Font: |-
+            =Font.Arial
+    - lisCabLinhaloc:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corLinha
+          X: |-
+            =224 + 1
+          Y: |-
+            =292
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =2
+          Visible: |-
+            =locAba = "loc"
+    - lisGalloc:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =Sort(Filter(Locais, (lisInativos.Value || statecode = 'Status (Locais)'.Ativo) && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_codigosap)), rlt_nome)
+          TemplateSize: |-
+            =44
+          TemplatePadding: |-
+            =0
+          X: |-
+            =224 + 1
+          Y: |-
+            =294
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =Parent.Height - 294 - 18
+          Visible: |-
+            =locAba = "loc"
+        Children:
+          - lisCloc0:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_nome
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.0
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.34 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCloc1:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_codigosap
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.34
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.14 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCloc2:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_area
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.48000000000000004
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.2 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCloc3:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_lado
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.68
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.1 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisSitloc:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, "ATIVO", "DESATIVADO")
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.78
+                Y: |-
+                  =11
+                Width: |-
+                  =96
+                Height: |-
+                  =22
+                Fill: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                DisabledFill: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                BorderColor: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                DisabledBorderColor: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =12
+                RadiusTopRight: |-
+                  =12
+                RadiusBottomLeft: |-
+                  =12
+                RadiusBottomRight: |-
+                  =12
+                Color: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                DisabledColor: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.Arial
+          - lisAltloc:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Alterar"
+                Color: |-
+                  =corAzul
+                Underline: |-
+                  =true
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Right
+                X: |-
+                  =Parent.TemplateWidth - 190
+                Y: |-
+                  =0
+                Width: |-
+                  =76
+                Height: |-
+                  =44
+                OnSelect: |-
+                  =UpdateContext({locLoc: ThisItem, locNovo: false, locJan: true, locErroLista: ""}); Reset(ediT1); Reset(ediT2); Reset(ediT3); Reset(ediT4); Reset(ediTipo); Reset(ediPerfil)
+                Font: |-
+                  =Font.Arial
+          - lisDesloc:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, "Desativar", "Reativar")
+                Color: |-
+                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(138, 0, 33, 1), corAzul)
+                Underline: |-
+                  =true
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Right
+                X: |-
+                  =Parent.TemplateWidth - 104
+                Y: |-
+                  =0
+                Width: |-
+                  =92
+                Height: |-
+                  =44
+                OnSelect: |-
+                  =If(false, Notify("Você não pode desativar o seu próprio cadastro.", NotificationType.Warning),
+                    Patch(Locais, LookUp(Locais, rlt_localid = ThisItem.rlt_localid), {statecode: If(ThisItem.statecode = 'Status (Locais)'.Ativo, 'Status (Locais)'.Inativo, 'Status (Locais)'.Ativo)});
+                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Locais: " & If(ThisItem.statecode = 'Status (Locais)'.Ativo, "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Locais)'.Ativo, " desativado.", " reativado."), NotificationType.Success))
+                Font: |-
+                  =Font.Arial
+          - lisLinhaloc:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =corLinha
+                X: |-
+                  =0
+                Y: |-
+                  =Parent.TemplateHeight - 1
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =1
+    - lisCabpes0:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="NOME"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.0
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.28
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "pes"
+          Font: |-
+            =Font.Arial
+    - lisCabpes1:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="CARGO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.28
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.2
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "pes"
+          Font: |-
+            =Font.Arial
+    - lisCabpes2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="PERFIL"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.48000000000000004
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.12
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "pes"
+          Font: |-
+            =Font.Arial
+    - lisCabpes3:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="E-MAIL DO LOGIN"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.6000000000000001
+          Y: |-
+            =258
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.18
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "pes"
+          Font: |-
+            =Font.Arial
+    - lisCabSitpes:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="SITUAÇÃO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.78
+          Y: |-
+            =258
+          Width: |-
+            =100
+          Height: |-
+            =34
+          Visible: |-
+            =locAba = "pes"
+          Font: |-
+            =Font.Arial
+    - lisCabLinhapes:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corLinha
+          X: |-
+            =224 + 1
+          Y: |-
+            =292
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =2
+          Visible: |-
+            =locAba = "pes"
+    - lisGalpes:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =Sort(Filter(Pessoas, (lisInativos.Value || statecode = 'Status (Pessoas)'.Ativo) && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_email || lisBusca.Text in rlt_cargo)), rlt_nome)
+          TemplateSize: |-
+            =44
+          TemplatePadding: |-
+            =0
+          X: |-
+            =224 + 1
+          Y: |-
+            =294
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =Parent.Height - 294 - 18
+          Visible: |-
+            =locAba = "pes"
+        Children:
+          - lisCpes0:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_nome
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.0
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.28 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCpes1:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_cargo
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.28
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.2 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCpes2:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Text(ThisItem.rlt_perfil)
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.48000000000000004
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.12 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisCpes3:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =ThisItem.rlt_email
+                Color: |-
+                  =corTexto
+                Size: |-
+                  =10
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.6000000000000001
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.18 - 8
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - lisSitpes:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, "ATIVO", "DESATIVADO")
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.78
+                Y: |-
+                  =11
+                Width: |-
+                  =96
+                Height: |-
+                  =22
+                Fill: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                DisabledFill: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                BorderColor: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                DisabledBorderColor: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                BorderThickness: |-
+                  =1
+                RadiusTopLeft: |-
+                  =12
+                RadiusTopRight: |-
+                  =12
+                RadiusBottomLeft: |-
+                  =12
+                RadiusBottomRight: |-
+                  =12
+                Color: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                DisabledColor: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.Arial
+          - lisAltpes:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="Alterar"
+                Color: |-
+                  =corAzul
+                Underline: |-
+                  =true
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Right
+                X: |-
+                  =Parent.TemplateWidth - 190
+                Y: |-
+                  =0
+                Width: |-
+                  =76
+                Height: |-
+                  =44
+                OnSelect: |-
+                  =UpdateContext({locPes: ThisItem, locNovo: false, locJan: true, locErroLista: ""}); Reset(ediT1); Reset(ediT2); Reset(ediT3); Reset(ediT4); Reset(ediTipo); Reset(ediPerfil)
+                Font: |-
+                  =Font.Arial
+          - lisDespes:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, "Desativar", "Reativar")
+                Color: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(138, 0, 33, 1), corAzul)
+                Underline: |-
+                  =true
+                Size: |-
+                  =10
+                Align: |-
+                  =Align.Right
+                X: |-
+                  =Parent.TemplateWidth - 104
+                Y: |-
+                  =0
+                Width: |-
+                  =92
+                Height: |-
+                  =44
+                OnSelect: |-
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo && ThisItem.rlt_pessoaid = gblUsuario.rlt_pessoaid, Notify("Você não pode desativar o seu próprio cadastro.", NotificationType.Warning),
+                    Patch(Pessoas, LookUp(Pessoas, rlt_pessoaid = ThisItem.rlt_pessoaid), {statecode: If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, 'Status (Pessoas)'.Inativo, 'Status (Pessoas)'.Ativo)});
+                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Pessoas e perfis: " & If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, " desativado.", " reativado."), NotificationType.Success))
+                Font: |-
+                  =Font.Arial
+          - lisLinhapes:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =corLinha
+                X: |-
+                  =0
+                Y: |-
+                  =Parent.TemplateHeight - 1
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =1
+    - ediFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =RGBA(0, 0, 0, 0.45)
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =Parent.Height
+          Visible: |-
+            =locJan
+    - ediCartao:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =""
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =(Parent.Width - 680) / 2
+          Y: |-
+            =(Parent.Height - 440) / 2
+          Width: |-
+            =680
+          Height: |-
+            =440
+          Fill: |-
+            =Color.White
+          DisabledFill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          DisabledBorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =12
+          RadiusTopRight: |-
+            =12
+          RadiusBottomLeft: |-
+            =12
+          RadiusBottomRight: |-
+            =12
+          Visible: |-
+            =locJan
+          Font: |-
+            =Font.Arial
+    - ediAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 20
+          Width: |-
+            =36
+          Height: |-
+            =4
+          Visible: |-
+            =locJan
+    - ediTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(locNovo, "INCLUIR – ", "ALTERAR – ") & Upper(Switch(locAba, "eq", "Equipamentos", "loc", "Locais", "Pessoas"))
+          Color: |-
+            =corAzul
+          Size: |-
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 28
+          Width: |-
+            =680 - 48
+          Height: |-
+            =30
+          Visible: |-
+            =locJan
+    - ediRot1:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =Switch(locAba, "eq", "DESCRIÇÃO *", "loc", "LOCAL ESPECÍFICO *", "NOME *")
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 76
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =20
+          Visible: |-
+            =locJan && (true)
+          Font: |-
+            =Font.Arial
+    - ediT1:
+        Control: Classic/TextInput@2.3.2
+        Properties:
+          Default: |-
+            =If(locNovo, "", Switch(locAba, "eq", locEq.rlt_nome, "loc", locLoc.rlt_nome, locPes.rlt_nome))
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 76 + 22
+          Width: |-
+            =680 - 48
+          Height: |-
+            =40
+          Visible: |-
+            =locJan
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          PaddingLeft: |-
+            =12
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - ediRot2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =Switch(locAba, "eq", "CÓDIGO SAP *", "loc", "CÓDIGO SAP *", "CARGO")
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 152
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =20
+          Visible: |-
+            =locJan && (true)
+          Font: |-
+            =Font.Arial
+    - ediT2:
+        Control: Classic/TextInput@2.3.2
+        Properties:
+          Default: |-
+            =If(locNovo, "", Switch(locAba, "eq", locEq.rlt_codigosap, "loc", locLoc.rlt_codigosap, locPes.rlt_cargo))
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 152 + 22
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =40
+          Visible: |-
+            =locJan
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          PaddingLeft: |-
+            =12
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - ediRotTipo:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="TIPO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =(Parent.Width - 680) / 2 + 24 + (680 - 48 - 16) / 2 + 16
+          Y: |-
+            =(Parent.Height - 440) / 2 + 152
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =20
+          Visible: |-
+            =locJan && (locAba in ["eq"])
+          Font: |-
+            =Font.Arial
+    - ediTipo:
+        Control: Classic/DropDown@2.3.1
+        Properties:
+          Items: |-
+            =Choices([@'Tipo de equipamento'])
+          Default: |-
+            =If(locNovo, "Outro", Text(locEq.rlt_tipo))
+          X: |-
+            =(Parent.Width - 680) / 2 + 24 + (680 - 48 - 16) / 2 + 16
+          Y: |-
+            =(Parent.Height - 440) / 2 + 152 + 22
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =40
+          Visible: |-
+            =locJan && locAba in ["eq"]
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          ChevronBackground: |-
+            =Color.White
+          ChevronFill: |-
+            =corTexto
+          SelectionFill: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          Font: |-
+            =Font.Arial
+    - ediRotPerfil:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="PERFIL *"
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =(Parent.Width - 680) / 2 + 24 + (680 - 48 - 16) / 2 + 16
+          Y: |-
+            =(Parent.Height - 440) / 2 + 152
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =20
+          Visible: |-
+            =locJan && (locAba in ["pes"])
+          Font: |-
+            =Font.Arial
+    - ediPerfil:
+        Control: Classic/DropDown@2.3.1
+        Properties:
+          Items: |-
+            =Choices([@Perfil])
+          Default: |-
+            =If(locNovo, "Técnico(a)", Text(locPes.rlt_perfil))
+          X: |-
+            =(Parent.Width - 680) / 2 + 24 + (680 - 48 - 16) / 2 + 16
+          Y: |-
+            =(Parent.Height - 440) / 2 + 152 + 22
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =40
+          Visible: |-
+            =locJan && locAba in ["pes"]
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          ChevronBackground: |-
+            =Color.White
+          ChevronFill: |-
+            =corTexto
+          SelectionFill: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          Font: |-
+            =Font.Arial
+    - ediRot3:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(locAba = "loc", "ÁREA *", "E-MAIL DO LOGIN")
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =If(locAba = "loc", (Parent.Width - 680) / 2 + 24 + (680 - 48 - 16) / 2 + 16, (Parent.Width - 680) / 2 + 24)
+          Y: |-
+            =If(locAba = "loc", (Parent.Height - 440) / 2 + 152, (Parent.Height - 440) / 2 + 228)
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =20
+          Visible: |-
+            =locJan && (locAba in ["loc", "pes"])
+          Font: |-
+            =Font.Arial
+    - ediT3:
+        Control: Classic/TextInput@2.3.2
+        Properties:
+          Default: |-
+            =If(locNovo, "", Switch(locAba, "eq", "", "loc", locLoc.rlt_area, locPes.rlt_email))
+          X: |-
+            =If(locAba = "loc", (Parent.Width - 680) / 2 + 24 + (680 - 48 - 16) / 2 + 16, (Parent.Width - 680) / 2 + 24)
+          Y: |-
+            =If(locAba = "loc", (Parent.Height - 440) / 2 + 152, (Parent.Height - 440) / 2 + 228) + 22
+          Width: |-
+            =If(locAba = "loc", (680 - 48 - 16) / 2, 680 - 48)
+          Height: |-
+            =40
+          Visible: |-
+            =locJan && locAba in ["loc", "pes"]
+          HintText: |-
+            =If(locAba = "loc", "Mesma grafia das áreas que já existem", "nome@inframerica.aero")
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          PaddingLeft: |-
+            =12
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - ediRot4:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="LADO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 228
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =20
+          Visible: |-
+            =locJan && (locAba in ["loc"])
+          Font: |-
+            =Font.Arial
+    - ediT4:
+        Control: Classic/TextInput@2.3.2
+        Properties:
+          Default: |-
+            =If(locNovo, "", Switch(locAba, "eq", "", "loc", locLoc.rlt_lado, ""))
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 228 + 22
+          Width: |-
+            =(680 - 48 - 16) / 2
+          Height: |-
+            =40
+          Visible: |-
+            =locJan && locAba in ["loc"]
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          PaddingLeft: |-
+            =12
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - ediAjuda:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corMuted
+          Size: |-
+            =9
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 228 + 70
+          Width: |-
+            =680 - 48
+          Height: |-
+            =36
+          Visible: |-
+            =locJan
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          Text: |-
+            =Switch(locAba, "eq", "O tipo define a Tela 3 do dashboard (Fator Q por tipo de equipamento).", "loc", "O app agrupa os locais pela área: use a mesma grafia das áreas que já existem.", "O e-mail liga a pessoa ao login no app. O perfil Líder libera esta tela e os avisos do Painel.")
+          Font: |-
+            =Font.Arial
+    - ediErro:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =locErroLista
+          Visible: |-
+            =locJan && !IsBlank(locErroLista)
+          Color: |-
+            =RGBA(138, 0, 33, 1)
+          Fill: |-
+            =corVerm20
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          PaddingLeft: |-
+            =12
+          X: |-
+            =(Parent.Width - 680) / 2 + 24
+          Y: |-
+            =(Parent.Height - 440) / 2 + 440 - 64
+          Width: |-
+            =680 - 48 - 150 - 8 - 120 - 8
+          Height: |-
+            =40
+          Font: |-
+            =Font.Arial
+    - ediSalvar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Salvar"
+          OnSelect: |-
+            =UpdateContext({locErroLista: Concat(Filter(Table(
+              {m: If(IsBlank(Trim(ediT1.Text)), "Preencha o " & Switch(locAba, "eq", "campo Descrição", "loc", "campo Local específico", "campo Nome") & ".", "")},
+              {m: If(locAba <> "pes" && IsBlank(Trim(ediT2.Text)), "Preencha o código SAP.", "")},
+              {m: If(locAba = "loc" && IsBlank(Trim(ediT3.Text)), "Preencha a área.", "")},
+              {m: If(locAba = "eq" && !IsBlank(Trim(ediT2.Text)) && !IsBlank(LookUp(Equipamentos, rlt_codigosap = Trim(ediT2.Text))) && (locNovo || LookUp(Equipamentos, rlt_codigosap = Trim(ediT2.Text)).rlt_equipamentoid <> locEq.rlt_equipamentoid), "Já existe um equipamento com esse código SAP: " & LookUp(Equipamentos, rlt_codigosap = Trim(ediT2.Text)).rlt_nome & ".", "")},
+              {m: If(locAba = "pes" && !IsBlank(Trim(ediT3.Text)) && !IsMatch(Trim(ediT3.Text), Match.Email), "E-mail inválido.", "")},
+              {m: If(locAba = "pes" && !IsBlank(Trim(ediT3.Text)) && !IsBlank(LookUp(Pessoas, rlt_email = Lower(Trim(ediT3.Text)))) && (locNovo || LookUp(Pessoas, rlt_email = Lower(Trim(ediT3.Text))).rlt_pessoaid <> locPes.rlt_pessoaid), "Esse e-mail já é de " & LookUp(Pessoas, rlt_email = Lower(Trim(ediT3.Text))).rlt_nome & ".", "")},
+              {m: If(locAba = "pes" && IsBlank(ediPerfil.Selected), "Escolha o perfil.", "")}
+            ), !IsBlank(m)), m, "  ")});
+            If(IsBlank(locErroLista),
+              Switch(locAba,
+              "eq", Patch(Equipamentos, If(locNovo, Defaults(Equipamentos), LookUp(Equipamentos, rlt_equipamentoid = locEq.rlt_equipamentoid)), {rlt_nome: Trim(ediT1.Text), rlt_codigosap: Trim(ediT2.Text), rlt_tipo: ediTipo.Selected.Value}),
+              "loc", Patch(Locais, If(locNovo, Defaults(Locais), LookUp(Locais, rlt_localid = locLoc.rlt_localid)), {rlt_nome: Trim(ediT1.Text), rlt_codigosap: Trim(ediT2.Text), rlt_area: Trim(ediT3.Text), rlt_lado: Trim(ediT4.Text)}),
+              Patch(Pessoas, If(locNovo, Defaults(Pessoas), LookUp(Pessoas, rlt_pessoaid = locPes.rlt_pessoaid)), {rlt_nome: Trim(ediT1.Text), rlt_cargo: Trim(ediT2.Text), rlt_email: Lower(Trim(ediT3.Text)), rlt_perfil: ediPerfil.Selected.Value}));
+              Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista " & Switch(locAba, "eq", "Equipamentos", "loc", "Locais", "Pessoas") & If(locNovo, ": incluído ", ": alterado ") & Trim(ediT1.Text), rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+              Notify(If(locNovo, "Incluído: ", "Alterado: ") & Trim(ediT1.Text), NotificationType.Success);
+              UpdateContext({locJan: false}))
+          X: |-
+            =(Parent.Width - 680) / 2 + 680 - 24 - 150
+          Y: |-
+            =(Parent.Height - 440) / 2 + 440 - 64
+          Width: |-
+            =150
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =corAzul
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =locJan
+          Font: |-
+            =Font.Arial
+    - ediCancelar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Cancelar"
+          OnSelect: |-
+            =UpdateContext({locJan: false})
+          X: |-
+            =(Parent.Width - 680) / 2 + 680 - 24 - 150 - 8 - 120
+          Y: |-
+            =(Parent.Height - 440) / 2 + 440 - 64
+          Width: |-
+            =120
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =locJan
+          Font: |-
+            =Font.Arial

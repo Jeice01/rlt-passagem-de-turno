@@ -28,5 +28,10 @@
         <label description="CHAMADO FALSO" languagecode="1046" />
       </labels>
     </option>
+    <option value="448170004" ExternalValue="" IsHidden="0">
+      <labels>
+        <label description="CANCELADO" languagecode="1046" />
+      </labels>
+    </option>
   </options>
 </optionset>

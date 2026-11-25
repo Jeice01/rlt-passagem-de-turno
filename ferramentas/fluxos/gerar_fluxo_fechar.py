@@ -35,6 +35,7 @@ FECHADO = 448170001
 SEC = {"elm": 448170000, "ele": 448170001, "bhs": 448170002, "civ": 448170003, "out": 448170004,
        "fq": 448170005, "prev": 448170006, "ios": 448170007}
 PENDENTE, IOS_CANCELADO, TURNO_ALFA = 448170000, 448170004, 448170000
+CANCELADO = 448170004  # status da atividade CANCELADO (25/11/2026)
 
 # Seções do PDF, na ordem e com os títulos do protótipo validado
 COLS_CORR = ["Descrição da atividade", "Local", "Hora início", "Hora de conclusão", "Status"]
@@ -103,9 +104,9 @@ eh_equip = f"or(equals({it('rlt_secao')}, {SEC['fq']}), equals({it('rlt_secao')}
 eh_ios = f"equals({it('rlt_secao')}, {SEC['ios']})"
 equipamento = esc(f"coalesce({it('_rlt_equipamento_value' + FMT)}, {it('rlt_equipamentolivre')})")
 descricao = esc(f"coalesce({it('rlt_descricao')}, {it('rlt_titulo')})")
-motivo = (f"if(and({eh_ios}, equals({it('rlt_statusios')}, {IOS_CANCELADO})), "
+motivo = (f"if(or(and({eh_ios}, equals({it('rlt_statusios')}, {IOS_CANCELADO})), and(not({eh_ios}), equals({it('rlt_status')}, {CANCELADO}))), "
           f"concat('<br><i>Motivo: ', {esc(it('rlt_motivocancelamento'))}, '</i>'), '')")
-col1 = f"if({eh_equip}, {equipamento}, concat({descricao}, {motivo}))"
+col1 = f"if({eh_equip}, concat({equipamento}, {motivo}), concat({descricao}, {motivo}))"
 col2 = f"if(or({eh_equip}, {eh_ios}), {esc(it('rlt_numero'))}, {esc(it('_rlt_local_value' + FMT))})"
 fim = (f"if(not(empty(coalesce({it('rlt_conclusao')}, ''))), {dh(it('rlt_conclusao'))}, "
        f"if(equals({it('rlt_ni')}, true), 'N/I', if(equals({it('rlt_status')}, {PENDENTE}), '–', '')))")
@@ -340,7 +341,7 @@ def solucao_xml():
             'CRMServerServiceabilityVersion="9.2.26111.00138">\n  <SolutionManifest>\n    <UniqueName>RLT_Fluxos</UniqueName>\n'
             '    <LocalizedNames>\n      <LocalizedName description="RLT – Fluxos" languagecode="1046" />\n    </LocalizedNames>\n'
             '    <Descriptions>\n      <Description description="Fluxos do RLT – Passagem de Turno do CCM (Fechar e enviar: PDF e e-mail)." languagecode="1046" />\n'
-            '    </Descriptions>\n    <Version>1.0.0.0</Version>\n    <Managed>0</Managed>\n    '
+            '    </Descriptions>\n    <Version>1.0.1.0</Version>\n    <Managed>0</Managed>\n    '
             + base[ini:fim] + "\n    <RootComponents>\n" + "\n".join(raizes) + "\n    </RootComponents>\n    <MissingDependencies />\n"
             "  </SolutionManifest>\n</ImportExportXml>\n")
 
