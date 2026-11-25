@@ -6,6 +6,8 @@
   <Description>App RLT do CCM: acesso igual para todos. Cria, lê e altera relatórios, registros, equipe, anexos e listas; histórico só criar e ler; sem exclusão.</Description>
   <RolePrivileges>
     <RolePrivilege name="prvAppendrlt_anexo" level="Global" />
+    <RolePrivilege name="prvAppendrlt_aviso" level="Global" />
+    <RolePrivilege name="prvAppendrlt_envioeletro" level="Global" />
     <RolePrivilege name="prvAppendrlt_equipamento" level="Global" />
     <RolePrivilege name="prvAppendrlt_equipe" level="Global" />
     <RolePrivilege name="prvAppendrlt_historico" level="Global" />
@@ -14,6 +16,8 @@
     <RolePrivilege name="prvAppendrlt_registro" level="Global" />
     <RolePrivilege name="prvAppendrlt_relatorio" level="Global" />
     <RolePrivilege name="prvAppendTorlt_anexo" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_aviso" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_envioeletro" level="Global" />
     <RolePrivilege name="prvAppendTorlt_equipamento" level="Global" />
     <RolePrivilege name="prvAppendTorlt_equipe" level="Global" />
     <RolePrivilege name="prvAppendTorlt_historico" level="Global" />
@@ -22,6 +26,8 @@
     <RolePrivilege name="prvAppendTorlt_registro" level="Global" />
     <RolePrivilege name="prvAppendTorlt_relatorio" level="Global" />
     <RolePrivilege name="prvCreaterlt_anexo" level="Global" />
+    <RolePrivilege name="prvCreaterlt_aviso" level="Global" />
+    <RolePrivilege name="prvCreaterlt_envioeletro" level="Global" />
     <RolePrivilege name="prvCreaterlt_equipamento" level="Global" />
     <RolePrivilege name="prvCreaterlt_equipe" level="Global" />
     <RolePrivilege name="prvCreaterlt_historico" level="Global" />
@@ -30,7 +36,10 @@
     <RolePrivilege name="prvCreaterlt_registro" level="Global" />
     <RolePrivilege name="prvCreaterlt_relatorio" level="Global" />
     <RolePrivilege name="prvCreateSharePointData" level="Global" />
+    <RolePrivilege name="prvDeleterlt_aviso" level="Global" />
     <RolePrivilege name="prvReadrlt_anexo" level="Global" />
+    <RolePrivilege name="prvReadrlt_aviso" level="Global" />
+    <RolePrivilege name="prvReadrlt_envioeletro" level="Global" />
     <RolePrivilege name="prvReadrlt_equipamento" level="Global" />
     <RolePrivilege name="prvReadrlt_equipe" level="Global" />
     <RolePrivilege name="prvReadrlt_historico" level="Global" />
@@ -41,6 +50,8 @@
     <RolePrivilege name="prvReadSharePointData" level="Global" />
     <RolePrivilege name="prvReadSharePointDocument" level="Global" />
     <RolePrivilege name="prvWriterlt_anexo" level="Global" />
+    <RolePrivilege name="prvWriterlt_aviso" level="Global" />
+    <RolePrivilege name="prvWriterlt_envioeletro" level="Global" />
     <RolePrivilege name="prvWriterlt_equipamento" level="Global" />
     <RolePrivilege name="prvWriterlt_equipe" level="Global" />
     <RolePrivilege name="prvWriterlt_local" level="Global" />
@@ -48,16 +59,5 @@
     <RolePrivilege name="prvWriterlt_registro" level="Global" />
     <RolePrivilege name="prvWriterlt_relatorio" level="Global" />
     <RolePrivilege name="prvWriteSharePointData" level="Global" />
-    <RolePrivilege name="prvCreaterlt_aviso" level="Global" />
-    <RolePrivilege name="prvReadrlt_aviso" level="Global" />
-    <RolePrivilege name="prvWriterlt_aviso" level="Global" />
-    <RolePrivilege name="prvDeleterlt_aviso" level="Global" />
-    <RolePrivilege name="prvAppendrlt_aviso" level="Global" />
-    <RolePrivilege name="prvAppendTorlt_aviso" level="Global" />
-    <RolePrivilege name="prvCreaterlt_envioeletro" level="Global" />
-    <RolePrivilege name="prvReadrlt_envioeletro" level="Global" />
-    <RolePrivilege name="prvWriterlt_envioeletro" level="Global" />
-    <RolePrivilege name="prvAppendrlt_envioeletro" level="Global" />
-    <RolePrivilege name="prvAppendTorlt_envioeletro" level="Global" />
   </RolePrivileges>
 </Role>

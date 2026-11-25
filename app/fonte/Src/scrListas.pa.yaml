@@ -549,7 +549,7 @@ Screens:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Equipamentos  (" & CountIf(Equipamentos, statecode = 'Status (Equipamentos)'.Ativo) & ")"
+            ="Equipamentos  (" & CountIf(Equipamentos, statecode = 'Status (Equipamentos)'.'Ativo(a)') & ")"
           OnSelect: |-
             =UpdateContext({locAba: "eq"}); Reset(lisBusca)
           X: |-
@@ -590,7 +590,7 @@ Screens:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Locais  (" & CountIf(Locais, statecode = 'Status (Locais)'.Ativo) & ")"
+            ="Locais  (" & CountIf(Locais, statecode = 'Status (Locais)'.'Ativo(a)') & ")"
           OnSelect: |-
             =UpdateContext({locAba: "loc"}); Reset(lisBusca)
           X: |-
@@ -631,7 +631,7 @@ Screens:
         Control: Classic/Button@2.2.0
         Properties:
           Text: |-
-            ="Pessoas e perfis  (" & CountIf(Pessoas, statecode = 'Status (Pessoas)'.Ativo) & ")"
+            ="Pessoas e perfis  (" & CountIf(Pessoas, statecode = 'Status (Pessoas)'.'Ativo(a)') & ")"
           OnSelect: |-
             =UpdateContext({locAba: "pes"}); Reset(lisBusca)
           X: |-
@@ -920,7 +920,7 @@ Screens:
         Variant: Vertical
         Properties:
           Items: |-
-            =Sort(Filter(Equipamentos, (lisInativos.Value || statecode = 'Status (Equipamentos)'.Ativo) && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_codigosap)), rlt_nome)
+            =Sort(Filter(Equipamentos, (lisInativos.Value || statecode = 'Status (Equipamentos)'.'Ativo(a)') && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_codigosap)), rlt_nome)
           TemplateSize: |-
             =44
           TemplatePadding: |-
@@ -997,7 +997,7 @@ Screens:
               Control: Classic/Button@2.2.0
               Properties:
                 Text: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, "ATIVO", "DESATIVADO")
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', "ATIVO", "DESATIVADO")
                 DisplayMode: |-
                   =DisplayMode.Disabled
                 TabIndex: |-
@@ -1011,13 +1011,13 @@ Screens:
                 Height: |-
                   =22
                 Fill: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
                 DisabledFill: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
                 BorderColor: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
                 DisabledBorderColor: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
                 BorderThickness: |-
                   =1
                 RadiusTopLeft: |-
@@ -1029,9 +1029,9 @@ Screens:
                 RadiusBottomRight: |-
                   =12
                 Color: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
                 DisabledColor: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
                 Size: |-
                   =9
                 FontWeight: |-
@@ -1067,9 +1067,9 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, "Desativar", "Reativar")
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', "Desativar", "Reativar")
                 Color: |-
-                  =If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, RGBA(138, 0, 33, 1), corAzul)
+                  =If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', RGBA(138, 0, 33, 1), corAzul)
                 Underline: |-
                   =true
                 Size: |-
@@ -1086,9 +1086,9 @@ Screens:
                   =44
                 OnSelect: |-
                   =If(false, Notify("Você não pode desativar o seu próprio cadastro.", NotificationType.Warning),
-                    Patch(Equipamentos, LookUp(Equipamentos, rlt_equipamentoid = ThisItem.rlt_equipamentoid), {statecode: If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, 'Status (Equipamentos)'.Inativo, 'Status (Equipamentos)'.Ativo)});
-                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Equipamentos: " & If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
-                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Equipamentos)'.Ativo, " desativado.", " reativado."), NotificationType.Success))
+                    Patch(Equipamentos, LookUp(Equipamentos, rlt_equipamentoid = ThisItem.rlt_equipamentoid), {statecode: If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', 'Status (Equipamentos)'.'Inativo(a)', 'Status (Equipamentos)'.'Ativo(a)')});
+                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Equipamentos: " & If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Equipamentos)'.'Ativo(a)', " desativado.", " reativado."), NotificationType.Success))
                 Font: |-
                   =Font.Arial
           - lisLinhaeq:
@@ -1239,7 +1239,7 @@ Screens:
         Variant: Vertical
         Properties:
           Items: |-
-            =Sort(Filter(Locais, (lisInativos.Value || statecode = 'Status (Locais)'.Ativo) && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_codigosap)), rlt_nome)
+            =Sort(Filter(Locais, (lisInativos.Value || statecode = 'Status (Locais)'.'Ativo(a)') && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_codigosap)), rlt_nome)
           TemplateSize: |-
             =44
           TemplatePadding: |-
@@ -1335,7 +1335,7 @@ Screens:
               Control: Classic/Button@2.2.0
               Properties:
                 Text: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, "ATIVO", "DESATIVADO")
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', "ATIVO", "DESATIVADO")
                 DisplayMode: |-
                   =DisplayMode.Disabled
                 TabIndex: |-
@@ -1349,13 +1349,13 @@ Screens:
                 Height: |-
                   =22
                 Fill: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
                 DisabledFill: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
                 BorderColor: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
                 DisabledBorderColor: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
                 BorderThickness: |-
                   =1
                 RadiusTopLeft: |-
@@ -1367,9 +1367,9 @@ Screens:
                 RadiusBottomRight: |-
                   =12
                 Color: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
                 DisabledColor: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
                 Size: |-
                   =9
                 FontWeight: |-
@@ -1405,9 +1405,9 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, "Desativar", "Reativar")
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', "Desativar", "Reativar")
                 Color: |-
-                  =If(ThisItem.statecode = 'Status (Locais)'.Ativo, RGBA(138, 0, 33, 1), corAzul)
+                  =If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', RGBA(138, 0, 33, 1), corAzul)
                 Underline: |-
                   =true
                 Size: |-
@@ -1424,9 +1424,9 @@ Screens:
                   =44
                 OnSelect: |-
                   =If(false, Notify("Você não pode desativar o seu próprio cadastro.", NotificationType.Warning),
-                    Patch(Locais, LookUp(Locais, rlt_localid = ThisItem.rlt_localid), {statecode: If(ThisItem.statecode = 'Status (Locais)'.Ativo, 'Status (Locais)'.Inativo, 'Status (Locais)'.Ativo)});
-                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Locais: " & If(ThisItem.statecode = 'Status (Locais)'.Ativo, "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
-                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Locais)'.Ativo, " desativado.", " reativado."), NotificationType.Success))
+                    Patch(Locais, LookUp(Locais, rlt_localid = ThisItem.rlt_localid), {statecode: If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', 'Status (Locais)'.'Inativo(a)', 'Status (Locais)'.'Ativo(a)')});
+                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Locais: " & If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Locais)'.'Ativo(a)', " desativado.", " reativado."), NotificationType.Success))
                 Font: |-
                   =Font.Arial
           - lisLinhaloc:
@@ -1577,7 +1577,7 @@ Screens:
         Variant: Vertical
         Properties:
           Items: |-
-            =Sort(Filter(Pessoas, (lisInativos.Value || statecode = 'Status (Pessoas)'.Ativo) && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_email || lisBusca.Text in rlt_cargo)), rlt_nome)
+            =Sort(Filter(Pessoas, (lisInativos.Value || statecode = 'Status (Pessoas)'.'Ativo(a)') && (IsBlank(Trim(lisBusca.Text)) || lisBusca.Text in rlt_nome || lisBusca.Text in rlt_email || lisBusca.Text in rlt_cargo)), rlt_nome)
           TemplateSize: |-
             =44
           TemplatePadding: |-
@@ -1673,7 +1673,7 @@ Screens:
               Control: Classic/Button@2.2.0
               Properties:
                 Text: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, "ATIVO", "DESATIVADO")
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', "ATIVO", "DESATIVADO")
                 DisplayMode: |-
                   =DisplayMode.Disabled
                 TabIndex: |-
@@ -1687,13 +1687,13 @@ Screens:
                 Height: |-
                   =22
                 Fill: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
                 DisabledFill: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', RGBA(227, 242, 218, 1), RGBA(236, 239, 242, 1))
                 BorderColor: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
                 DisabledBorderColor: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', RGBA(191, 226, 168, 1), RGBA(207, 214, 221, 1))
                 BorderThickness: |-
                   =1
                 RadiusTopLeft: |-
@@ -1705,9 +1705,9 @@ Screens:
                 RadiusBottomRight: |-
                   =12
                 Color: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
                 DisabledColor: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', RGBA(47, 98, 20, 1), RGBA(71, 82, 94, 1))
                 Size: |-
                   =9
                 FontWeight: |-
@@ -1743,9 +1743,9 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, "Desativar", "Reativar")
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', "Desativar", "Reativar")
                 Color: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, RGBA(138, 0, 33, 1), corAzul)
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', RGBA(138, 0, 33, 1), corAzul)
                 Underline: |-
                   =true
                 Size: |-
@@ -1761,10 +1761,10 @@ Screens:
                 Height: |-
                   =44
                 OnSelect: |-
-                  =If(ThisItem.statecode = 'Status (Pessoas)'.Ativo && ThisItem.rlt_pessoaid = gblUsuario.rlt_pessoaid, Notify("Você não pode desativar o seu próprio cadastro.", NotificationType.Warning),
-                    Patch(Pessoas, LookUp(Pessoas, rlt_pessoaid = ThisItem.rlt_pessoaid), {statecode: If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, 'Status (Pessoas)'.Inativo, 'Status (Pessoas)'.Ativo)});
-                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Pessoas e perfis: " & If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
-                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Pessoas)'.Ativo, " desativado.", " reativado."), NotificationType.Success))
+                  =If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)' && ThisItem.rlt_pessoaid = gblUsuario.rlt_pessoaid, Notify("Você não pode desativar o seu próprio cadastro.", NotificationType.Warning),
+                    Patch(Pessoas, LookUp(Pessoas, rlt_pessoaid = ThisItem.rlt_pessoaid), {statecode: If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', 'Status (Pessoas)'.'Inativo(a)', 'Status (Pessoas)'.'Ativo(a)')});
+                    Patch(Histórico, Defaults(Histórico), {rlt_campo: "Lista Pessoas e perfis: " & If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', "desativado ", "reativado ") & ThisItem.rlt_nome, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+                    Notify(ThisItem.rlt_nome & If(ThisItem.statecode = 'Status (Pessoas)'.'Ativo(a)', " desativado.", " reativado."), NotificationType.Success))
                 Font: |-
                   =Font.Arial
           - lisLinhapes:

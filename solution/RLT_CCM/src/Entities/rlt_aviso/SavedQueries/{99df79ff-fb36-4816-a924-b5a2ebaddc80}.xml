@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>0</isdefault>
+    <savedqueryid>{99df79ff-fb36-4816-a924-b5a2ebaddc80}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="rlt_titulo" select="1" icon="1" preview="1">
+        <row name="result" id="rlt_avisoid">
+          <cell name="rlt_titulo" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="rlt_aviso">
+          <attribute name="rlt_avisoid" />
+          <attribute name="rlt_titulo" />
+          <attribute name="createdon" />
+          <order attribute="rlt_titulo" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="1" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.4.0.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Avisos Inativos(as)" languagecode="1046" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml version="9.2.26111.138" SolutionPackageVersion="9.2" languagecode="1046" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26111.138" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26111.00138">
+<ImportExportXml version="9.2.26112.144" SolutionPackageVersion="9.2" languagecode="1046" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26112.144" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26112.00144">
   <SolutionManifest>
     <UniqueName>RLT_CCM</UniqueName>
     <LocalizedNames>
@@ -8,7 +8,7 @@
     <Descriptions>
       <Description description="App de Relatório de Passagem de Turno (RLT) do CCM – substitui a planilha Excel. Ver PRD." languagecode="1046" />
     </Descriptions>
-    <Version>1.2.0.1</Version>
+    <Version>1.4.0.0</Version>
     <Managed>0</Managed>
     <Publisher>
       <UniqueName>InframericaRLT</UniqueName>

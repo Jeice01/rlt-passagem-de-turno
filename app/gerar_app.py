@@ -86,9 +86,13 @@ ABERTO_REL = f"!IsBlank(gblRel) && gblRel.rlt_situacao = {SIT}.Aberto"
 LIDER = "(!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder)"
 
 
+# Nomes das opções da coluna de sistema Status neste ambiente (conferidos no Studio em 25/11/2026)
+OP_ATIVO, OP_INATIVO = "'Ativo(a)'", "'Inativo(a)'"
+
+
 def ativo(tabela, ativo=True):
     """Condição de item ativo (coluna de sistema Status). Itens das listas não se excluem: o líder desativa."""
-    return f"statecode = 'Status ({tabela})'.{'Ativo' if ativo else 'Inativo'}"
+    return f"statecode = 'Status ({tabela})'.{OP_ATIVO if ativo else OP_INATIVO}"
 
 
 def ativos(tabela):
@@ -1333,7 +1337,7 @@ def tela_listas():
         proprio = f"{eh_ativo} && ThisItem.rlt_pessoaid = gblUsuario.rlt_pessoaid" if aba == "pes" else "false"
         alternar = (f"If({proprio}, "
                     f"Notify(\"Você não pode desativar o seu próprio cadastro.\", NotificationType.Warning),\n"
-                    f"  Patch({tab}, {reg}, {{statecode: If({eh_ativo}, 'Status ({tab})'.Inativo, 'Status ({tab})'.Ativo)}});\n  "
+                    f"  Patch({tab}, {reg}, {{statecode: If({eh_ativo}, 'Status ({tab})'.{OP_INATIVO}, 'Status ({tab})'.{OP_ATIVO})}});\n  "
                     + hist(f'"Lista {rot}: " & If({eh_ativo}, "desativado ", "reativado ") & ThisItem.rlt_nome')
                     + f";\n  Notify(ThisItem.rlt_nome & If({eh_ativo}, \" desativado.\", \" reativado.\"), NotificationType.Success))")
         alterar = (f'UpdateContext({{{var}: ThisItem, locNovo: false, locJan: true, locErroLista: ""}}); '

@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <EntityRelationship Name="business_unit_rlt_anexo" />
+  <EntityRelationship Name="business_unit_rlt_aviso" />
+  <EntityRelationship Name="business_unit_rlt_envioeletro" />
   <EntityRelationship Name="business_unit_rlt_equipe" />
   <EntityRelationship Name="business_unit_rlt_historico" />
   <EntityRelationship Name="business_unit_rlt_registro" />
@@ -8,6 +10,10 @@
   <EntityRelationship Name="FileAttachment_rlt_anexo_rlt_arquivo" />
   <EntityRelationship Name="lk_rlt_anexo_createdby" />
   <EntityRelationship Name="lk_rlt_anexo_modifiedby" />
+  <EntityRelationship Name="lk_rlt_aviso_createdby" />
+  <EntityRelationship Name="lk_rlt_aviso_modifiedby" />
+  <EntityRelationship Name="lk_rlt_envioeletro_createdby" />
+  <EntityRelationship Name="lk_rlt_envioeletro_modifiedby" />
   <EntityRelationship Name="lk_rlt_equipamento_createdby" />
   <EntityRelationship Name="lk_rlt_equipamento_modifiedby" />
   <EntityRelationship Name="lk_rlt_equipe_createdby" />
@@ -26,12 +32,16 @@
   <EntityRelationship Name="organization_rlt_local" />
   <EntityRelationship Name="organization_rlt_pessoa" />
   <EntityRelationship Name="owner_rlt_anexo" />
+  <EntityRelationship Name="owner_rlt_aviso" />
+  <EntityRelationship Name="owner_rlt_envioeletro" />
   <EntityRelationship Name="owner_rlt_equipe" />
   <EntityRelationship Name="owner_rlt_historico" />
   <EntityRelationship Name="owner_rlt_registro" />
   <EntityRelationship Name="owner_rlt_relatorio" />
   <EntityRelationship Name="rlt_equipamento_registro" />
   <EntityRelationship Name="rlt_local_registro" />
+  <EntityRelationship Name="rlt_pessoa_aviso" />
+  <EntityRelationship Name="rlt_pessoa_envioeletro" />
   <EntityRelationship Name="rlt_pessoa_equipe" />
   <EntityRelationship Name="rlt_pessoa_equipe_retiradopor" />
   <EntityRelationship Name="rlt_pessoa_historico" />
@@ -43,15 +53,17 @@
   <EntityRelationship Name="rlt_relatorio_historico" />
   <EntityRelationship Name="rlt_relatorio_registro" />
   <EntityRelationship Name="team_rlt_anexo" />
+  <EntityRelationship Name="team_rlt_aviso" />
+  <EntityRelationship Name="team_rlt_envioeletro" />
   <EntityRelationship Name="team_rlt_equipe" />
   <EntityRelationship Name="team_rlt_historico" />
   <EntityRelationship Name="team_rlt_registro" />
   <EntityRelationship Name="team_rlt_relatorio" />
   <EntityRelationship Name="user_rlt_anexo" />
+  <EntityRelationship Name="user_rlt_aviso" />
+  <EntityRelationship Name="user_rlt_envioeletro" />
   <EntityRelationship Name="user_rlt_equipe" />
   <EntityRelationship Name="user_rlt_historico" />
   <EntityRelationship Name="user_rlt_registro" />
   <EntityRelationship Name="user_rlt_relatorio" />
-  <EntityRelationship Name="rlt_pessoa_aviso" />
-  <EntityRelationship Name="rlt_pessoa_envioeletro" />
 </EntityRelationships>

@@ -27,7 +27,7 @@ O app é gerado a partir do protótipo validado (`prototipo/index.html`, PRD 1.3
 O `pac canvas pack` não acrescenta fontes de dados. Quando o gerador passa a usar uma tabela nova (ex.: **Avisos**, na 1.4.0.0),
 importe a solução, abra o app no Studio e adicione a tabela em **Dados > Adicionar dados** antes de publicar.
 
-O "ativo/desativado" das listas usa a coluna de sistema **Status** (`statecode`, opções `'Status (Equipamentos)'.Ativo` e `.Inativo`).
+O "ativo/desativado" das listas usa a coluna de sistema **Status** (`statecode`, opções `'Status (Equipamentos)'.'Ativo(a)'` e `.'Inativo(a)'`, nomes conferidos no Studio).
 
 ## Coisas que só o Studio confirma
 

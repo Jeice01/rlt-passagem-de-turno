@@ -30,7 +30,7 @@ App:
         {Ordem: 8, Nome: "IOS informados", Valor: [@'Seção'].'IOS informados', Tipo: "ios", Cor: RGBA(153, 175, 193, 1)}
       );
     OnStart: |-
-      =Set(gblUsuario, LookUp(Pessoas, rlt_email = User().Email && statecode = 'Status (Pessoas)'.Ativo));
+      =Set(gblUsuario, LookUp(Pessoas, rlt_email = User().Email && statecode = 'Status (Pessoas)'.'Ativo(a)'));
       Set(gblRel, First(Sort(Filter(Relatórios, rlt_situacao = [@'Situação do relatório'].Aberto), createdon, SortOrder.Descending)));
       If(IsBlank(gblRel), Set(gblRel, First(Sort(Relatórios, createdon, SortOrder.Descending))));
       If(!IsBlank(gblUsuario) && !IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto &&

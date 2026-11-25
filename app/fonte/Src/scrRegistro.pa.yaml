@@ -801,7 +801,7 @@ Screens:
                 HoverFill: |-
                   =corAzul10
                 Items: |-
-                  =Sort(Distinct(Filter(Locais, statecode = 'Status (Locais)'.Ativo), rlt_area), Value)
+                  =Sort(Distinct(Filter(Locais, statecode = 'Status (Locais)'.'Ativo(a)'), rlt_area), Value)
                 Default: |-
                   =locArea
                 Visible: |-
@@ -852,7 +852,7 @@ Screens:
                 HoverFill: |-
                   =corAzul10
                 Items: |-
-                  =Filter(Locais, rlt_area = regArea.Selected.Value && statecode = 'Status (Locais)'.Ativo)
+                  =Filter(Locais, rlt_area = regArea.Selected.Value && statecode = 'Status (Locais)'.'Ativo(a)')
                 DisplayFields: |-
                   =["rlt_nome"]
                 SearchFields: |-
@@ -871,7 +871,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  ="Lista de " & CountIf(Locais, statecode = 'Status (Locais)'.Ativo) & " locais (código SAP), escolhida em dois passos."
+                  ="Lista de " & CountIf(Locais, statecode = 'Status (Locais)'.'Ativo(a)') & " locais (código SAP), escolhida em dois passos."
                 Color: |-
                   =corMuted
                 Size: |-
@@ -957,7 +957,7 @@ Screens:
                 HoverFill: |-
                   =corAzul10
                 Items: |-
-                  =Filter(Equipamentos, statecode = 'Status (Equipamentos)'.Ativo)
+                  =Filter(Equipamentos, statecode = 'Status (Equipamentos)'.'Ativo(a)')
                 DisplayFields: |-
                   =["rlt_nome"]
                 SearchFields: |-

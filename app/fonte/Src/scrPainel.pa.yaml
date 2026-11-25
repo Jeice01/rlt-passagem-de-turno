@@ -926,7 +926,7 @@ Screens:
                     Control: Classic/ComboBox@2.4.0
                     Properties:
                       Items: |-
-                        =Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem && statecode = 'Status (Equipamentos)'.Ativo)
+                        =Filter(Equipamentos, rlt_tipo <> [@'Tipo de equipamento'].Bagagem && statecode = 'Status (Equipamentos)'.'Ativo(a)')
                       DisplayFields: |-
                         =["rlt_nome"]
                       SearchFields: |-
@@ -1501,7 +1501,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =CountIf(Equipamentos, statecode = 'Status (Equipamentos)'.Ativo)
+                  =CountIf(Equipamentos, statecode = 'Status (Equipamentos)'.'Ativo(a)')
                 X: |-
                   =16 + (Parent.TemplateWidth - 14 - 32) * 0.6
                 Y: |-
@@ -1579,7 +1579,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =CountIf(Locais, statecode = 'Status (Locais)'.Ativo)
+                  =CountIf(Locais, statecode = 'Status (Locais)'.'Ativo(a)')
                 X: |-
                   =16 + (Parent.TemplateWidth - 14 - 32) * 0.6
                 Y: |-
@@ -1657,7 +1657,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =CountIf(Pessoas, statecode = 'Status (Pessoas)'.Ativo)
+                  =CountIf(Pessoas, statecode = 'Status (Pessoas)'.'Ativo(a)')
                 X: |-
                   =16 + (Parent.TemplateWidth - 14 - 32) * 0.6
                 Y: |-
