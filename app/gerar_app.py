@@ -509,11 +509,11 @@ def tela_registro():
       rlt_numero: regNum.Text,
       rlt_inicio: vIni,
       rlt_conclusao: vFim,
-      rlt_ni: regNI.Value && IsBlank(vFim),
+      rlt_ni: regNI.Value && (IsBlank(vFim) || vFim > Now()),
       rlt_chamadofalso: regFalso.Value,
       rlt_limpezatecnica: regLimpeza.Value,
-      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && IsBlank(vFim), {ST}.'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, "CANCELADO", {ST}.CANCELADO, {ST}.'EM ANDAMENTO')),
-      rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), {SI}.'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", {SI}.Agendado, "Suspenso", {SI}.Suspenso, "Concluído", {SI}.Concluído, "Cancelado", {SI}.Cancelado, "Não informado (NI)", {SI}.'Não informado (NI)', {SI}.'Em andamento')),
+      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && (IsBlank(vFim) || vFim > Now()), {ST}.'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, "CANCELADO", {ST}.CANCELADO, {ST}.'EM ANDAMENTO')),
+      rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && (IsBlank(vFim) || vFim > Now()), {SI}.'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", {SI}.Agendado, "Suspenso", {SI}.Suspenso, "Concluído", {SI}.Concluído, "Cancelado", {SI}.Cancelado, "Não informado (NI)", {SI}.'Não informado (NI)', {SI}.'Em andamento')),
       rlt_motivocancelamento: regMotivo.Text,
       rlt_feedback: If({ELETRO}, Trim(regFeedback.Text), "")
     }}));
@@ -544,7 +544,9 @@ def tela_registro():
       Back())
   )
 )"""
-    status_fim = (f"UpdateContext({{locFim: {v_fim}}}); If(!IsBlank(locFim), UpdateContext({{locNI: false, locStatus: \"CONCLUÍDO\", locStatusIos: \"Concluído\"}}))")
+    # Hora de conclusão no futuro = previsão de término (ex.: fim programado de um IOS): não conclui e não bloqueia o N/I (25/11/2026)
+    SEM_FIM = "(IsBlank(locFim) || locFim > Now())"
+    status_fim = (f"UpdateContext({{locFim: {v_fim}}}); If(!IsBlank(locFim) && locFim <= Now(), UpdateContext({{locNI: false, locStatus: \"CONCLUÍDO\", locStatusIos: \"Concluído\"}}))")
     agora = 'UpdateContext({locFim: Now(), locNI: false, locStatus: "CONCLUÍDO", locStatusIos: "Concluído"})'
     limpar = (f"UpdateContext({{locFim: Blank(), locStatus: If(locStatus = \"CONCLUÍDO\", \"EM ANDAMENTO\", locStatus), "
               f"locStatusIos: If(locStatusIos = \"Concluído\", \"Em andamento\", locStatusIos)}});\n"
@@ -641,7 +643,7 @@ def tela_registro():
         ent("regIniM", DDL, f"{xl} + {w} - 80", f"({y_ini}) + 22", "80", Items="tabMinutos", Default='Text(Minute(locIni), "00")', DisplayMode=ini_ro),
         ent("regNI", CHK, xl, f"({y_ini}) + 68", "300", Height="30", Text='"N/I – não informado"', Default="locNI",
             OnCheck="UpdateContext({locNI: true})", OnUncheck="UpdateContext({locNI: false})",
-            DisplayMode=f"If({ABERTO_REL} && IsBlank(locFim), DisplayMode.Edit, DisplayMode.Disabled)"),
+            DisplayMode=f"If({ABERTO_REL} && {SEM_FIM}, DisplayMode.Edit, DisplayMode.Disabled)"),
         # conclusão
         rot("regRotFim", '"HORA DE CONCLUSÃO"', xr, y_ini),
         ent("regFimData", DTP, xr, f"({y_ini}) + 22", f"{w} - 340", DefaultDate="locFim", Format='"dd/mm/yyyy"', OnChange=status_fim,
@@ -653,20 +655,20 @@ def tela_registro():
             AllowEmptySelection="true", OnChange=status_fim, Reset="locResetar || locResetFim"),
         botao("regAgora", '"Agora"', agora, f"{xr} + {w} - 162", f"({y_ini}) + 22", 76, 40, primario=False, Size="10", Visible=ABERTO_REL),
         botao("regLimpar", '"Limpar"', limpar, f"{xr} + {w} - 78", f"({y_ini}) + 22", 78, 40, primario=False, Size="10", Visible=ABERTO_REL),
-        ajuda("regAjudaFim", 'If(IsBlank(locFim), "Preencha quando o chamado for concluído. O status muda sozinho.", "")', xr, f"({y_ini}) + 68", w),
+        ajuda("regAjudaFim", 'If(IsBlank(locFim), "Preencha quando o chamado for concluído. O status muda sozinho.", locFim > Now(), "Data futura: vale como previsão de término. O status não muda.", "")', xr, f"({y_ini}) + 68", w),
         # status
         rot("regRotStatus", f'If({tipo} = "ios", "STATUS DO IOS *", "STATUS *")', xl, y_st),
         ent("regStatus", DDL, xl, f"({y_st}) + 22", w, Default="locStatus", Visible=f'{tipo} <> "ios"',
-            Items='Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO", "CANCELADO"], !IsBlank(locFim) || Value <> "CONCLUÍDO")',
+            Items=f'Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO", "CANCELADO"], !{SEM_FIM} || Value <> "CONCLUÍDO")',
             OnChange="UpdateContext({locStatus: Self.Selected.Value})",
-            DisplayMode=f"If({ABERTO_REL} && !regFalso.Value && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
+            DisplayMode=f"If({ABERTO_REL} && !regFalso.Value && !(regNI.Value && {SEM_FIM}), DisplayMode.Edit, DisplayMode.Disabled)"),
         ent("regStatusIos", DDL, xl, f"({y_st}) + 22", w, Default="locStatusIos", Visible=f'{tipo} = "ios"',
-            Items='Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !IsBlank(locFim) || Value <> "Concluído")',
+            Items=f'Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !{SEM_FIM} || Value <> "Concluído")',
             OnChange="UpdateContext({locStatusIos: Self.Selected.Value})",
-            DisplayMode=f"If({ABERTO_REL} && !(regNI.Value && IsBlank(locFim)), DisplayMode.Edit, DisplayMode.Disabled)"),
-        ajuda("regAjudaStatus", f'If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && IsBlank(locFim), "EM ANDAMENTO porque está marcado N/I.", '
+            DisplayMode=f"If({ABERTO_REL} && !(regNI.Value && {SEM_FIM}), DisplayMode.Edit, DisplayMode.Disabled)"),
+        ajuda("regAjudaStatus", f'If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && {SEM_FIM}, If({tipo} = "ios", "Não informado (NI) porque está marcado N/I.", "EM ANDAMENTO porque está marcado N/I."), '
                                 f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado" || {tipo} <> "ios" && locStatus = "CANCELADO", "Cancelado: conta como encerrado e não passa para o próximo turno.", '
-                                f'!IsBlank(locFim) && locStatus = "CONCLUÍDO", "CONCLUÍDO porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
+                                f'!{SEM_FIM} && If({tipo} = "ios", locStatusIos = "Concluído", locStatus = "CONCLUÍDO"), "Concluído porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
                                 f'"Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")', xl, f"({y_st}) + 66", w),
         rot("regRotMotivo", '"MOTIVO DO CANCELAMENTO *"', xr, y_st, vis=CANCELADO),
         ent("regMotivo", TXT, xr, f"({y_st}) + 22", w, Default="locReg.rlt_motivocancelamento", Visible=CANCELADO),
