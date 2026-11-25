@@ -1106,7 +1106,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =Switch(LookUp(tabSecoes, Valor = locSecao).Tipo, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos: ano + número)")
+                  =Switch(LookUp(tabSecoes, Valor = locSecao).Tipo, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO  (opcional)", "Nº IOS * (8 dígitos: ano + número)")
                 Color: |-
                   =corMuted
                 Size: |-
@@ -2373,7 +2373,7 @@ Screens:
                       {m: If(vTipo in ["corretiva", "ios"] && IsBlank(Trim(regDesc.Text)), "Informe a descrição.", "")},
                       {m: If(vTipo = "corretiva" && IsBlank(regLocal.Selected), "Escolha o local.", "")},
                       {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
-                      {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
+                      {m: If(vTipo in ["fq", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
                       {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
                       {m: If(((LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")) && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
                       {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},
@@ -2565,7 +2565,7 @@ Screens:
                       {m: If(vTipo in ["corretiva", "ios"] && IsBlank(Trim(regDesc.Text)), "Informe a descrição.", "")},
                       {m: If(vTipo = "corretiva" && IsBlank(regLocal.Selected), "Escolha o local.", "")},
                       {m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")},
-                      {m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
+                      {m: If(vTipo in ["fq", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")},
                       {m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\d{8}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")},
                       {m: If(((LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado") || (LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")) && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")},
                       {m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")},

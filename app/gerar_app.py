@@ -351,7 +351,12 @@ def cor_status(st, i, padrao):
 def tela_chamados():
     """Chamados do plantão agrupados por seção, no layout do protótipo (telaPendencias)."""
     p = "cha"
-    filtro = f"(!locSoAbertos || {ABERTO})"
+    # busca por palavra-chave (25/11/2026): colRegs já está no aparelho, então "in" (sem diferença de maiúsculas) não tem limite de delegação
+    termo = "Trim(chaBusca.Text)"
+    campos_busca = ["rlt_titulo", "rlt_descricao", "rlt_numero", "rlt_equipamentolivre", "rlt_local.rlt_nome", "rlt_equipamento.rlt_nome",
+                    "rlt_feedback", "rlt_motivocancelamento"]
+    busca = f"(IsBlank({termo}) || " + " || ".join(f"{termo} in {c}" for c in campos_busca) + ")"
+    filtro = f"((!locSoAbertos || {ABERTO}) && {busca})"
     do_grupo = f"Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && {filtro}), rlt_inicio)"
     grupos = (f"Filter(tabSecoes, (IsBlank(locSecaoFiltro) || Valor = locSecaoFiltro) && "
               f"CountRows(Filter(colRegs, rlt_secao = Valor && {filtro})) > 0)")
@@ -386,6 +391,14 @@ def tela_chamados():
               HoverColor="If(locSoAbertos, Color.White, corTexto)", Size="11", **pilula),
         botao(f"{p}LimpaSec", '"Seção: " & LookUp(tabSecoes, Valor = locSecaoFiltro).Nome & "   ×"', "UpdateContext({locSecaoFiltro: Blank()})", 530, 146, 240, 34,
               primario=False, Visible="!IsBlank(locSecaoFiltro)", Size="11", **{**pilula, "BorderColor": "corAzul"}),
+        C("chaBusca", TXT, Default='""', HintText='"🔍  Buscar por palavra-chave: descrição, nº, local, equipamento…"', DelayOutput="true",
+          X="Parent.Width - 24 - 420", Y="146", Width="420", Height="34", Size="11", PaddingLeft="14", PaddingRight="40",
+          BorderColor="RGBA(197, 206, 215, 1)", FocusedBorderColor="corVerde", FocusedBorderThickness="2", Color="corTexto",
+          RadiusTopLeft="18", RadiusTopRight="18", RadiusBottomLeft="18", RadiusBottomRight="18"),
+        botao(f"{p}LimpaBusca", '"×"', "Reset(chaBusca)", "Parent.Width - 24 - 40", 148, 30, 30, primario=False, Size="12",
+              Visible=f"!IsBlank({termo})", BorderThickness="0", RadiusTopLeft="15", RadiusTopRight="15", RadiusBottomLeft="15", RadiusBottomRight="15"),
+        C(f"{p}SemResultado", LBL, Text=f'"Nenhum chamado com “" & {termo} & "”."', Color="corMuted", Size="11", Align="Align.Center",
+          X="224", Y="220", Width="Parent.Width - 248", Height="40", Visible=f"!IsBlank({termo}) && CountRows({grupos}) = 0"),
         C(f"{p}Grupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0",
           X="224", Y="188", Width="Parent.Width - 236", Height="Parent.Height - 194",
           filhos=[
@@ -478,7 +491,7 @@ def tela_registro():
     {{m: If(vTipo in ["corretiva", "ios"] && IsBlank(Trim(regDesc.Text)), "Informe a descrição.", "")}},
     {{m: If(vTipo = "corretiva" && IsBlank(regLocal.Selected), "Escolha o local.", "")}},
     {{m: If(vTipo in ["fq", "prev"] && IsBlank(regEquip.Selected) && !(regForaLista.Value && !IsBlank(Trim(regEquipLivre.Text))), "Escolha o equipamento.", "")}},
-    {{m: If(vTipo in ["fq", "prev", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")}},
+    {{m: If(vTipo in ["fq", "ios"] && IsBlank(Trim(regNum.Text)), "Informe o número.", "")}},
     {{m: If(vTipo = "ios" && !IsMatch(regNum.Text, "\\d{{8}}"), "Nº IOS deve ter 8 dígitos: ano + número.", "")}},
     {{m: If(({CANCELADO}) && IsBlank(Trim(regMotivo.Text)), "Informe o motivo do cancelamento.", "")}},
     {{m: If(IsBlank(regIniData.SelectedDate), "Informe o início.", "")}},
@@ -619,7 +632,7 @@ def tela_registro():
             Visible=em("fq")),
         ajuda("regAjudaFora", '"Não bloqueia: vai para o Painel geral de informações (RN-017)."', f"{xr} + 30", f"({y_row2}) + 60", f"{w} - 30", em("fq")),
         # número
-        rot("regRotNum", f'Switch({tipo}, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO *", "Nº IOS * (8 dígitos: ano + número)")', xl, y_num, vis=em("fq", "prev", "ios")),
+        rot("regRotNum", f'Switch({tipo}, "fq", "Nº DO CHAMADO *", "prev", "Nº DA ORDEM DE SERVIÇO  (opcional)", "Nº IOS * (8 dígitos: ano + número)")', xl, y_num, vis=em("fq", "prev", "ios")),
         ent("regNum", TXT, xl, f"({y_num}) + 22", w, Default="locReg.rlt_numero", Visible=em("fq", "prev", "ios")),
         # início
         rot("regRotIni", '"INÍCIO (DATA E HORA) *"', xl, y_ini),

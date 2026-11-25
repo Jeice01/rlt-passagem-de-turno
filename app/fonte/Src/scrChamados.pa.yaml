@@ -647,12 +647,119 @@ Screens:
             =!IsBlank(locSecaoFiltro)
           Font: |-
             =Font.Arial
+    - chaBusca:
+        Control: Classic/TextInput@2.3.2
+        Properties:
+          Default: |-
+            =""
+          HintText: |-
+            ="🔍  Buscar por palavra-chave: descrição, nº, local, equipamento…"
+          DelayOutput: |-
+            =true
+          X: |-
+            =Parent.Width - 24 - 420
+          Y: |-
+            =146
+          Width: |-
+            =420
+          Height: |-
+            =34
+          Size: |-
+            =11
+          PaddingLeft: |-
+            =14
+          PaddingRight: |-
+            =40
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Color: |-
+            =corTexto
+          RadiusTopLeft: |-
+            =18
+          RadiusTopRight: |-
+            =18
+          RadiusBottomLeft: |-
+            =18
+          RadiusBottomRight: |-
+            =18
+          Font: |-
+            =Font.Arial
+    - chaLimpaBusca:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="×"
+          OnSelect: |-
+            =Reset(chaBusca)
+          X: |-
+            =Parent.Width - 24 - 40
+          Y: |-
+            =148
+          Width: |-
+            =30
+          Height: |-
+            =30
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =0
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          RadiusTopLeft: |-
+            =15
+          RadiusTopRight: |-
+            =15
+          RadiusBottomLeft: |-
+            =15
+          RadiusBottomRight: |-
+            =15
+          Visible: |-
+            =!IsBlank(Trim(chaBusca.Text))
+          Font: |-
+            =Font.Arial
+    - chaSemResultado:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Nenhum chamado com “" & Trim(chaBusca.Text) & "”."
+          Color: |-
+            =corMuted
+          Size: |-
+            =11
+          Align: |-
+            =Align.Center
+          X: |-
+            =224
+          Y: |-
+            =220
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =40
+          Visible: |-
+            =!IsBlank(Trim(chaBusca.Text)) && CountRows(Filter(tabSecoes, (IsBlank(locSecaoFiltro) || Valor = locSecaoFiltro) && CountRows(Filter(colRegs, rlt_secao = Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento)))) > 0)) = 0
+          Font: |-
+            =Font.Arial
     - chaGrupos:
         Control: Gallery@2.15.0
         Variant: VariableHeight
         Properties:
           Items: |-
-            =Filter(tabSecoes, (IsBlank(locSecaoFiltro) || Valor = locSecaoFiltro) && CountRows(Filter(colRegs, rlt_secao = Valor && (!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')))) > 0)
+            =Filter(tabSecoes, (IsBlank(locSecaoFiltro) || Valor = locSecaoFiltro) && CountRows(Filter(colRegs, rlt_secao = Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento)))) > 0)
           TemplateSize: |-
             =60
           TemplatePadding: |-
@@ -691,7 +798,7 @@ Screens:
               Control: Classic/Button@2.2.0
               Properties:
                 Text: |-
-                  =CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && (!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))))
+                  =CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento))))
                 DisplayMode: |-
                   =DisplayMode.Disabled
                 TabIndex: |-
@@ -737,7 +844,7 @@ Screens:
               Variant: Vertical
               Properties:
                 Items: |-
-                  =Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && (!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))), rlt_inicio)
+                  =Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento))), rlt_inicio)
                 TemplateSize: |-
                   =112
                 TemplatePadding: |-
@@ -751,7 +858,7 @@ Screens:
                 Width: |-
                   =Parent.TemplateWidth - 12
                 Height: |-
-                  =CountRows(Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && (!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO'))), rlt_inicio)) * 112
+                  =CountRows(Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento))), rlt_inicio)) * 112
               Children:
                 - chaBorda:
                     Control: Classic/Button@2.2.0
