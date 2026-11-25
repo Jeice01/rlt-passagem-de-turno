@@ -12,7 +12,7 @@ Situação em 25/11/2026. Piloto previsto para 30/11/2026 (PRD).
 | Fluxo "RLT – Fechar e enviar": PDF no layout do protótipo, OneDrive `RLT-CCM/ano/mês`, e-mail da RN-005, resultado na tela Fechar | `ferramentas/fluxos/gerar_fluxo_fechar.py` → `solution/RLT_Fluxos` | Testado com PDF e e-mail |
 | Fluxo: seção "Anexos dos chamados" no PDF e cópia dos anexos no OneDrive (RF-016) | idem | Importado; **falta testar** fechando um relatório com foto |
 
-## Versão 1.4.0.0 (25/11/2026): gerada, falta importar e testar
+## Versão 1.4 (25/11/2026): importada e publicada (RLT_CCM 1.4.0.4, RLT_Fluxos 1.1.0.0), falta testar
 
 | Mudança | O que faz |
 |---|---|

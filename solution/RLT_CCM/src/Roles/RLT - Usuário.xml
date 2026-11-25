@@ -36,7 +36,9 @@
     <RolePrivilege name="prvCreaterlt_registro" level="Global" />
     <RolePrivilege name="prvCreaterlt_relatorio" level="Global" />
     <RolePrivilege name="prvCreateSharePointData" level="Global" />
+    <RolePrivilege name="prvDeleterlt_anexo" level="Global" />
     <RolePrivilege name="prvDeleterlt_aviso" level="Global" />
+    <RolePrivilege name="prvDeleterlt_registro" level="Global" />
     <RolePrivilege name="prvReadrlt_anexo" level="Global" />
     <RolePrivilege name="prvReadrlt_aviso" level="Global" />
     <RolePrivilege name="prvReadrlt_envioeletro" level="Global" />
@@ -59,7 +61,5 @@
     <RolePrivilege name="prvWriterlt_registro" level="Global" />
     <RolePrivilege name="prvWriterlt_relatorio" level="Global" />
     <RolePrivilege name="prvWriteSharePointData" level="Global" />
-    <RolePrivilege name="prvDeleterlt_registro" level="Global" />
-    <RolePrivilege name="prvDeleterlt_anexo" level="Global" />
   </RolePrivileges>
 </Role>

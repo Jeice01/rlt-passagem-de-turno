@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CanvasApp xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name>rlt_rltpassagemdeturno_1ffb1</Name>
-  <AppVersion>2026-11-25T18:52:19Z</AppVersion>
+  <AppVersion>2026-11-25T22:10:14Z</AppVersion>
   <Status>Ready</Status>
   <CreatedByClientVersion>3.26112.12.0</CreatedByClientVersion>
   <MinClientVersion>3.26112.12.0</MinClientVersion>
@@ -11,7 +11,7 @@
   <BackgroundColor>rgba(0, 56, 99, 1)</BackgroundColor>
   <DisplayName>RLT Passagem de Turno</DisplayName>
   <Description>Relatório de Passagem de Turno (RLT) do CCM – Aeroporto de Brasília. Registro das atividades, chamados do Fator Q, preventivas e IOS do plantão ALFA ou BRAVO, com fechamento e envio do relatório em PDF.</Description>
-  <CommitMessage xsi:nil="true"></CommitMessage>
+  <CommitMessage></CommitMessage>
   <Publisher></Publisher>
   <AuthorizationReferences>[]</AuthorizationReferences>
   <ConnectionReferences>{}</ConnectionReferences>
@@ -24,7 +24,7 @@
   <AdminControlBypassConsent>0</AdminControlBypassConsent>
   <EmbeddedApp xsi:nil="true"></EmbeddedApp>
   <IntroducedVersion>1.0</IntroducedVersion>
-  <CdsDependencies>{"cdsdependencies":[{"logicalname":"rlt_relatorio","componenttype":1},{"logicalname":"rlt_registro","componenttype":1},{"logicalname":"rlt_equipe","componenttype":1},{"logicalname":"rlt_anexo","componenttype":1},{"logicalname":"rlt_historico","componenttype":1},{"logicalname":"rlt_pessoa","componenttype":1},{"logicalname":"rlt_local","componenttype":1},{"logicalname":"rlt_equipamento","componenttype":1},{"logicalname":"rlt_aviso","componenttype":1},{"logicalname":"rlt_envioeletro","componenttype":1}]}</CdsDependencies>
+  <CdsDependencies>{"cdsdependencies":[{"componenttype":1,"logicalname":"rlt_relatorio"},{"componenttype":1,"logicalname":"rlt_registro"},{"componenttype":1,"logicalname":"rlt_equipe"},{"componenttype":1,"logicalname":"rlt_anexo"},{"componenttype":1,"logicalname":"rlt_historico"},{"componenttype":1,"logicalname":"rlt_pessoa"},{"componenttype":1,"logicalname":"rlt_local"},{"componenttype":1,"logicalname":"rlt_equipamento"},{"componenttype":1,"logicalname":"rlt_aviso"},{"componenttype":1,"logicalname":"rlt_envioeletro"}]}</CdsDependencies>
   <IsCustomizable>1</IsCustomizable>
   <BackgroundImageUri>/CanvasApps/rlt_rltpassagemdeturno_1ffb1_BackgroundImageUri</BackgroundImageUri>
   <DocumentUri>/CanvasApps/rlt_rltpassagemdeturno_1ffb1_DocumentUri.msapp</DocumentUri>
