@@ -1474,8 +1474,9 @@ def tela_eletro():
     secs = f"(rlt_secao = {SEC}.Eletromecânica || rlt_secao = {SEC}.'Fator Q (Z9)' || rlt_secao = {SEC}.'Preventiva (ZM02)')"
     carregar = (
         "With({d: Coalesce(eleData.SelectedDate, locEleData)},\n"
-        "  With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0)},\n"
-        f"    ClearCollect(colDia, Filter(Registros, {secs} && rlt_inicio < DateAdd(ini, 1, TimeUnit.Days) && "
+        # ini e fim calculados antes do Filter: DateAdd dentro do Filter não é delegável (o Dataverse só veria 500 registros)
+        "  With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0), fim: DateAdd(DateTime(Year(d), Month(d), Day(d), 0, 0, 0), 1, TimeUnit.Days)},\n"
+        f"    ClearCollect(colDia, Filter(Registros, {secs} && rlt_inicio < fim && "
         "(IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));\n"
         "    ClearCollect(colEletro, Sort(Filter(colDia As r, IsBlank(LookUp(colDia As o, o.rlt_origem.rlt_registroid = r.rlt_registroid)) && "
         f"(r.rlt_secao <> {SEC}.'Preventiva (ZM02)' || IsBlank(r.rlt_equipamento) || r.rlt_equipamento.rlt_tipo <> [@'Tipo de equipamento'].Bagagem)), rlt_inicio));\n"

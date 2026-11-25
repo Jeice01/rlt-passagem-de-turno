@@ -9,8 +9,8 @@ Screens:
         UpdateContext({locEleEquipe: Coalesce(First(Sort('Envios Eletromecânica', createdon, SortOrder.Descending)).rlt_equipe, "")});
         Reset(eleData); Reset(eleEquipe);
         With({d: Coalesce(eleData.SelectedDate, locEleData)},
-          With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0)},
-            ClearCollect(colDia, Filter(Registros, (rlt_secao = [@'Seção'].Eletromecânica || rlt_secao = [@'Seção'].'Fator Q (Z9)' || rlt_secao = [@'Seção'].'Preventiva (ZM02)') && rlt_inicio < DateAdd(ini, 1, TimeUnit.Days) && (IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));
+          With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0), fim: DateAdd(DateTime(Year(d), Month(d), Day(d), 0, 0, 0), 1, TimeUnit.Days)},
+            ClearCollect(colDia, Filter(Registros, (rlt_secao = [@'Seção'].Eletromecânica || rlt_secao = [@'Seção'].'Fator Q (Z9)' || rlt_secao = [@'Seção'].'Preventiva (ZM02)') && rlt_inicio < fim && (IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));
             ClearCollect(colEletro, Sort(Filter(colDia As r, IsBlank(LookUp(colDia As o, o.rlt_origem.rlt_registroid = r.rlt_registroid)) && (r.rlt_secao <> [@'Seção'].'Preventiva (ZM02)' || IsBlank(r.rlt_equipamento) || r.rlt_equipamento.rlt_tipo <> [@'Tipo de equipamento'].Bagagem)), rlt_inicio));
             UpdateContext({locEnvio: First(Sort(Filter('Envios Eletromecânica', rlt_data = d), createdon, SortOrder.Descending)), locConfirma: false})))
     Children:
@@ -583,8 +583,8 @@ Screens:
             ="dd/mm/yyyy"
           OnChange: |-
             =With({d: Coalesce(eleData.SelectedDate, locEleData)},
-              With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0)},
-                ClearCollect(colDia, Filter(Registros, (rlt_secao = [@'Seção'].Eletromecânica || rlt_secao = [@'Seção'].'Fator Q (Z9)' || rlt_secao = [@'Seção'].'Preventiva (ZM02)') && rlt_inicio < DateAdd(ini, 1, TimeUnit.Days) && (IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));
+              With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0), fim: DateAdd(DateTime(Year(d), Month(d), Day(d), 0, 0, 0), 1, TimeUnit.Days)},
+                ClearCollect(colDia, Filter(Registros, (rlt_secao = [@'Seção'].Eletromecânica || rlt_secao = [@'Seção'].'Fator Q (Z9)' || rlt_secao = [@'Seção'].'Preventiva (ZM02)') && rlt_inicio < fim && (IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));
                 ClearCollect(colEletro, Sort(Filter(colDia As r, IsBlank(LookUp(colDia As o, o.rlt_origem.rlt_registroid = r.rlt_registroid)) && (r.rlt_secao <> [@'Seção'].'Preventiva (ZM02)' || IsBlank(r.rlt_equipamento) || r.rlt_equipamento.rlt_tipo <> [@'Tipo de equipamento'].Bagagem)), rlt_inicio));
                 UpdateContext({locEnvio: First(Sort(Filter('Envios Eletromecânica', rlt_data = d), createdon, SortOrder.Descending)), locConfirma: false})))
           X: |-
