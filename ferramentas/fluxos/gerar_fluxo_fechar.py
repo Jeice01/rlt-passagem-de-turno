@@ -295,19 +295,20 @@ def montar_definicao():
                                   "subscriptionRequest/filterexpression": f"rlt_situacao eq {FECHADO}"},
                    "authentication": "@parameters('$authentication')"}}}
 
+    return embrulhar(gatilho, acoes, {P_DEST: ("rlt_destinatarios", "")})
+
+
+def embrulhar(gatilho, acoes, parametros):
+    """JSON do fluxo: conexões, parâmetros (variáveis de ambiente: nome -> (schema, padrão)), gatilho e ações."""
+    params = {"$connections": {"defaultValue": {}, "type": "Object"}, "$authentication": {"defaultValue": {}, "type": "SecureObject"}}
+    for nome, (schema, padrao) in {**parametros, P_PASTA: ("rlt_pastapdf", "/RLT-CCM")}.items():
+        params[nome] = {"defaultValue": padrao, "type": "String", "metadata": {"schemaName": schema}}
     return {"properties": {
         "connectionReferences": {c: {"runtimeSource": "embedded", "connection": {"connectionReferenceLogicalName": n},
                                      "api": {"name": c}} for c, (n, _) in CONEXOES.items()},
         "definition": {
             "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-            "contentVersion": "1.0.0.0",
-            "parameters": {
-                "$connections": {"defaultValue": {}, "type": "Object"},
-                "$authentication": {"defaultValue": {}, "type": "SecureObject"},
-                P_DEST: {"defaultValue": "", "type": "String", "metadata": {"schemaName": "rlt_destinatarios"}},
-                P_PASTA: {"defaultValue": "/RLT-CCM", "type": "String", "metadata": {"schemaName": "rlt_pastapdf"}},
-            },
-            "triggers": gatilho, "actions": acoes},
+            "contentVersion": "1.0.0.0", "parameters": params, "triggers": gatilho, "actions": acoes},
         "templateName": ""}, "schemaVersion": "1.0.0.0"}
 
 
@@ -333,15 +334,15 @@ def solucao_xml():
     with open(os.path.join(RAIZ, "solution", "RLT_CCM", "src", "Other", "Solution.xml"), encoding="utf-8-sig") as f:
         base = f.read()
     ini, fim = base.index("<Publisher>"), base.index("</Publisher>") + len("</Publisher>")
-    raizes = [f'      <RootComponent type="29" id="{{{FLUXO_ID}}}" behavior="0" />'] + \
-             [f'      <RootComponent type="380" schemaName="{s}" behavior="0" />' for s, *_ in VARS]
+    raizes = [f'      <RootComponent type="29" id="{{{f[0]}}}" behavior="0" />' for f in fluxos()] + \
+             [f'      <RootComponent type="380" schemaName="{s}" behavior="0" />' for s, *_ in todas_vars()]
     return ('<?xml version="1.0" encoding="utf-8"?>\n'
             '<ImportExportXml version="9.2.26111.138" SolutionPackageVersion="9.2" languagecode="1046" generatedBy="CrmLive" '
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26111.138" OrganizationSchemaType="Standard" '
             'CRMServerServiceabilityVersion="9.2.26111.00138">\n  <SolutionManifest>\n    <UniqueName>RLT_Fluxos</UniqueName>\n'
             '    <LocalizedNames>\n      <LocalizedName description="RLT – Fluxos" languagecode="1046" />\n    </LocalizedNames>\n'
-            '    <Descriptions>\n      <Description description="Fluxos do RLT – Passagem de Turno do CCM (Fechar e enviar: PDF e e-mail)." languagecode="1046" />\n'
-            '    </Descriptions>\n    <Version>1.0.1.0</Version>\n    <Managed>0</Managed>\n    '
+            '    <Descriptions>\n      <Description description="Fluxos do RLT – Passagem de Turno do CCM (Fechar e enviar; Relatório da Eletromecânica)." languagecode="1046" />\n'
+            '    </Descriptions>\n    <Version>1.1.0.0</Version>\n    <Managed>0</Managed>\n    '
             + base[ini:fim] + "\n    <RootComponents>\n" + "\n".join(raizes) + "\n    </RootComponents>\n    <MissingDependencies />\n"
             "  </SolutionManifest>\n</ImportExportXml>\n")
 
@@ -364,19 +365,32 @@ def customizacoes_xml():
             "  <Languages>\n    <Language>1046</Language>\n  </Languages>\n</ImportExportXml>\n")
 
 
-def fluxo_xml():
+def fluxo_xml(fluxo_id, nome, descricao, arquivo):
     campos = [("Type", 1), ("Subprocess", 0), ("Category", 5), ("Mode", 0), ("Scope", 4), ("OnDemand", 0), ("TriggerOnCreate", 0),
               ("TriggerOnDelete", 0), ("AsyncAutodelete", 0), ("SyncWorkflowLogOnFailure", 0),
               ("StateCode", 1), ("StatusCode", 2),  # ligado: a importação pelo portal pede as conexões e ativa o fluxo
               ("RunAs", 1), ("IsTransacted", 1), ("IntroducedVersion", "1.0.0.0"), ("IsCustomizable", 1), ("BusinessProcessType", 0),
               ("IsCustomProcessingStepAllowedForOtherPublishers", 1), ("PrimaryEntity", "none")]
     return ('<?xml version="1.0" encoding="utf-8"?>\n'
-            f'<Workflow WorkflowId="{{{FLUXO_ID}}}" Name="{FLUXO_NOME}" '
-            'Description="Gera o PDF do relatório fechado, guarda no OneDrive e envia o e-mail (RF-013 a RF-016)." '
+            f'<Workflow WorkflowId="{{{fluxo_id}}}" Name="{nome}" Description="{descricao}" '
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n'
-            f"  <JsonFileName>/Workflows/{ARQ_FLUXO}</JsonFileName>\n"
+            f"  <JsonFileName>/Workflows/{arquivo}</JsonFileName>\n"
             + "".join(f"  <{k}>{v}</{k}>\n" for k, v in campos)
-            + f'  <LocalizedNames>\n    <LocalizedName languagecode="1046" description="{FLUXO_NOME}" />\n  </LocalizedNames>\n</Workflow>\n')
+            + f'  <LocalizedNames>\n    <LocalizedName languagecode="1046" description="{nome}" />\n  </LocalizedNames>\n</Workflow>\n')
+
+
+def fluxos():
+    """(id, nome, descrição, arquivo, definição) de cada fluxo da solução RLT_Fluxos."""
+    import fluxo_eletro as fe  # aqui dentro: fluxo_eletro importa funções deste arquivo
+    return [(FLUXO_ID, FLUXO_NOME, "Gera o PDF do relatório fechado, guarda no OneDrive e envia o e-mail (RF-013 a RF-016).", ARQ_FLUXO,
+             montar_definicao()),
+            (fe.FLUXO_ID, fe.FLUXO_NOME, "Relatório diário da Eletromecânica (Fator Q): PDF no OneDrive e e-mail, enviado pelo Bravo às 24:00.",
+             fe.ARQ_FLUXO, embrulhar(*fe.montar_definicao()))]
+
+
+def todas_vars():
+    import fluxo_eletro as fe
+    return VARS + fe.VARS
 
 
 def escrever(rel, texto):
@@ -391,9 +405,10 @@ def main():
         shutil.rmtree(DESTINO)
     escrever("Other/Solution.xml", solucao_xml())
     escrever("Other/Customizations.xml", customizacoes_xml())
-    escrever(f"Workflows/{ARQ_FLUXO}", json.dumps(montar_definicao(), ensure_ascii=False, indent=2) + "\n")
-    escrever(f"Workflows/{ARQ_FLUXO}.data.xml", fluxo_xml())
-    for schema, nome, desc, padrao in VARS:
+    for fluxo_id, nome, descricao, arquivo, definicao in fluxos():
+        escrever(f"Workflows/{arquivo}", json.dumps(definicao, ensure_ascii=False, indent=2) + "\n")
+        escrever(f"Workflows/{arquivo}.data.xml", fluxo_xml(fluxo_id, nome, descricao, arquivo))
+    for schema, nome, desc, padrao in todas_vars():
         escrever(f"environmentvariabledefinitions/{schema}/environmentvariabledefinition.xml", var_ambiente(schema, nome, desc, padrao))
     print(f"Solução RLT_Fluxos gerada em {os.path.relpath(DESTINO, RAIZ)}")
 

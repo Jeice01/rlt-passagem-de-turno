@@ -47,7 +47,8 @@ $TABELAS = @(
               @("rlt_numero", "Nº do chamado, OS ou IOS", "texto", 20), @("rlt_inicio", "Início", "datahora", $null), @("rlt_conclusao", "Hora de conclusão", "datahora", $null),
               @("rlt_ni", "N/I – não informado", "simnao", $null), @("rlt_status", "Status", "escolha", "rlt_statusatividade"), @("rlt_statusios", "Status do IOS", "escolha", "rlt_statusios"),
               @("rlt_chamadofalso", "Chamado falso", "simnao", $null), @("rlt_limpezatecnica", "Limpeza técnica", "simnao", $null),
-              @("rlt_motivocancelamento", "Motivo do cancelamento", "texto", 500), @("rlt_herdado", "Herdado", "simnao", $null)) }
+              @("rlt_motivocancelamento", "Motivo do cancelamento", "texto", 500), @("rlt_herdado", "Herdado", "simnao", $null),
+              @("rlt_feedback", "Feedback para a Eletromecânica", "memo", 2000)) }   # feedback: 25/11/2026
   @{ n = "rlt_equipe"; s = "Membro da equipe"; p = "Equipe do plantão"; d = "Quem fez login no plantão"; dono = "UserOwned"; prim = @("rlt_nome", "Nome", 100)
      cols = @(@("rlt_perfil", "Perfil", "escolha", "rlt_perfil"), @("rlt_entrouem", "Entrou em", "datahora", $null), @("rlt_retiradoem", "Retirado em", "datahora", $null)) }
   @{ n = "rlt_anexo"; s = "Anexo"; p = "Anexos"; d = "Foto ou arquivo de um registro"; dono = "UserOwned"; prim = @("rlt_nome", "Nome do arquivo", 200)
@@ -56,6 +57,9 @@ $TABELAS = @(
      cols = @(, @("rlt_quando", "Quando", "datahora", $null)) }   # vírgula: evita que a lista de uma coluna só seja achatada
   @{ n = "rlt_aviso"; s = "Aviso"; p = "Avisos"; d = "Avisos do Painel geral de informações, publicados pelo líder"; dono = "UserOwned"; prim = @("rlt_titulo", "Título", 200)
      cols = @(@("rlt_texto", "Texto", "memo", 4000), @("rlt_publicadoem", "Publicado em", "datahora", $null)) }
+  @{ n = "rlt_envioeletro"; s = "Envio Eletromecânica"; p = "Envios Eletromecânica"; d = "Envio diário do relatório da Eletromecânica (Fator Q), feito pelo Bravo às 24:00"; dono = "UserOwned"; prim = @("rlt_nome", "Nome", 100)
+     cols = @(@("rlt_data", "Data do relatório", "data", $null), @("rlt_equipe", "Eletromecânica de plantão", "memo", 2000),
+              @("rlt_enviadoem", "Enviado em", "datahora", $null), @("rlt_resultado", "Resultado do envio", "memo", 2000)) }
 )
 # relação: tabela filha, coluna, rótulo, tabela mãe, nome da relação
 $RELACOES = @(
@@ -71,7 +75,8 @@ $RELACOES = @(
   @("rlt_historico", "rlt_registro", "Registro", "rlt_registro", "rlt_registro_historico"),
   @("rlt_historico", "rlt_quem", "Quem", "rlt_pessoa", "rlt_pessoa_historico"),
   @("rlt_relatorio", "rlt_fechadopor", "Fechado por", "rlt_pessoa", "rlt_pessoa_relatorio_fechadopor"),
-  @("rlt_aviso", "rlt_autor", "Publicado por", "rlt_pessoa", "rlt_pessoa_aviso")
+  @("rlt_aviso", "rlt_autor", "Publicado por", "rlt_pessoa", "rlt_pessoa_aviso"),
+  @("rlt_envioeletro", "rlt_enviadopor", "Enviado por", "rlt_pessoa", "rlt_pessoa_envioeletro")
 )
 
 # ================= XML =================

@@ -453,6 +453,7 @@ def tela_registro():
         "UpdateContext({locStatus: If(IsBlank(locReg.rlt_status), \"EM ANDAMENTO\", Text(locReg.rlt_status))});\n"
         "UpdateContext({locStatusIos: If(IsBlank(locReg.rlt_statusios), \"Em andamento\", Text(locReg.rlt_statusios))});\n"
         "UpdateContext({locArea: locReg.rlt_local.rlt_area});\n"
+        "UpdateContext({locFeedback: Coalesce(locReg.rlt_feedback, \"\")});\n"
         "UpdateContext({locErro: \"\"});\n"
         "UpdateContext({locAnexar: false});\n"
         "UpdateContext({locFicar: false});\n"
@@ -461,6 +462,8 @@ def tela_registro():
         "UpdateContext({locResetar: false});\n"
         "ResetForm(frmAnexo)")
     # Cancelamento (RN-014, ampliada em 25/11/2026): IOS "Cancelado" ou atividade "CANCELADO"; o motivo é obrigatório nos dois
+    # Chamados que vão no relatório diário da Eletromecânica: corretiva Eletromecânica, Fator Q e Preventiva
+    ELETRO = f'(locSecao = {SEC}.Eletromecânica || {tipo} in ["fq", "prev"])'
     CANCELADO = (f'({tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado") || '
                  f'({tipo} <> "ios" && !regFalso.Value && regStatus.Selected.Value = "CANCELADO")')
     v_ini = "DateTime(Year(regIniData.SelectedDate), Month(regIniData.SelectedDate), Day(regIniData.SelectedDate), Value(regIniH.Selected.Value), Value(regIniM.Selected.Value), 0)"
@@ -494,7 +497,8 @@ def tela_registro():
       rlt_limpezatecnica: regLimpeza.Value,
       rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && IsBlank(vFim), {ST}.'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, "CANCELADO", {ST}.CANCELADO, {ST}.'EM ANDAMENTO')),
       rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), {SI}.'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", {SI}.Agendado, "Suspenso", {SI}.Suspenso, "Concluído", {SI}.Concluído, "Cancelado", {SI}.Cancelado, "Não informado (NI)", {SI}.'Não informado (NI)', {SI}.'Em andamento')),
-      rlt_motivocancelamento: regMotivo.Text
+      rlt_motivocancelamento: regMotivo.Text,
+      rlt_feedback: If({ELETRO}, Trim(regFeedback.Text), "")
     }}));
     If(IsBlank(locId),
       {hist('"Registro criado"', "gblSalvo")},
@@ -509,7 +513,8 @@ def tela_registro():
           {{c: "Status", m: locReg.rlt_status <> gblSalvo.rlt_status || locReg.rlt_statusios <> gblSalvo.rlt_statusios}},
           {{c: "Chamado falso", m: locReg.rlt_chamadofalso <> regFalso.Value}},
           {{c: "Limpeza técnica", m: locReg.rlt_limpezatecnica <> regLimpeza.Value}},
-          {{c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text}}
+          {{c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text}},
+          {{c: "Feedback para a Eletromecânica", m: Coalesce(locReg.rlt_feedback, "") <> Coalesce(gblSalvo.rlt_feedback, "")}}
         ), m),
         {hist("c", "gblSalvo")})
     );
@@ -542,7 +547,9 @@ def tela_registro():
     y_ini = f"18 + {D} + {R2} + {N}"
     y_st = f"({y_ini}) + 104"
     y_falso = f"({y_st}) + 96"
-    y_fotos = f"({y_falso}) + {F}"
+    y_feed = f"({y_falso}) + {F}"
+    FB = f"If({ELETRO}, 124, 0)"                          # feedback para a Eletromecânica
+    y_fotos = f"({y_feed}) + {FB}"
     anexos = "Filter(Anexos, rlt_registro.rlt_registroid = locId)"
     n_anx = f"If(IsBlank(locId), 0, CountRows({anexos}))"
     ALT_ANX = 46
@@ -654,6 +661,19 @@ def tela_registro():
             OnCheck="UpdateContext({locFalso: true})", OnUncheck="UpdateContext({locFalso: false})", Visible=em("corretiva", "fq")),
         ajuda("regAjudaFalso", f'"Status CHAMADO FALSO: conta como encerrado, não vira pendência e fica fora de preventiva x corretiva (RN-011" & If({tipo} = "fq", ").", "; nesta seção, conforme a proposta do PRD 1.2).")',
               f"{xl} + 30", f"({y_falso}) + 28", f"{full} - 30", em("corretiva", "fq")),
+        # feedback para a Eletromecânica (coluna "Feedback Coordenação Responsável" do relatório diário)
+        rot("regRotFeedback", '"FEEDBACK PARA A ELETROMECÂNICA  (sai no relatório diário da Eletromecânica)"', xl, y_feed, larg=full, vis=ELETRO),
+        ent("regFeedback", TXT, xl, f"({y_feed}) + 22", full, Default="locFeedback", OnChange="UpdateContext({locFeedback: Self.Text})",
+            HintText='"Ex.: MOTIVO: BOTÃO STOP.  ou  IOS 1414_2026 - CCM - MEC - ATUALIZAÇÃO.2"', MaxLength="2000", Visible=ELETRO),
+        ent("regVincIos", DDL, xl, f"({y_feed}) + 70", f"{w} - 122", AllowEmptySelection="true", Default='""', Visible=f"{ELETRO} && {ABERTO_REL}",
+            Items=(f'ForAll(Filter(colRegs, rlt_secao = {SEC}.\'IOS informados\'), '
+                   '{Value: "IOS " & Mid(rlt_numero, 5) & "_" & Left(rlt_numero, 4) & " - " & Upper(rlt_titulo)})'),
+            OnChange=('If(!IsBlank(Self.Selected.Value), UpdateContext({locFeedback: Trim(locFeedback & '
+                      'If(IsBlank(Trim(locFeedback)), "", "  ·  ") & Self.Selected.Value)}))')),
+        botao("regBtnMotivo", '"MOTIVO:"', 'If(!StartsWith(Upper(Trim(locFeedback)), "MOTIVO:"), UpdateContext({locFeedback: "MOTIVO: " & locFeedback}))',
+              f"{xl} + {w} - 110", f"({y_feed}) + 70", 110, 40, primario=False, Size="10", Visible=f"{ELETRO} && {ABERTO_REL}"),
+        ajuda("regAjudaFeedback", '"A lista ao lado tem os IOS informados neste plantão: escolher um escreve a referência no feedback."',
+              xr, f"({y_feed}) + 72", w, f"{ELETRO} && {ABERTO_REL}", h="36"),
         # fotos e arquivos (RF-007)
         C("regRotFotos", LBL, Text='"FOTOS E ARQUIVOS  (opcional)"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold", X=xl, Y=y_fotos, Width="400", Height="20"),
         C("regGalAnexos", GAL, variante="Vertical", Items=anexos, TemplateSize=str(ALT_ANX), TemplatePadding="0", ShowScrollbar="false",
@@ -1205,6 +1225,9 @@ def tela_fechar():
     ]
     titulo_sub = '"Qualquer usuário pode fechar e enviar (RN-007, alteração de 19/11). O envio fica registrado com o nome de quem enviou."'
     filhos = moldura(p, "scrFechar") + titulo(p, '"FECHAR RELATÓRIO"', titulo_sub)
+    # Relatório diário da Eletromecânica: o Bravo envia às 24:00 (decisão de 25/11/2026)
+    filhos.append(botao(f"{p}Eletro", '"Relatório da Eletromecânica  ›"', "Navigate(scrEletro, ScreenTransition.None)",
+                        "Parent.Width - 24 - 230", 86, 230, 40, primario=False, Size="10"))
     filhos.append(C(f"{p}Pagina", GAL, variante="VariableHeight", Items="Table({b: 1}, {b: 2}, {b: 3}, {b: 4}, {b: 5})", TemplateSize="60", TemplatePadding="0",
                     X="224", Y="146", Width="Parent.Width - 230", Height="Parent.Height - 150", filhos=pagina))
     return tela("scrFechar", {"Fill": "corFundo", "OnVisible": atualizar + ";\n" + REFRESH}, filhos)
@@ -1434,6 +1457,111 @@ def janela_lista():
     ]
 
 
+# ================================================================== TELA RELATÓRIO DA ELETROMECÂNICA (25/11/2026)
+ENVIOS = "'Envios Eletromecânica'"
+
+
+def tela_eletro():
+    """Relatório diário da Eletromecânica (Fator Q): o Bravo confere e envia às 24:00. O app cria um Envio Eletromecânica;
+    o fluxo "RLT – Relatório da Eletromecânica" gera o PDF, guarda no OneDrive e envia o e-mail (ferramentas/fluxos/fluxo_eletro.py).
+    A prévia usa a mesma regra do fluxo: chamados que começaram, terminaram ou ficaram abertos no dia; de uma pendência
+    herdada, só a cópia mais recente; preventivas de BHS ficam fora."""
+    p = "ele"
+    secs = f"(rlt_secao = {SEC}.Eletromecânica || rlt_secao = {SEC}.'Fator Q (Z9)' || rlt_secao = {SEC}.'Preventiva (ZM02)')"
+    carregar = (
+        "With({d: Coalesce(eleData.SelectedDate, locEleData)},\n"
+        "  With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0)},\n"
+        f"    ClearCollect(colDia, Filter(Registros, {secs} && rlt_inicio < DateAdd(ini, 1, TimeUnit.Days) && "
+        "(IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));\n"
+        "    ClearCollect(colEletro, Sort(Filter(colDia As r, IsBlank(LookUp(colDia As o, o.rlt_origem.rlt_registroid = r.rlt_registroid)) && "
+        f"(r.rlt_secao <> {SEC}.'Preventiva (ZM02)' || IsBlank(r.rlt_equipamento) || r.rlt_equipamento.rlt_tipo <> [@'Tipo de equipamento'].Bagagem)), rlt_inicio));\n"
+        f"    UpdateContext({{locEnvio: First(Sort(Filter({ENVIOS}, rlt_data = d), createdon, SortOrder.Descending)), locConfirma: false}})))")
+    ao_abrir = ("UpdateContext({locEleData: If(Hour(Now()) < 12, DateAdd(Today(), -1, TimeUnit.Days), Today())});\n"
+                f"UpdateContext({{locEleEquipe: Coalesce(First(Sort({ENVIOS}, createdon, SortOrder.Descending)).rlt_equipe, \"\")}});\n"
+                "Reset(eleData); Reset(eleEquipe);\n" + carregar)
+    enviar = (
+        "If(!IsBlank(locEnvio) && !locConfirma,\n"
+        "  UpdateContext({locConfirma: true});\n"
+        "  Notify(\"Este dia já foi enviado. Toque em \" & Char(34) & \"Confirmar novo envio\" & Char(34) & \" para mandar outra vez.\", NotificationType.Warning),\n"
+        f"  UpdateContext({{locEnvio: Patch({ENVIOS}, Defaults({ENVIOS}), {{rlt_nome: \"ELETROMECÂNICA \" & Text(eleData.SelectedDate, \"dd.mm.yyyy\"), "
+        "rlt_data: eleData.SelectedDate, rlt_equipe: eleEquipe.Text, rlt_enviadopor: gblUsuario, rlt_enviadoem: Now()})});\n"
+        "  UpdateContext({locConfirma: false});\n  "
+        + hist('"Relatório da Eletromecânica enviado: " & Text(eleData.SelectedDate, "dd/mm/yyyy")')
+        + ";\n  Notify(\"Enviado para o fluxo: o PDF e o e-mail saem em alguns minutos.\", NotificationType.Success))")
+    atualizar = f"UpdateContext({{locEnvio: LookUp({ENVIOS}, rlt_envioeletroid = locEnvio.rlt_envioeletroid)}})"
+    X0, LARG = "224", "Parent.Width - 248"
+    campo = dict(BorderColor="RGBA(197, 206, 215, 1)", BorderThickness="1", FocusedBorderColor="corVerde", FocusedBorderThickness="2",
+                 Size="11", Color="corTexto")
+    filhos = moldura(p, "scrFechar") + [
+        C(f"{p}Voltar", LBL, Text='"‹  Fechar"', Color="corAzul", Size="10", Underline="true", X="224", Y="70", Width="300", Height="22", OnSelect="Back()"),
+    ] + titulo(p, '"RELATÓRIO DA ELETROMECÂNICA"',
+               '"O Bravo envia às 24:00 os chamados do dia da Eletromecânica, do Fator Q (Z9) e das preventivas (ZM02, sem BHS), para Eletromecânica SBBR com cópia para o CCM."',
+               y=100)
+    filhos += [
+        rotulo(f"{p}RotData", '"DATA DO RELATÓRIO *"', 224, 168, 200),
+        C("eleData", DTP, DefaultDate="locEleData", Format='"dd/mm/yyyy"', OnChange=carregar, X="224", Y="192", Width="200", Height="40",
+          IconBackground="Color.White", IconFill="corTexto", **campo),
+        rotulo(f"{p}RotEquipe", '"ELETROMECÂNICA DE PLANTÃO  (cabeçalho do PDF)"', 444, 168, 500),
+        C("eleEquipe", TXT, Default="locEleEquipe", Mode="TextMode.MultiLine", MaxLength="2000", X="444", Y="192",
+          Width="Parent.Width - 444 - 24 - 250", Height="84", PaddingLeft="10",
+          HintText='"Um por linha. Ex.: Wellington Alves - Plantão Alfa"', RadiusTopLeft="8", RadiusTopRight="8", RadiusBottomLeft="8",
+          RadiusBottomRight="8", **campo),
+        botao(f"{p}Enviar", 'If(IsBlank(locEnvio), "➤  Enviar para a Eletromecânica", locConfirma, "Confirmar novo envio", "Enviar de novo")', enviar,
+              "Parent.Width - 24 - 230", 192, 230, 44, Size="11", DisplayMode="If(IsBlank(eleData.SelectedDate), DisplayMode.Disabled, DisplayMode.Edit)"),
+        C(f"{p}Resultado", LBL, OnSelect=atualizar, Size="10", PaddingLeft="12", X=X0, Y="290", Width=LARG, Height="44",
+          Fill="If(IsBlank(locEnvio), corAzul10, StartsWith(Coalesce(locEnvio.rlt_resultado, \"\"), \"FALHA\"), corVerm20, RGBA(227, 242, 218, 1))",
+          Color="If(!IsBlank(locEnvio) && StartsWith(Coalesce(locEnvio.rlt_resultado, \"\"), \"FALHA\"), RGBA(138, 0, 33, 1), corTexto)",
+          Text=('If(IsBlank(locEnvio), "Ainda não enviado para " & Text(eleData.SelectedDate, "dd/mm/yyyy") & ".", '
+                '"Enviado por " & Coalesce(locEnvio.rlt_enviadopor.rlt_nome, "—") & " em " & Text(locEnvio.rlt_enviadoem, "dd/mm/yyyy hh:mm") & ".   " & '
+                'If(IsBlank(locEnvio.rlt_resultado), "PDF e e-mail em andamento: toque aqui para atualizar.", locEnvio.rlt_resultado))')),
+        C(f"{p}Qtd", LBL, Text='CountRows(colEletro) & If(CountRows(colEletro) = 1, " chamado", " chamados") & " no dia. Toque no chamado para completar o feedback."',
+          Color="corMuted", Size="10", X=X0, Y="342", Width=LARG, Height="24"),
+        cartao(f"{p}Grade", X0, 370, LARG, "Parent.Height - 370 - 16", raio=8),
+    ]
+    cols = [("REGISTRO / OCORRÊNCIA", 0.31), ("NOTA", 0.06), ("CHAMADO", 0.1), ("REGISTRO", 0.1), ("TÉRMINO", 0.1), ("STATUS", 0.13), ("FEEDBACK", 0.2)]
+    acc, xs = 0.0, []
+    for _c, larg in cols:
+        xs.append(acc)
+        acc += larg
+    for j, (cab, larg) in enumerate(cols):
+        filhos.append(C(f"{p}Cab{j}", LBL, Text=f'"{cab}"', Color="corMuted", Size="8", FontWeight="FontWeight.Bold",
+                        X=f"{X0} + 12 + ({LARG} - 24) * {xs[j]}", Y="370", Width=f"({LARG} - 24) * {larg}", Height="34"))
+    filhos.append(C(f"{p}CabLinha", RET, Fill="corLinha", X=f"{X0} + 1", Y="404", Width=f"{LARG} - 2", Height="2"))
+    sec = "ThisItem.rlt_secao"
+    equip = "Upper(Coalesce(ThisItem.rlt_equipamento.rlt_nome, ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo))"
+    ocorr = (f"Switch({sec}, {SEC}.'Fator Q (Z9)', \"SOLICITAÇÃO DE ATENDIMENTO PARA INOPERÂNCIA – \" & {equip}, "
+             f"{SEC}.'Preventiva (ZM02)', \"MANUTENÇÃO PREVENTIVA – \" & {equip}, Upper(Coalesce(ThisItem.rlt_descricao, ThisItem.rlt_titulo)))")
+    eh_equip = f"({sec} = {SEC}.'Fator Q (Z9)' || {sec} = {SEC}.'Preventiva (ZM02)')"
+    st = 'Switch(Text(ThisItem.rlt_status), "EM ANDAMENTO", "EM EXECUÇÃO", "CONCLUÍDO", "CONCLUÍDO / OPERACIONAL", Text(ThisItem.rlt_status))'
+    fb = (f"If(IsBlank(Trim(ThisItem.rlt_feedback)) && ThisItem.rlt_status = {ST}.CANCELADO, \"MOTIVO: \" & ThisItem.rlt_motivocancelamento, "
+          "Coalesce(ThisItem.rlt_feedback, \"\"))")
+    valores = [ocorr, f'If({eh_equip}, If({sec} = {SEC}.\'Fator Q (Z9)\', "Z9", "ZM02"), "–")', f'If({eh_equip}, ThisItem.rlt_numero, "–")',
+               'Text(ThisItem.rlt_inicio, "dd/mm hh:mm")',
+               'If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")', st,
+               f'If(IsBlank({fb}), "(sem feedback)", {fb})']
+    ALT = 56
+    abrir = "Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})"
+    celulas = []
+    for j, ((_c, larg), v) in enumerate(zip(cols, valores)):
+        extra = {}
+        if j == 0:
+            extra = dict(Color="corAzul", Underline="true", OnSelect=abrir)
+        elif j == 1:
+            extra = dict(Color="RGBA(192, 0, 0, 1)", FontWeight="FontWeight.Bold")
+        elif j == 6:
+            extra = dict(Color=f'If(IsBlank({fb}), corMuted, corTexto)', Italic=f"IsBlank({fb})")
+        celulas.append(C(f"{p}C{j}", LBL, Text=v, Size="9", X=f"12 + (Parent.TemplateWidth - 24) * {xs[j]}", Y="0",
+                         Width=f"(Parent.TemplateWidth - 24) * {larg} - 8", Height=str(ALT), **{"Color": "corTexto", **extra}))
+    celulas.append(C(f"{p}Linha", RET, Fill="corLinha", X="0", Y="Parent.TemplateHeight - 1", Width="Parent.TemplateWidth", Height="1"))
+    filhos += [
+        C(f"{p}Vazio", LBL, Text='"Nenhum chamado da Eletromecânica, do Fator Q ou de preventiva neste dia."', Color="corMuted", Size="10",
+          Align="Align.Center", X=X0, Y="420", Width=LARG, Height="40", Visible="CountRows(colEletro) = 0"),
+        C(f"{p}Gal", GAL, variante="Vertical", Items="colEletro", TemplateSize=str(ALT), TemplatePadding="0",
+          X=f"{X0} + 1", Y="406", Width=f"{LARG} - 2", Height="Parent.Height - 406 - 18", filhos=celulas),
+    ]
+    return tela("scrEletro", {"Fill": "corFundo", "OnVisible": ao_abrir}, filhos)
+
+
 # ================================================================== APP
 APP = f"""App:
   Properties:
@@ -1484,6 +1612,7 @@ EDITOR = """EditorState:
     - scrPainel
     - scrListas
     - scrFechar
+    - scrEletro
     - scrAbrir
 """
 
@@ -1495,7 +1624,7 @@ def main(src):
         "App.pa.yaml": APP, "_EditorState.pa.yaml": EDITOR,
         "scrRelatorio.pa.yaml": tela_relatorio(), "scrChamados.pa.yaml": tela_chamados(), "scrRegistro.pa.yaml": tela_registro(),
         "scrHistorico.pa.yaml": tela_historico(), "scrPainel.pa.yaml": tela_painel(), "scrFechar.pa.yaml": tela_fechar(),
-        "scrAbrir.pa.yaml": tela_abrir(), "scrListas.pa.yaml": tela_listas(),
+        "scrAbrir.pa.yaml": tela_abrir(), "scrListas.pa.yaml": tela_listas(), "scrEletro.pa.yaml": tela_eletro(),
     }
     velho = os.path.join(src, "Screen1.pa.yaml")
     if os.path.exists(velho):

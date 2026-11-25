@@ -53,4 +53,5 @@
   <EntityRelationship Name="user_rlt_registro" />
   <EntityRelationship Name="user_rlt_relatorio" />
   <EntityRelationship Name="rlt_pessoa_aviso" />
+  <EntityRelationship Name="rlt_pessoa_envioeletro" />
 </EntityRelationships>

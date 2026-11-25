@@ -523,6 +523,47 @@ Screens:
             =VerticalAlign.Top
           Font: |-
             =Font.Arial
+    - fecEletro:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Relatório da Eletromecânica  ›"
+          OnSelect: |-
+            =Navigate(scrEletro, ScreenTransition.None)
+          X: |-
+            =Parent.Width - 24 - 230
+          Y: |-
+            =86
+          Width: |-
+            =230
+          Height: |-
+            =40
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
     - fecPagina:
         Control: Gallery@2.15.0
         Variant: VariableHeight

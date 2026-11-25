@@ -1,0 +1,409 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "rlt_dataverse"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_onedriveforbusiness": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "rlt_onedrive"
+        },
+        "api": {
+          "name": "shared_onedriveforbusiness"
+        }
+      },
+      "shared_office365": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "rlt_outlook"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "RLT – E-mail da Eletromecânica (rlt_emaileletro)": {
+          "defaultValue": "",
+          "type": "String",
+          "metadata": {
+            "schemaName": "rlt_emaileletro"
+          }
+        },
+        "RLT – Cópia do e-mail da Eletromecânica (rlt_copiaeletro)": {
+          "defaultValue": "",
+          "type": "String",
+          "metadata": {
+            "schemaName": "rlt_copiaeletro"
+          }
+        },
+        "RLT – Coordenador da Eletromecânica (rlt_coordeletro)": {
+          "defaultValue": "Eng. Rogério Santos de Oliveira",
+          "type": "String",
+          "metadata": {
+            "schemaName": "rlt_coordeletro"
+          }
+        },
+        "RLT – Pasta dos PDFs no OneDrive (rlt_pastapdf)": {
+          "defaultValue": "/RLT-CCM",
+          "type": "String",
+          "metadata": {
+            "schemaName": "rlt_pastapdf"
+          }
+        }
+      },
+      "triggers": {
+        "Quando_um_envio_e_criado": {
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 1,
+              "subscriptionRequest/entityname": "rlt_envioeletro",
+              "subscriptionRequest/scope": 4
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Gerar_e_enviar": {
+          "type": "Scope",
+          "actions": {
+            "Janela": {
+              "type": "Compose",
+              "inputs": {
+                "ini": "@{convertToUtc(concat(if(empty(coalesce(triggerOutputs()?['body/rlt_data'], '')), '', formatDateTime(coalesce(triggerOutputs()?['body/rlt_data'], '2000-01-01T00:00:00'), 'yyyy-MM-dd')), 'T00:00:00'), 'E. South America Standard Time')}",
+                "fim": "@{addDays(convertToUtc(concat(if(empty(coalesce(triggerOutputs()?['body/rlt_data'], '')), '', formatDateTime(coalesce(triggerOutputs()?['body/rlt_data'], '2000-01-01T00:00:00'), 'yyyy-MM-dd')), 'T00:00:00'), 'E. South America Standard Time'), 1)}"
+              },
+              "runAfter": {}
+            },
+            "Dados": {
+              "type": "Compose",
+              "inputs": {
+                "nome": "@{concat(if(empty(coalesce(triggerOutputs()?['body/rlt_data'], '')), '', formatDateTime(coalesce(triggerOutputs()?['body/rlt_data'], '2000-01-01T00:00:00'), 'dd.MM.yyyy')), '_CHAMADOS ELETROMECANICA_FATOR Q')}",
+                "dataPonto": "@{if(empty(coalesce(triggerOutputs()?['body/rlt_data'], '')), '', formatDateTime(coalesce(triggerOutputs()?['body/rlt_data'], '2000-01-01T00:00:00'), 'dd.MM.yyyy'))}",
+                "dataBarra": "@{if(empty(coalesce(triggerOutputs()?['body/rlt_data'], '')), '', formatDateTime(coalesce(triggerOutputs()?['body/rlt_data'], '2000-01-01T00:00:00'), 'dd/MM/yyyy'))}",
+                "ano": "@{if(empty(coalesce(triggerOutputs()?['body/rlt_data'], '')), '', formatDateTime(coalesce(triggerOutputs()?['body/rlt_data'], '2000-01-01T00:00:00'), 'yyyy'))}",
+                "mes": "@{if(empty(coalesce(triggerOutputs()?['body/rlt_data'], '')), '', formatDateTime(coalesce(triggerOutputs()?['body/rlt_data'], '2000-01-01T00:00:00'), 'MM'))}",
+                "equipe": "@{replace(replace(replace(coalesce(triggerOutputs()?['body/rlt_equipe'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;')}",
+                "enviadoPor": "@{replace(replace(replace(coalesce(triggerOutputs()?['body/_rlt_enviadopor_value@OData.Community.Display.V1.FormattedValue'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;')}",
+                "enviadoEm": "@{if(empty(coalesce(triggerOutputs()?['body/rlt_enviadoem'], '')), '', convertFromUtc(coalesce(triggerOutputs()?['body/rlt_enviadoem'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm'))}"
+              },
+              "runAfter": {}
+            },
+            "Listar_chamados": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "rlt_registros",
+                  "fetchXml": "<fetch><entity name=\"rlt_registro\"><attribute name=\"rlt_registroid\"/><attribute name=\"rlt_titulo\"/><attribute name=\"rlt_descricao\"/><attribute name=\"rlt_secao\"/><attribute name=\"rlt_numero\"/><attribute name=\"rlt_inicio\"/><attribute name=\"rlt_conclusao\"/><attribute name=\"rlt_ni\"/><attribute name=\"rlt_status\"/><attribute name=\"rlt_equipamento\"/><attribute name=\"rlt_equipamentolivre\"/><attribute name=\"rlt_feedback\"/><attribute name=\"rlt_motivocancelamento\"/><order attribute=\"rlt_inicio\"/><filter type=\"and\"><condition attribute=\"rlt_secao\" operator=\"in\"><value>448170000</value><value>448170005</value><value>448170006</value></condition><condition attribute=\"rlt_inicio\" operator=\"lt\" value=\"@{outputs('Janela')?['fim']}\"/><filter type=\"or\"><condition attribute=\"rlt_conclusao\" operator=\"null\"/><condition attribute=\"rlt_conclusao\" operator=\"ge\" value=\"@{outputs('Janela')?['ini']}\"/></filter><condition entityname=\"suc\" attribute=\"rlt_registroid\" operator=\"null\"/><filter type=\"or\"><condition attribute=\"rlt_secao\" operator=\"ne\" value=\"448170006\"/><condition entityname=\"eq\" attribute=\"rlt_tipo\" operator=\"ne\" value=\"448170002\"/><condition entityname=\"eq\" attribute=\"rlt_tipo\" operator=\"null\"/></filter></filter><link-entity name=\"rlt_registro\" from=\"rlt_origem\" to=\"rlt_registroid\" link-type=\"outer\" alias=\"suc\"/><link-entity name=\"rlt_equipamento\" from=\"rlt_equipamentoid\" to=\"rlt_equipamento\" link-type=\"outer\" alias=\"eq\"/></entity></fetch>"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Janela": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Linhas": {
+              "type": "Select",
+              "inputs": {
+                "from": "@body('Listar_chamados')?['value']",
+                "select": "@concat('<tr><td class=\"oc\">', replace(replace(replace(coalesce(if(equals(item()?['rlt_secao'], 448170005), concat('SOLICITAÇÃO DE ATENDIMENTO PARA INOPERÂNCIA – ', toUpper(coalesce(item()?['_rlt_equipamento_value@OData.Community.Display.V1.FormattedValue'], item()?['rlt_equipamentolivre'], item()?['rlt_titulo'], ''))), if(equals(item()?['rlt_secao'], 448170006), concat('MANUTENÇÃO PREVENTIVA – ', toUpper(coalesce(item()?['_rlt_equipamento_value@OData.Community.Display.V1.FormattedValue'], item()?['rlt_equipamentolivre'], item()?['rlt_titulo'], ''))), toUpper(coalesce(item()?['rlt_descricao'], item()?['rlt_titulo'], '')))), ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '</td><td class=\"c nota\">', if(equals(item()?['rlt_secao'], 448170005), 'Z9', if(equals(item()?['rlt_secao'], 448170006), 'ZM02', '–')), '</td><td class=\"c\">', if(or(equals(item()?['rlt_secao'], 448170005), equals(item()?['rlt_secao'], 448170006)), replace(replace(replace(coalesce(item()?['rlt_numero'], ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '–'), '</td><td class=\"c\">', if(empty(coalesce(item()?['rlt_inicio'], '')), '', convertFromUtc(coalesce(item()?['rlt_inicio'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd.MM.yyyy')), '</td><td class=\"c\">', if(empty(coalesce(item()?['rlt_inicio'], '')), '', convertFromUtc(coalesce(item()?['rlt_inicio'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'HH:mm')), '</td><td class=\"c\">', if(empty(coalesce(item()?['rlt_inicio'], '')), '', convertFromUtc(coalesce(item()?['rlt_inicio'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd.MM.yyyy')), '</td><td class=\"c\">', if(not(empty(coalesce(item()?['rlt_conclusao'], ''))), if(empty(coalesce(item()?['rlt_conclusao'], '')), '', convertFromUtc(coalesce(item()?['rlt_conclusao'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'HH:mm')), if(equals(item()?['rlt_ni'], true), 'N/I', '–')), '</td><td class=\"c\">', if(not(empty(coalesce(item()?['rlt_conclusao'], ''))), if(empty(coalesce(item()?['rlt_conclusao'], '')), '', convertFromUtc(coalesce(item()?['rlt_conclusao'], '2000-01-01T00:00:00Z'), 'E. South America Standard Time', 'dd.MM.yyyy')), '–'), '</td><td class=\"c st st', string(sub(coalesce(item()?['rlt_status'], 448170001), 448170000)), '\">', createArray('PENDENTE', 'EM EXECUÇÃO', 'CONCLUÍDO / OPERACIONAL', 'CHAMADO FALSO', 'CANCELADO')[sub(coalesce(item()?['rlt_status'], 448170001), 448170000)], '</td><td class=\"c\">', replace(replace(replace(coalesce(if(empty(trim(coalesce(item()?['rlt_feedback'], ''))), if(equals(item()?['rlt_status'], 448170004), concat('MOTIVO: ', coalesce(item()?['rlt_motivocancelamento'], '')), ''), item()?['rlt_feedback']), ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '</td></tr>')"
+              },
+              "runAfter": {
+                "Listar_chamados": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "HTML": {
+              "type": "Compose",
+              "inputs": "@concat('<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>', outputs('Dados')?['nome'], '</title><style>@page{size:A4 landscape;margin:12mm}body{font-family:Calibri,Arial,Helvetica,sans-serif;font-size:8.5pt;color:#111;margin:0}.cab{width:100%;border-collapse:collapse;margin-bottom:6px}.cab td{border:0;vertical-align:top}.marca{font-size:15pt;color:#003863;font-weight:bold;line-height:1.1;width:18%}.marca span{font-size:10pt;font-weight:normal;display:block}.tit{text-align:center;color:#1f4e79;font-style:italic;font-weight:bold;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.5}.tit .g{font-size:9.5pt}.reg{width:22%;text-align:right}.reg table{border-collapse:collapse;margin-left:auto}.reg td{background:#fde9b4;padding:4px 14px;font-weight:bold;font-size:10pt;border:0}.eq{white-space:pre-line;text-align:center;font-size:8.5pt;line-height:1.6;margin:6px 0 10px}table.t{width:100%;border-collapse:collapse}.t th{background:#5b9bd5;color:#fff;font-size:8.5pt;padding:6px 4px;border:1px dotted #fff}.t td{border:1px dotted #555;padding:6px 5px;vertical-align:middle}.t tr:nth-child(even) td{background:#ddebf7}.c{text-align:center}.nota{color:#c00000;font-weight:bold}.oc{width:30%}.st2{background:#70ad47 !important;color:#fff;font-weight:bold}.st1{background:#ffd966 !important;font-weight:bold}.st0{background:#f4b183 !important;font-weight:bold}.st3,.st4{background:#d0cece !important;font-weight:bold}.vazio{color:#888;text-align:center}.rod{margin-top:14px;font-size:8pt;color:#1f4e79}</style></head><body><table class=\"cab\"><tr><td class=\"marca\"><span>Aeroporto de</span>Brasília</td><td class=\"tit\">CCM – CENTRO DE CONTROLE DE MANUTENÇÃO<br>COORDENAÇÃO DE PLANEJAMENTO E CONTROLE DE MANUTENÇÃO - PCM<br><span class=\"g\">GERÊNCIA DE MANUTENÇÃO</span><br><br>Registro de Ocorrências Eletromecânica Equipamentos &quot;FATOR Q&quot;<br>Coordenador Responsável: ', replace(replace(replace(coalesce(parameters('RLT – Coordenador da Eletromecânica (rlt_coordeletro)'), ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '</td><td class=\"reg\"><table><tr><td>Registro</td><td>', outputs('Dados')?['dataBarra'], '</td></tr></table></td></tr></table><div class=\"eq\">', outputs('Dados')?['equipe'], '</div><table class=\"t\"><thead><tr><th>Registro / Ocorrência</th><th>Tipo de Nota</th><th>Chamado Nº</th><th>Data do Registro</th><th>Hora do Registro</th><th>Data Início do Serviço</th><th>Hora Término do Serviço</th><th>Data Término do Serviço</th><th>Status</th><th>Feedback Coordenação Responsável</th></tr></thead><tbody>', if(empty(body('Linhas')), '<tr><td colspan=\"10\" class=\"vazio\">Nenhum chamado da Eletromecânica no dia</td></tr>', join(body('Linhas'), '')), '</tbody></table><div class=\"rod\">Enviado por ', outputs('Dados')?['enviadoPor'], ' em ', outputs('Dados')?['enviadoEm'], ' &nbsp;·&nbsp; Classificação: Interno</div></body></html>')",
+              "runAfter": {
+                "Linhas": [
+                  "Succeeded"
+                ],
+                "Dados": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Verificar_destinatarios": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(trim(coalesce(parameters('RLT – E-mail da Eletromecânica (rlt_emaileletro)'), '')))",
+                      true
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Registrar_sem_destinatarios": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateOnlyRecord",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "rlt_envioeletros",
+                      "recordId": "@triggerOutputs()?['body/rlt_envioeletroid']",
+                      "item/rlt_resultado": "FALHA: a variável de ambiente RLT – E-mail da Eletromecânica está vazia. Nada foi enviado."
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  },
+                  "runAfter": {}
+                },
+                "Sem_destinatarios": {
+                  "type": "Terminate",
+                  "inputs": {
+                    "runStatus": "Failed",
+                    "runError": {
+                      "code": "SemDestinatarios",
+                      "message": "A variável de ambiente rlt_emaileletro está vazia."
+                    }
+                  },
+                  "runAfter": {
+                    "Registrar_sem_destinatarios": [
+                      "Succeeded",
+                      "Failed"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "HTML": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Criar_HTML_temporario": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "CreateFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "folderPath": "@{concat(parameters('RLT – Pasta dos PDFs no OneDrive (rlt_pastapdf)'), '/_temp')}",
+                  "name": "@{concat(guid(), '.html')}",
+                  "body": "@outputs('HTML')"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Verificar_destinatarios": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Converter_em_PDF": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "ConvertFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "id": "@body('Criar_HTML_temporario')?['Id']",
+                  "type": "PDF"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Criar_HTML_temporario": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Salvar_PDF": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "CreateFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "folderPath": "@{concat(parameters('RLT – Pasta dos PDFs no OneDrive (rlt_pastapdf)'), '/', outputs('Dados')?['ano'], '/', outputs('Dados')?['mes'])}",
+                  "name": "@{concat(outputs('Dados')?['nome'], '.pdf')}",
+                  "body": "@body('Converter_em_PDF')"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Converter_em_PDF": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Apagar_HTML_temporario": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_onedriveforbusiness",
+                  "operationId": "DeleteFile",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                },
+                "parameters": {
+                  "id": "@body('Criar_HTML_temporario')?['Id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Salvar_PDF": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              }
+            },
+            "Enviar_email": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_office365",
+                  "operationId": "SendEmailV2",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                },
+                "parameters": {
+                  "emailMessage/To": "@parameters('RLT – E-mail da Eletromecânica (rlt_emaileletro)')",
+                  "emailMessage/Cc": "@{trim(coalesce(parameters('RLT – Cópia do e-mail da Eletromecânica (rlt_copiaeletro)'), ''))}",
+                  "emailMessage/Subject": "@{concat('Registro de Ocorrências Eletromecânica – Equipamentos Fator Q – ', outputs('Dados')?['dataPonto'])}",
+                  "emailMessage/Body": "<p>Prezados,</p><p>Encaminho, em anexo, o Registro de Ocorrências da Eletromecânica (equipamentos Fator Q) referente ao dia @{outputs('Dados')?['dataPonto']}.</p><p>Atenciosamente,<br>CCM – Centro de Controle de Manutenção</p>",
+                  "emailMessage/Attachments": [
+                    {
+                      "Name": "@{concat(outputs('Dados')?['nome'], '.pdf')}",
+                      "ContentBytes": "@body('Converter_em_PDF')"
+                    }
+                  ],
+                  "emailMessage/Importance": "Normal"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Salvar_PDF": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Registrar_envio": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "UpdateOnlyRecord",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "rlt_envioeletros",
+                  "recordId": "@triggerOutputs()?['body/rlt_envioeletroid']",
+                  "item/rlt_resultado": "@{concat('Enviado em ', convertFromUtc(utcNow(), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm'), ' para ', parameters('RLT – E-mail da Eletromecânica (rlt_emaileletro)'), if(empty(trim(coalesce(parameters('RLT – Cópia do e-mail da Eletromecânica (rlt_copiaeletro)'), ''))), '', concat(' (cópia: ', parameters('RLT – Cópia do e-mail da Eletromecânica (rlt_copiaeletro)'), ')')), '. ', string(length(body('Linhas'))), ' chamado(s). PDF: ', body('Salvar_PDF')?['Path'])}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Enviar_email": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "runAfter": {}
+        },
+        "Erros": {
+          "type": "Query",
+          "inputs": {
+            "from": "@result('Gerar_e_enviar')",
+            "where": "@equals(item()?['status'], 'Failed')"
+          },
+          "runAfter": {
+            "Gerar_e_enviar": [
+              "Failed",
+              "TimedOut"
+            ]
+          }
+        },
+        "Registrar_falha": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "UpdateOnlyRecord",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "rlt_envioeletros",
+              "recordId": "@triggerOutputs()?['body/rlt_envioeletroid']",
+              "item/rlt_resultado": "@{concat('FALHA em ', convertFromUtc(utcNow(), 'E. South America Standard Time', 'dd/MM/yyyy HH:mm'), ' na etapa ', coalesce(first(body('Erros'))?['name'], '?'), ': ', coalesce(first(body('Erros'))?['error']?['message'], string(first(body('Erros'))?['outputs']?['body']), 'erro desconhecido'))}"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Erros": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Terminar_com_falha": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed",
+            "runError": {
+              "code": "FalhaNoEnvio",
+              "message": "O PDF ou o e-mail da Eletromecânica não foi enviado. Veja rlt_resultado no envio."
+            }
+          },
+          "runAfter": {
+            "Registrar_falha": [
+              "Succeeded",
+              "Failed"
+            ]
+          }
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

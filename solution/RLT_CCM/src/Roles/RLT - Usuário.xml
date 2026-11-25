@@ -54,5 +54,10 @@
     <RolePrivilege name="prvDeleterlt_aviso" level="Global" />
     <RolePrivilege name="prvAppendrlt_aviso" level="Global" />
     <RolePrivilege name="prvAppendTorlt_aviso" level="Global" />
+    <RolePrivilege name="prvCreaterlt_envioeletro" level="Global" />
+    <RolePrivilege name="prvReadrlt_envioeletro" level="Global" />
+    <RolePrivilege name="prvWriterlt_envioeletro" level="Global" />
+    <RolePrivilege name="prvAppendrlt_envioeletro" level="Global" />
+    <RolePrivilege name="prvAppendTorlt_envioeletro" level="Global" />
   </RolePrivileges>
 </Role>

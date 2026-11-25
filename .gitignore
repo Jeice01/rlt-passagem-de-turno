@@ -16,3 +16,6 @@ ferramentas/dataverse/saida/
 
 # Pacote da solução de fluxos e arquivos de configuração (contêm e-mails)
 ferramentas/fluxos/saida/
+
+# Relatórios reais da Eletromecânica usados como modelo (têm nomes de técnicos)
+*_CHAMADOS ELETROMECANICA_*

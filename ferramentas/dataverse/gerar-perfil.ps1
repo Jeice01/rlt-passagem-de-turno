@@ -21,6 +21,7 @@ $tabelas = [ordered]@{
   rlt_relatorio = $completo; rlt_registro = $completo; rlt_equipe = $completo; rlt_anexo = $completo
   rlt_pessoa = $completo; rlt_local = $completo; rlt_equipamento = $completo
   rlt_historico = @("Create", "Read", "Append", "AppendTo")
+  rlt_envioeletro = $completo   # envio diário da Eletromecânica (25/11/2026)
   rlt_aviso = @("Create", "Read", "Write", "Delete", "Append", "AppendTo")   # avisos do Painel: todos podem excluir (25/11/2026)
 }
 $linhas = foreach ($t in $tabelas.Keys) { foreach ($p in $tabelas[$t]) { "    <RolePrivilege name=`"prv$p$t`" level=`"Global`" />" } }

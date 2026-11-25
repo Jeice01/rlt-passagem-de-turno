@@ -84,6 +84,7 @@
     <RootComponents>
       <RootComponent type="1" schemaName="rlt_anexo" behavior="0" />
       <RootComponent type="1" schemaName="rlt_aviso" behavior="0" />
+      <RootComponent type="1" schemaName="rlt_envioeletro" behavior="0" />
       <RootComponent type="1" schemaName="rlt_equipamento" behavior="0" />
       <RootComponent type="1" schemaName="rlt_equipe" behavior="0" />
       <RootComponent type="1" schemaName="rlt_historico" behavior="0" />

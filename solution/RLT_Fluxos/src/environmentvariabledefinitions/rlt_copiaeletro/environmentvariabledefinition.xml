@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="rlt_copiaeletro">
+  <description default="Cópia do relatório diário da Eletromecânica. No piloto: CCM@inframerica.aero. Nos testes: vazio ou o e-mail de quem testa.">
+    <label description="Cópia do relatório diário da Eletromecânica. No piloto: CCM@inframerica.aero. Nos testes: vazio ou o e-mail de quem testa." languagecode="1046" />
+  </description>
+  <displayname default="RLT – Cópia do e-mail da Eletromecânica">
+    <label description="RLT – Cópia do e-mail da Eletromecânica" languagecode="1046" />
+  </displayname>
+  <introducedversion>1.0.0.0</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

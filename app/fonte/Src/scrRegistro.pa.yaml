@@ -13,6 +13,7 @@ Screens:
         UpdateContext({locStatus: If(IsBlank(locReg.rlt_status), "EM ANDAMENTO", Text(locReg.rlt_status))});
         UpdateContext({locStatusIos: If(IsBlank(locReg.rlt_statusios), "Em andamento", Text(locReg.rlt_statusios))});
         UpdateContext({locArea: locReg.rlt_local.rlt_area});
+        UpdateContext({locFeedback: Coalesce(locReg.rlt_feedback, "")});
         UpdateContext({locErro: ""});
         UpdateContext({locAnexar: false});
         UpdateContext({locFicar: false});
@@ -619,7 +620,7 @@ Screens:
                 Width: |-
                   =Parent.TemplateWidth - 14
                 Height: |-
-                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10
+                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10
                 Fill: |-
                   =Color.White
                 DisabledFill: |-
@@ -1991,6 +1992,201 @@ Screens:
                   =VerticalAlign.Top
                 Font: |-
                   =Font.Arial
+          - regRotFeedback:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="FEEDBACK PARA A ELETROMECÂNICA  (sai no relatório diário da Eletromecânica)"
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                FontWeight: |-
+                  =FontWeight.Bold
+                X: |-
+                  =18
+                Y: |-
+                  =(((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 36)
+                Height: |-
+                  =20
+                Visible: |-
+                  =(locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"])
+                Font: |-
+                  =Font.Arial
+          - regFeedback:
+              Control: Classic/TextInput@2.3.2
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 22
+                Width: |-
+                  =(Parent.TemplateWidth - 14 - 36)
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                PaddingLeft: |-
+                  =12
+                Default: |-
+                  =locFeedback
+                OnChange: |-
+                  =UpdateContext({locFeedback: Self.Text})
+                HintText: |-
+                  ="Ex.: MOTIVO: BOTÃO STOP.  ou  IOS 1414_2026 - CCM - MEC - ATUALIZAÇÃO.2"
+                MaxLength: |-
+                  =2000
+                Visible: |-
+                  =(locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"])
+                Font: |-
+                  =Font.Arial
+          - regVincIos:
+              Control: Classic/DropDown@2.3.1
+              Properties:
+                X: |-
+                  =18
+                Y: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 70
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 122
+                Height: |-
+                  =40
+                DisplayMode: |-
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.View)
+                BorderColor: |-
+                  =RGBA(197, 206, 215, 1)
+                BorderThickness: |-
+                  =1
+                HoverBorderColor: |-
+                  =corAzul80
+                FocusedBorderColor: |-
+                  =corVerde
+                FocusedBorderThickness: |-
+                  =2
+                Size: |-
+                  =11
+                Color: |-
+                  =corTexto
+                Reset: |-
+                  =locResetar
+                ChevronBackground: |-
+                  =Color.White
+                ChevronFill: |-
+                  =corTexto
+                ChevronHoverBackground: |-
+                  =corAzul10
+                ChevronHoverFill: |-
+                  =corTexto
+                ChevronDisabledBackground: |-
+                  =Color.White
+                SelectionFill: |-
+                  =corAzul
+                HoverFill: |-
+                  =corAzul10
+                AllowEmptySelection: |-
+                  =true
+                Default: |-
+                  =""
+                Visible: |-
+                  =(locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]) && !IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                Items: |-
+                  =ForAll(Filter(colRegs, rlt_secao = [@'Seção'].'IOS informados'), {Value: "IOS " & Mid(rlt_numero, 5) & "_" & Left(rlt_numero, 4) & " - " & Upper(rlt_titulo)})
+                OnChange: |-
+                  =If(!IsBlank(Self.Selected.Value), UpdateContext({locFeedback: Trim(locFeedback & If(IsBlank(Trim(locFeedback)), "", "  ·  ") & Self.Selected.Value)}))
+                Font: |-
+                  =Font.Arial
+          - regBtnMotivo:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="MOTIVO:"
+                OnSelect: |-
+                  =If(!StartsWith(Upper(Trim(locFeedback)), "MOTIVO:"), UpdateContext({locFeedback: "MOTIVO: " & locFeedback}))
+                X: |-
+                  =18 + ((Parent.TemplateWidth - 14 - 36) / 2 - 12) - 110
+                Y: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 70
+                Width: |-
+                  =110
+                Height: |-
+                  =40
+                Size: |-
+                  =10
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =corAzul
+                BorderColor: |-
+                  =corAzul
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corAzul10
+                HoverColor: |-
+                  =corAzul
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =(locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]) && !IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                Font: |-
+                  =Font.Arial
+          - regAjudaFeedback:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  ="A lista ao lado tem os IOS informados neste plantão: escolher um escreve a referência no feedback."
+                Color: |-
+                  =corMuted
+                Size: |-
+                  =9
+                X: |-
+                  =(18 + (Parent.TemplateWidth - 14 - 36) / 2 + 12)
+                Y: |-
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 72
+                Width: |-
+                  =((Parent.TemplateWidth - 14 - 36) / 2 - 12)
+                Height: |-
+                  =36
+                Visible: |-
+                  =(locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]) && !IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto
+                VerticalAlign: |-
+                  =VerticalAlign.Top
+                Font: |-
+                  =Font.Arial
           - regRotFotos:
               Control: Label@2.5.1
               Properties:
@@ -2005,7 +2201,7 @@ Screens:
                 X: |-
                   =18
                 Y: |-
-                  =(((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)
+                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)
                 Width: |-
                   =400
                 Height: |-
@@ -2027,7 +2223,7 @@ Screens:
                 X: |-
                   =18
                 Y: |-
-                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 24
+                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + 24
                 Width: |-
                   =(Parent.TemplateWidth - 14 - 36)
                 Height: |-
@@ -2200,7 +2396,8 @@ Screens:
                         rlt_limpezatecnica: regLimpeza.Value,
                         rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
                         rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
-                        rlt_motivocancelamento: regMotivo.Text
+                        rlt_motivocancelamento: regMotivo.Text,
+                        rlt_feedback: If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), Trim(regFeedback.Text), "")
                       }));
                       If(IsBlank(locId),
                         Patch(Histórico, Defaults(Histórico), {rlt_campo: "Registro criado", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}),
@@ -2215,7 +2412,8 @@ Screens:
                             {c: "Status", m: locReg.rlt_status <> gblSalvo.rlt_status || locReg.rlt_statusios <> gblSalvo.rlt_statusios},
                             {c: "Chamado falso", m: locReg.rlt_chamadofalso <> regFalso.Value},
                             {c: "Limpeza técnica", m: locReg.rlt_limpezatecnica <> regLimpeza.Value},
-                            {c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text}
+                            {c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text},
+                            {c: "Feedback para a Eletromecânica", m: Coalesce(locReg.rlt_feedback, "") <> Coalesce(gblSalvo.rlt_feedback, "")}
                           ), m),
                           Patch(Histórico, Defaults(Histórico), {rlt_campo: c, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}))
                       );
@@ -2231,7 +2429,7 @@ Screens:
                 X: |-
                   =18
                 Y: |-
-                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0)
+                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + 24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0)
                 Width: |-
                   =If(IsBlank(locId), 280, 220)
                 Height: |-
@@ -2276,7 +2474,7 @@ Screens:
                 X: |-
                   =18
                 Y: |-
-                  =((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + 24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 46
+                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + 24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 46
                 Width: |-
                   =(Parent.TemplateWidth - 14 - 36)
                 Height: |-
@@ -2307,7 +2505,7 @@ Screens:
                 X: |-
                   =0
                 Y: |-
-                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
+                  =((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
                 Width: |-
                   =Parent.TemplateWidth - 14 - 380
                 Height: |-
@@ -2324,7 +2522,7 @@ Screens:
                 X: |-
                   =Parent.TemplateWidth - 14 - 190 - 108
                 Y: |-
-                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
+                  =((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
                 Width: |-
                   =100
                 Height: |-
@@ -2390,7 +2588,8 @@ Screens:
                         rlt_limpezatecnica: regLimpeza.Value,
                         rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && IsBlank(vFim), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
                         rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && IsBlank(vFim), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
-                        rlt_motivocancelamento: regMotivo.Text
+                        rlt_motivocancelamento: regMotivo.Text,
+                        rlt_feedback: If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), Trim(regFeedback.Text), "")
                       }));
                       If(IsBlank(locId),
                         Patch(Histórico, Defaults(Histórico), {rlt_campo: "Registro criado", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}),
@@ -2405,7 +2604,8 @@ Screens:
                             {c: "Status", m: locReg.rlt_status <> gblSalvo.rlt_status || locReg.rlt_statusios <> gblSalvo.rlt_statusios},
                             {c: "Chamado falso", m: locReg.rlt_chamadofalso <> regFalso.Value},
                             {c: "Limpeza técnica", m: locReg.rlt_limpezatecnica <> regLimpeza.Value},
-                            {c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text}
+                            {c: "Motivo do cancelamento", m: Coalesce(locReg.rlt_motivocancelamento, "") <> regMotivo.Text},
+                            {c: "Feedback para a Eletromecânica", m: Coalesce(locReg.rlt_feedback, "") <> Coalesce(gblSalvo.rlt_feedback, "")}
                           ), m),
                           Patch(Histórico, Defaults(Histórico), {rlt_campo: c, rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: gblSalvo}))
                       );
@@ -2421,7 +2621,7 @@ Screens:
                 X: |-
                   =Parent.TemplateWidth - 14 - 190
                 Y: |-
-                  =(((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
+                  =((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
                 Width: |-
                   =190
                 Height: |-
@@ -2462,7 +2662,7 @@ Screens:
                 X: |-
                   =0
                 Y: |-
-                  =((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16) + 44
+                  =(((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16) + 44
                 Width: |-
                   =10
                 Height: |-

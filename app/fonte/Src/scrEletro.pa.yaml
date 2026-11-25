@@ -1,0 +1,1167 @@
+# Gerado por app/gerar_app.py a partir do protótipo validado. Edite o gerador, não este arquivo.
+Screens:
+  scrEletro:
+    Properties:
+      Fill: |-
+        =corFundo
+      OnVisible: |-
+        =UpdateContext({locEleData: If(Hour(Now()) < 12, DateAdd(Today(), -1, TimeUnit.Days), Today())});
+        UpdateContext({locEleEquipe: Coalesce(First(Sort('Envios Eletromecânica', createdon, SortOrder.Descending)).rlt_equipe, "")});
+        Reset(eleData); Reset(eleEquipe);
+        With({d: Coalesce(eleData.SelectedDate, locEleData)},
+          With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0)},
+            ClearCollect(colDia, Filter(Registros, (rlt_secao = [@'Seção'].Eletromecânica || rlt_secao = [@'Seção'].'Fator Q (Z9)' || rlt_secao = [@'Seção'].'Preventiva (ZM02)') && rlt_inicio < DateAdd(ini, 1, TimeUnit.Days) && (IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));
+            ClearCollect(colEletro, Sort(Filter(colDia As r, IsBlank(LookUp(colDia As o, o.rlt_origem.rlt_registroid = r.rlt_registroid)) && (r.rlt_secao <> [@'Seção'].'Preventiva (ZM02)' || IsBlank(r.rlt_equipamento) || r.rlt_equipamento.rlt_tipo <> [@'Tipo de equipamento'].Bagagem)), rlt_inicio));
+            UpdateContext({locEnvio: First(Sort(Filter('Envios Eletromecânica', rlt_data = d), createdon, SortOrder.Descending)), locConfirma: false})))
+    Children:
+    - eleTopo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corAzul
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =56
+    - eleFaixa:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =56
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =5
+    - eleMarca:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RLT · CCM"
+          Color: |-
+            =Color.White
+          Size: |-
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =20
+          Y: |-
+            =7
+          Width: |-
+            =300
+          Height: |-
+            =24
+    - eleMarca2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Passagem de Turno"
+          Color: |-
+            =Color.White
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =20
+          Y: |-
+            =29
+          Width: |-
+            =300
+          Height: |-
+            =20
+          Font: |-
+            =Font.Arial
+    - eleUsuario:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =Coalesce(gblUsuario.rlt_nome, User().FullName)
+          Color: |-
+            =Color.White
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Bold
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 470
+          Y: |-
+            =8
+          Width: |-
+            =410
+          Height: |-
+            =22
+          Font: |-
+            =Font.Arial
+    - elePerfil:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =If(IsBlank(gblUsuario), "fora da lista de pessoas", Text(gblUsuario.rlt_perfil) & If(IsBlank(gblUsuario.rlt_cargo), "", " · " & Lower(gblUsuario.rlt_cargo)))
+          Color: |-
+            =Color.White
+          Size: |-
+            =9
+          Align: |-
+            =Align.Right
+          X: |-
+            =Parent.Width - 470
+          Y: |-
+            =29
+          Width: |-
+            =410
+          Height: |-
+            =18
+          Font: |-
+            =Font.Arial
+    - eleAvatar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =Upper(Left(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), 1) & If(CountRows(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")) > 1, Left(Last(Split(Trim(Coalesce(gblUsuario.rlt_nome, User().FullName)), " ")).Value, 1), ""))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =Parent.Width - 52
+          Y: |-
+            =10
+          Width: |-
+            =36
+          Height: |-
+            =36
+          Fill: |-
+            =corVerde
+          DisabledFill: |-
+            =corVerde
+          BorderColor: |-
+            =corVerde
+          DisabledBorderColor: |-
+            =corVerde
+          BorderThickness: |-
+            =0
+          RadiusTopLeft: |-
+            =18
+          RadiusTopRight: |-
+            =18
+          RadiusBottomLeft: |-
+            =18
+          RadiusBottomRight: |-
+            =18
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.Arial
+    - eleMenuFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          X: |-
+            =0
+          Y: |-
+            =61
+          Width: |-
+            =200
+          Height: |-
+            =Parent.Height - 61
+    - eleMenu0:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="▤    Relatório"
+          OnSelect: |-
+            =Navigate(scrRelatorio, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =76
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - eleMenu1:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="◔    Chamados"
+          OnSelect: |-
+            =Navigate(scrChamados, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =126
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - eleMenu2:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="↺    Histórico"
+          OnSelect: |-
+            =Navigate(scrHistorico, ScreenTransition.None, {locHistReg: Blank()})
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =176
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - eleMenu3:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="◈    Painel geral"
+          OnSelect: |-
+            =Navigate(scrPainel, ScreenTransition.None)
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corMuted
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Normal
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =226
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - eleMenuBolha:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento)))
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =166
+          Y: |-
+            =240
+          Width: |-
+            =22
+          Height: |-
+            =18
+          Fill: |-
+            =corVerm
+          DisabledFill: |-
+            =corVerm
+          BorderColor: |-
+            =corVerm
+          DisabledBorderColor: |-
+            =corVerm
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =12
+          RadiusTopRight: |-
+            =12
+          RadiusBottomLeft: |-
+            =12
+          RadiusBottomRight: |-
+            =12
+          Color: |-
+            =Color.White
+          DisabledColor: |-
+            =Color.White
+          Size: |-
+            =9
+          FontWeight: |-
+            =FontWeight.Bold
+          Visible: |-
+            =CountRows(Filter(colRegs, rlt_secao = [@'Seção'].'Fator Q (Z9)' && IsBlank(rlt_equipamento))) > 0
+          Font: |-
+            =Font.Arial
+    - eleMenu4:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="➤    Fechar"
+          OnSelect: |-
+            =Navigate(scrFechar, ScreenTransition.None)
+          Fill: |-
+            =corAzul10
+          Color: |-
+            =corAzul
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          PressedFill: |-
+            =corAzul10
+          BorderThickness: |-
+            =0
+          Align: |-
+            =Align.Left
+          PaddingLeft: |-
+            =22
+          FontWeight: |-
+            =FontWeight.Bold
+          Size: |-
+            =12
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =200
+          Height: |-
+            =46
+          RadiusTopLeft: |-
+            =0
+          RadiusTopRight: |-
+            =0
+          RadiusBottomLeft: |-
+            =0
+          RadiusBottomRight: |-
+            =0
+          Font: |-
+            =Font.Arial
+    - eleMenuMarca:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =0
+          Y: |-
+            =276
+          Width: |-
+            =4
+          Height: |-
+            =46
+    - eleVoltar:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="‹  Fechar"
+          Color: |-
+            =corAzul
+          Size: |-
+            =10
+          Underline: |-
+            =true
+          X: |-
+            =224
+          Y: |-
+            =70
+          Width: |-
+            =300
+          Height: |-
+            =22
+          OnSelect: |-
+            =Back()
+          Font: |-
+            =Font.Arial
+    - eleAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerde
+          X: |-
+            =224
+          Y: |-
+            =98
+          Width: |-
+            =36
+          Height: |-
+            =4
+    - eleTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="RELATÓRIO DA ELETROMECÂNICA"
+          Color: |-
+            =corAzul
+          Size: |-
+            =20
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =224
+          Y: |-
+            =104
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =34
+    - eleSub:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="O Bravo envia às 24:00 os chamados do dia da Eletromecânica, do Fator Q (Z9) e das preventivas (ZM02, sem BHS), para Eletromecânica SBBR com cópia para o CCM."
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          X: |-
+            =224
+          Y: |-
+            =138
+          Width: |-
+            =Parent.Width - 460
+          Height: |-
+            =24
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          Font: |-
+            =Font.Arial
+    - eleRotData:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="DATA DO RELATÓRIO *"
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =224
+          Y: |-
+            =168
+          Width: |-
+            =200
+          Height: |-
+            =22
+          Visible: |-
+            =true
+          Font: |-
+            =Font.Arial
+    - eleData:
+        Control: Classic/DatePicker@2.6.0
+        Properties:
+          DefaultDate: |-
+            =locEleData
+          Format: |-
+            ="dd/mm/yyyy"
+          OnChange: |-
+            =With({d: Coalesce(eleData.SelectedDate, locEleData)},
+              With({ini: DateTime(Year(d), Month(d), Day(d), 0, 0, 0)},
+                ClearCollect(colDia, Filter(Registros, (rlt_secao = [@'Seção'].Eletromecânica || rlt_secao = [@'Seção'].'Fator Q (Z9)' || rlt_secao = [@'Seção'].'Preventiva (ZM02)') && rlt_inicio < DateAdd(ini, 1, TimeUnit.Days) && (IsBlank(rlt_conclusao) || rlt_conclusao >= ini)));
+                ClearCollect(colEletro, Sort(Filter(colDia As r, IsBlank(LookUp(colDia As o, o.rlt_origem.rlt_registroid = r.rlt_registroid)) && (r.rlt_secao <> [@'Seção'].'Preventiva (ZM02)' || IsBlank(r.rlt_equipamento) || r.rlt_equipamento.rlt_tipo <> [@'Tipo de equipamento'].Bagagem)), rlt_inicio));
+                UpdateContext({locEnvio: First(Sort(Filter('Envios Eletromecânica', rlt_data = d), createdon, SortOrder.Descending)), locConfirma: false})))
+          X: |-
+            =224
+          Y: |-
+            =192
+          Width: |-
+            =200
+          Height: |-
+            =40
+          IconBackground: |-
+            =Color.White
+          IconFill: |-
+            =corTexto
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          Font: |-
+            =Font.Arial
+    - eleRotEquipe:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="ELETROMECÂNICA DE PLANTÃO  (cabeçalho do PDF)"
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          FontWeight: |-
+            =FontWeight.Semibold
+          X: |-
+            =444
+          Y: |-
+            =168
+          Width: |-
+            =500
+          Height: |-
+            =22
+          Visible: |-
+            =true
+          Font: |-
+            =Font.Arial
+    - eleEquipe:
+        Control: Classic/TextInput@2.3.2
+        Properties:
+          Default: |-
+            =locEleEquipe
+          Mode: |-
+            =TextMode.MultiLine
+          MaxLength: |-
+            =2000
+          X: |-
+            =444
+          Y: |-
+            =192
+          Width: |-
+            =Parent.Width - 444 - 24 - 250
+          Height: |-
+            =84
+          PaddingLeft: |-
+            =10
+          HintText: |-
+            ="Um por linha. Ex.: Wellington Alves - Plantão Alfa"
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          BorderColor: |-
+            =RGBA(197, 206, 215, 1)
+          BorderThickness: |-
+            =1
+          FocusedBorderColor: |-
+            =corVerde
+          FocusedBorderThickness: |-
+            =2
+          Size: |-
+            =11
+          Color: |-
+            =corTexto
+          Font: |-
+            =Font.Arial
+    - eleEnviar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =If(IsBlank(locEnvio), "➤  Enviar para a Eletromecânica", locConfirma, "Confirmar novo envio", "Enviar de novo")
+          OnSelect: |-
+            =If(!IsBlank(locEnvio) && !locConfirma,
+              UpdateContext({locConfirma: true});
+              Notify("Este dia já foi enviado. Toque em " & Char(34) & "Confirmar novo envio" & Char(34) & " para mandar outra vez.", NotificationType.Warning),
+              UpdateContext({locEnvio: Patch('Envios Eletromecânica', Defaults('Envios Eletromecânica'), {rlt_nome: "ELETROMECÂNICA " & Text(eleData.SelectedDate, "dd.mm.yyyy"), rlt_data: eleData.SelectedDate, rlt_equipe: eleEquipe.Text, rlt_enviadopor: gblUsuario, rlt_enviadoem: Now()})});
+              UpdateContext({locConfirma: false});
+              Patch(Histórico, Defaults(Histórico), {rlt_campo: "Relatório da Eletromecânica enviado: " & Text(eleData.SelectedDate, "dd/mm/yyyy"), rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+              Notify("Enviado para o fluxo: o PDF e o e-mail saem em alguns minutos.", NotificationType.Success))
+          X: |-
+            =Parent.Width - 24 - 230
+          Y: |-
+            =192
+          Width: |-
+            =230
+          Height: |-
+            =44
+          Size: |-
+            =11
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =corAzul
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul80
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          DisplayMode: |-
+            =If(IsBlank(eleData.SelectedDate), DisplayMode.Disabled, DisplayMode.Edit)
+          Font: |-
+            =Font.Arial
+    - eleResultado:
+        Control: Label@2.5.1
+        Properties:
+          OnSelect: |-
+            =UpdateContext({locEnvio: LookUp('Envios Eletromecânica', rlt_envioeletroid = locEnvio.rlt_envioeletroid)})
+          Size: |-
+            =10
+          PaddingLeft: |-
+            =12
+          X: |-
+            =224
+          Y: |-
+            =290
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =44
+          Fill: |-
+            =If(IsBlank(locEnvio), corAzul10, StartsWith(Coalesce(locEnvio.rlt_resultado, ""), "FALHA"), corVerm20, RGBA(227, 242, 218, 1))
+          Color: |-
+            =If(!IsBlank(locEnvio) && StartsWith(Coalesce(locEnvio.rlt_resultado, ""), "FALHA"), RGBA(138, 0, 33, 1), corTexto)
+          Text: |-
+            =If(IsBlank(locEnvio), "Ainda não enviado para " & Text(eleData.SelectedDate, "dd/mm/yyyy") & ".", "Enviado por " & Coalesce(locEnvio.rlt_enviadopor.rlt_nome, "—") & " em " & Text(locEnvio.rlt_enviadoem, "dd/mm/yyyy hh:mm") & ".   " & If(IsBlank(locEnvio.rlt_resultado), "PDF e e-mail em andamento: toque aqui para atualizar.", locEnvio.rlt_resultado))
+          Font: |-
+            =Font.Arial
+    - eleQtd:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            =CountRows(colEletro) & If(CountRows(colEletro) = 1, " chamado", " chamados") & " no dia. Toque no chamado para completar o feedback."
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          X: |-
+            =224
+          Y: |-
+            =342
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =24
+          Font: |-
+            =Font.Arial
+    - eleGrade:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =""
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =224
+          Y: |-
+            =370
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =Parent.Height - 370 - 16
+          Fill: |-
+            =Color.White
+          DisabledFill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          DisabledBorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Font: |-
+            =Font.Arial
+    - eleCab0:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="REGISTRO / OCORRÊNCIA"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.0
+          Y: |-
+            =370
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.31
+          Height: |-
+            =34
+          Font: |-
+            =Font.Arial
+    - eleCab1:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="NOTA"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.31
+          Y: |-
+            =370
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.06
+          Height: |-
+            =34
+          Font: |-
+            =Font.Arial
+    - eleCab2:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="CHAMADO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.37
+          Y: |-
+            =370
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.1
+          Height: |-
+            =34
+          Font: |-
+            =Font.Arial
+    - eleCab3:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="REGISTRO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.47
+          Y: |-
+            =370
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.1
+          Height: |-
+            =34
+          Font: |-
+            =Font.Arial
+    - eleCab4:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="TÉRMINO"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.57
+          Y: |-
+            =370
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.1
+          Height: |-
+            =34
+          Font: |-
+            =Font.Arial
+    - eleCab5:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="STATUS"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.6699999999999999
+          Y: |-
+            =370
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.13
+          Height: |-
+            =34
+          Font: |-
+            =Font.Arial
+    - eleCab6:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="FEEDBACK"
+          Color: |-
+            =corMuted
+          Size: |-
+            =8
+          FontWeight: |-
+            =FontWeight.Bold
+          X: |-
+            =224 + 12 + (Parent.Width - 248 - 24) * 0.7999999999999999
+          Y: |-
+            =370
+          Width: |-
+            =(Parent.Width - 248 - 24) * 0.2
+          Height: |-
+            =34
+          Font: |-
+            =Font.Arial
+    - eleCabLinha:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corLinha
+          X: |-
+            =224 + 1
+          Y: |-
+            =404
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =2
+    - eleVazio:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="Nenhum chamado da Eletromecânica, do Fator Q ou de preventiva neste dia."
+          Color: |-
+            =corMuted
+          Size: |-
+            =10
+          Align: |-
+            =Align.Center
+          X: |-
+            =224
+          Y: |-
+            =420
+          Width: |-
+            =Parent.Width - 248
+          Height: |-
+            =40
+          Visible: |-
+            =CountRows(colEletro) = 0
+          Font: |-
+            =Font.Arial
+    - eleGal:
+        Control: Gallery@2.15.0
+        Variant: Vertical
+        Properties:
+          Items: |-
+            =colEletro
+          TemplateSize: |-
+            =56
+          TemplatePadding: |-
+            =0
+          X: |-
+            =224 + 1
+          Y: |-
+            =406
+          Width: |-
+            =Parent.Width - 248 - 2
+          Height: |-
+            =Parent.Height - 406 - 18
+        Children:
+          - eleC0:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Switch(ThisItem.rlt_secao, [@'Seção'].'Fator Q (Z9)', "SOLICITAÇÃO DE ATENDIMENTO PARA INOPERÂNCIA – " & Upper(Coalesce(ThisItem.rlt_equipamento.rlt_nome, ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo)), [@'Seção'].'Preventiva (ZM02)', "MANUTENÇÃO PREVENTIVA – " & Upper(Coalesce(ThisItem.rlt_equipamento.rlt_nome, ThisItem.rlt_equipamentolivre, ThisItem.rlt_titulo)), Upper(Coalesce(ThisItem.rlt_descricao, ThisItem.rlt_titulo)))
+                Size: |-
+                  =9
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.0
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.31 - 8
+                Height: |-
+                  =56
+                Color: |-
+                  =corAzul
+                Underline: |-
+                  =true
+                OnSelect: |-
+                  =Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})
+                Font: |-
+                  =Font.Arial
+          - eleC1:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If((ThisItem.rlt_secao = [@'Seção'].'Fator Q (Z9)' || ThisItem.rlt_secao = [@'Seção'].'Preventiva (ZM02)'), If(ThisItem.rlt_secao = [@'Seção'].'Fator Q (Z9)', "Z9", "ZM02"), "–")
+                Size: |-
+                  =9
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.31
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.06 - 8
+                Height: |-
+                  =56
+                Color: |-
+                  =RGBA(192, 0, 0, 1)
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.Arial
+          - eleC2:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If((ThisItem.rlt_secao = [@'Seção'].'Fator Q (Z9)' || ThisItem.rlt_secao = [@'Seção'].'Preventiva (ZM02)'), ThisItem.rlt_numero, "–")
+                Size: |-
+                  =9
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.37
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.1 - 8
+                Height: |-
+                  =56
+                Color: |-
+                  =corTexto
+                Font: |-
+                  =Font.Arial
+          - eleC3:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Text(ThisItem.rlt_inicio, "dd/mm hh:mm")
+                Size: |-
+                  =9
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.47
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.1 - 8
+                Height: |-
+                  =56
+                Color: |-
+                  =corTexto
+                Font: |-
+                  =Font.Arial
+          - eleC4:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")
+                Size: |-
+                  =9
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.57
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.1 - 8
+                Height: |-
+                  =56
+                Color: |-
+                  =corTexto
+                Font: |-
+                  =Font.Arial
+          - eleC5:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =Switch(Text(ThisItem.rlt_status), "EM ANDAMENTO", "EM EXECUÇÃO", "CONCLUÍDO", "CONCLUÍDO / OPERACIONAL", Text(ThisItem.rlt_status))
+                Size: |-
+                  =9
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.6699999999999999
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.13 - 8
+                Height: |-
+                  =56
+                Color: |-
+                  =corTexto
+                Font: |-
+                  =Font.Arial
+          - eleC6:
+              Control: Label@2.5.1
+              Properties:
+                Text: |-
+                  =If(IsBlank(If(IsBlank(Trim(ThisItem.rlt_feedback)) && ThisItem.rlt_status = [@'Status da atividade'].CANCELADO, "MOTIVO: " & ThisItem.rlt_motivocancelamento, Coalesce(ThisItem.rlt_feedback, ""))), "(sem feedback)", If(IsBlank(Trim(ThisItem.rlt_feedback)) && ThisItem.rlt_status = [@'Status da atividade'].CANCELADO, "MOTIVO: " & ThisItem.rlt_motivocancelamento, Coalesce(ThisItem.rlt_feedback, "")))
+                Size: |-
+                  =9
+                X: |-
+                  =12 + (Parent.TemplateWidth - 24) * 0.7999999999999999
+                Y: |-
+                  =0
+                Width: |-
+                  =(Parent.TemplateWidth - 24) * 0.2 - 8
+                Height: |-
+                  =56
+                Color: |-
+                  =If(IsBlank(If(IsBlank(Trim(ThisItem.rlt_feedback)) && ThisItem.rlt_status = [@'Status da atividade'].CANCELADO, "MOTIVO: " & ThisItem.rlt_motivocancelamento, Coalesce(ThisItem.rlt_feedback, ""))), corMuted, corTexto)
+                Italic: |-
+                  =IsBlank(If(IsBlank(Trim(ThisItem.rlt_feedback)) && ThisItem.rlt_status = [@'Status da atividade'].CANCELADO, "MOTIVO: " & ThisItem.rlt_motivocancelamento, Coalesce(ThisItem.rlt_feedback, "")))
+                Font: |-
+                  =Font.Arial
+          - eleLinha:
+              Control: Rectangle@2.3.0
+              Properties:
+                Fill: |-
+                  =corLinha
+                X: |-
+                  =0
+                Y: |-
+                  =Parent.TemplateHeight - 1
+                Width: |-
+                  =Parent.TemplateWidth
+                Height: |-
+                  =1
