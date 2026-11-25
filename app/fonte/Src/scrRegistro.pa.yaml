@@ -19,7 +19,8 @@ Screens:
         UpdateContext({locFicar: false});
         UpdateContext({locResetar: true});
         UpdateContext({locResetar: false});
-        ResetForm(frmAnexo)
+        ResetForm(frmAnexo);
+        UpdateContext({locExcluir: false})
     Children:
     - regTopo:
         Control: Rectangle@2.3.0
@@ -2503,13 +2504,210 @@ Screens:
                 PaddingLeft: |-
                   =12
                 X: |-
+                  =If(IsBlank(locId), 0, 170)
+                Y: |-
+                  =((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
+                Width: |-
+                  =Parent.TemplateWidth - 14 - 380 - If(IsBlank(locId), 0, 170)
+                Height: |-
+                  =44
+                Font: |-
+                  =Font.Arial
+          - regExcluir:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  ="🗑  Excluir chamado"
+                OnSelect: |-
+                  =ClearCollect(colCadeia, LookUp(Registros, rlt_registroid = locId));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  If(!IsBlank(Last(colCadeia).rlt_origem), Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)));
+                  UpdateContext({locFimAbaixo: false});
+                  ClearCollect(colAbaixo, LookUp(Registros, rlt_registroid = locId));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))));
+                  Collect(colCadeia, Filter(colAbaixo, rlt_registroid <> locId));
+                  UpdateContext({locExcluir: true})
+                X: |-
                   =0
                 Y: |-
                   =((((((18 + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "ios"], 116, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq", "prev"], 96, 0) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev", "ios"], 76, 0)) + 104) + 96) + If(LookUp(tabSecoes, Valor = locSecao).Tipo in ["corretiva", "fq"], 64, 0)) + If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), 124, 0)) + (24 + If(If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) > 0, If(IsBlank(locId), 0, CountRows(Filter(Anexos, rlt_registro.rlt_registroid = locId))) * 46 + 6, 0) + 40 + 30) + 10) + 16
                 Width: |-
-                  =Parent.TemplateWidth - 14 - 380
+                  =160
                 Height: |-
                   =44
+                Size: |-
+                  =10
+                FontWeight: |-
+                  =FontWeight.Semibold
+                Fill: |-
+                  =Color.White
+                Color: |-
+                  =RGBA(138, 0, 33, 1)
+                BorderColor: |-
+                  =RGBA(138, 0, 33, 1)
+                BorderThickness: |-
+                  =1
+                HoverFill: |-
+                  =corVerm20
+                HoverColor: |-
+                  =RGBA(138, 0, 33, 1)
+                RadiusTopLeft: |-
+                  =8
+                RadiusTopRight: |-
+                  =8
+                RadiusBottomLeft: |-
+                  =8
+                RadiusBottomRight: |-
+                  =8
+                Visible: |-
+                  =!IsBlank(locId)
                 Font: |-
                   =Font.Arial
           - regCancelar:
@@ -3322,5 +3520,213 @@ Screens:
             =8
           Visible: |-
             =locAnexar
+          Font: |-
+            =Font.Arial
+    - excFundo:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =RGBA(0, 0, 0, 0.45)
+          X: |-
+            =0
+          Y: |-
+            =0
+          Width: |-
+            =Parent.Width
+          Height: |-
+            =Parent.Height
+          Visible: |-
+            =locExcluir
+    - excCartao:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            =""
+          DisplayMode: |-
+            =DisplayMode.Disabled
+          TabIndex: |-
+            =-1
+          X: |-
+            =(Parent.Width - 580) / 2
+          Y: |-
+            =(Parent.Height - 290) / 2
+          Width: |-
+            =580
+          Height: |-
+            =290
+          Fill: |-
+            =Color.White
+          DisabledFill: |-
+            =Color.White
+          BorderColor: |-
+            =corLinha
+          DisabledBorderColor: |-
+            =corLinha
+          BorderThickness: |-
+            =1
+          RadiusTopLeft: |-
+            =12
+          RadiusTopRight: |-
+            =12
+          RadiusBottomLeft: |-
+            =12
+          RadiusBottomRight: |-
+            =12
+          Visible: |-
+            =locExcluir
+          Font: |-
+            =Font.Arial
+    - excAcento:
+        Control: Rectangle@2.3.0
+        Properties:
+          Fill: |-
+            =corVerm
+          X: |-
+            =(Parent.Width - 580) / 2 + 24
+          Y: |-
+            =(Parent.Height - 290) / 2 + 20
+          Width: |-
+            =36
+          Height: |-
+            =4
+          Visible: |-
+            =locExcluir
+    - excTit:
+        Control: Label@2.5.1
+        Properties:
+          Text: |-
+            ="EXCLUIR CHAMADO"
+          Color: |-
+            =RGBA(138, 0, 33, 1)
+          Size: |-
+            =14
+          FontWeight: |-
+            =FontWeight.Bold
+          Font: |-
+            =Font.'Open Sans Condensed'
+          X: |-
+            =(Parent.Width - 580) / 2 + 24
+          Y: |-
+            =(Parent.Height - 290) / 2 + 28
+          Width: |-
+            =580 - 48
+          Height: |-
+            =30
+          Visible: |-
+            =locExcluir
+    - excTexto:
+        Control: Label@2.5.1
+        Properties:
+          Color: |-
+            =corTexto
+          Size: |-
+            =11
+          VerticalAlign: |-
+            =VerticalAlign.Top
+          X: |-
+            =(Parent.Width - 580) / 2 + 24
+          Y: |-
+            =(Parent.Height - 290) / 2 + 70
+          Width: |-
+            =580 - 48
+          Height: |-
+            =140
+          Visible: |-
+            =locExcluir
+          Text: |-
+            ="Excluir “" & locReg.rlt_titulo & "”?" & Char(10) & Char(10) & If(CountRows(colCadeia) > 1, "É uma pendência herdada: aparece em " & CountRows(colCadeia) & " relatórios e sai de todos. ", "") & "Os anexos também são excluídos. A exclusão fica no histórico, mas não dá para desfazer. Um PDF já enviado não muda."
+          Font: |-
+            =Font.Arial
+    - excConfirmar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Excluir"
+          OnSelect: |-
+            =ForAll(colCadeia As c, RemoveIf(Anexos, rlt_registro.rlt_registroid = c.rlt_registroid));
+            Patch(Histórico, Defaults(Histórico), {rlt_campo: "Chamado excluído: " & LookUp(tabSecoes, Valor = locReg.rlt_secao).Nome & " – " & Left(locReg.rlt_titulo, 120) & If(IsBlank(locReg.rlt_numero), "", " (nº " & locReg.rlt_numero & ")") & If(CountRows(colCadeia) > 1, " – " & CountRows(colCadeia) & " relatórios", ""), rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: Blank()});
+            ForAll(colCadeia As c, Remove(Registros, LookUp(Registros, rlt_registroid = c.rlt_registroid)));
+            ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+            ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)));
+            UpdateContext({locExcluir: false});
+            Notify("Chamado excluído.", NotificationType.Success);
+            Back()
+          X: |-
+            =(Parent.Width - 580) / 2 + 580 - 24 - 150
+          Y: |-
+            =(Parent.Height - 290) / 2 + 290 - 64
+          Width: |-
+            =150
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =RGBA(138, 0, 33, 1)
+          Color: |-
+            =Color.White
+          BorderColor: |-
+            =RGBA(138, 0, 33, 1)
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corVerm
+          HoverColor: |-
+            =Color.White
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =locExcluir
+          Font: |-
+            =Font.Arial
+    - excCancelar:
+        Control: Classic/Button@2.2.0
+        Properties:
+          Text: |-
+            ="Cancelar"
+          OnSelect: |-
+            =UpdateContext({locExcluir: false})
+          X: |-
+            =(Parent.Width - 580) / 2 + 580 - 24 - 150 - 8 - 120
+          Y: |-
+            =(Parent.Height - 290) / 2 + 290 - 64
+          Width: |-
+            =120
+          Height: |-
+            =40
+          Size: |-
+            =12
+          FontWeight: |-
+            =FontWeight.Semibold
+          Fill: |-
+            =Color.White
+          Color: |-
+            =corAzul
+          BorderColor: |-
+            =corAzul
+          BorderThickness: |-
+            =1
+          HoverFill: |-
+            =corAzul10
+          HoverColor: |-
+            =corAzul
+          RadiusTopLeft: |-
+            =8
+          RadiusTopRight: |-
+            =8
+          RadiusBottomLeft: |-
+            =8
+          RadiusBottomRight: |-
+            =8
+          Visible: |-
+            =locExcluir
           Font: |-
             =Font.Arial

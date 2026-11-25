@@ -59,5 +59,7 @@
     <RolePrivilege name="prvWriterlt_registro" level="Global" />
     <RolePrivilege name="prvWriterlt_relatorio" level="Global" />
     <RolePrivilege name="prvWriteSharePointData" level="Global" />
+    <RolePrivilege name="prvDeleterlt_registro" level="Global" />
+    <RolePrivilege name="prvDeleterlt_anexo" level="Global" />
   </RolePrivileges>
 </Role>

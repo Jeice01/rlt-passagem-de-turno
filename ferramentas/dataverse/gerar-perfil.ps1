@@ -5,7 +5,7 @@
   Regra (decisão de 19/11/2026): acesso igual para todos os perfis.
     - Tabelas de operação e listas: criar, ler, alterar, anexar e ser anexado, no ambiente inteiro (Global).
     - Histórico: só criar e ler (ninguém altera nem apaga o histórico - RN-021).
-    - Nenhuma exclusão: engano vira cancelamento ou chamado falso. Exceção: avisos do Painel (25/11/2026).
+    - Exclusão (25/11/2026): chamados e anexos (qualquer usuário, com confirmação no app) e avisos do Painel. O resto não se exclui.
     - Listas (equipamentos, locais, pessoas): não se excluem; o líder desativa (Status = Inativo).
   O perfil "Usuário Básico" da Microsoft continua sendo atribuído a todos automaticamente.
 
@@ -17,8 +17,9 @@ $ID = "{6a1f3c52-8d4e-4b7a-9e21-3c5d7f9a0b14}"   # fixo, para reimportar sem dup
 $NOME = "RLT - Usuário"
 
 $completo = "Create", "Read", "Write", "Append", "AppendTo"
+$comExclusao = $completo + "Delete"   # chamados e anexos: qualquer usuário exclui (decisão de 25/11/2026)
 $tabelas = [ordered]@{
-  rlt_relatorio = $completo; rlt_registro = $completo; rlt_equipe = $completo; rlt_anexo = $completo
+  rlt_relatorio = $completo; rlt_registro = $comExclusao; rlt_equipe = $completo; rlt_anexo = $comExclusao
   rlt_pessoa = $completo; rlt_local = $completo; rlt_equipamento = $completo
   rlt_historico = @("Create", "Read", "Append", "AppendTo")
   rlt_envioeletro = $completo   # envio diário da Eletromecânica (25/11/2026)

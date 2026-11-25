@@ -718,7 +718,9 @@ def tela_registro():
               xl, f"({y_fotos}) + 24 + If({n_anx} > 0, {n_anx} * {ALT_ANX} + 6, 0) + 46", full),
         # erros e botões
         C("regErro", LBL, Text="locErro", Visible="!IsBlank(locErro)", Color="RGBA(138, 0, 33, 1)", Fill="corVerm20", Size="10", FontWeight="FontWeight.Semibold",
-          PaddingLeft="12", X="0", Y=y_botoes, Width=f"{TW} - 380", Height="44"),
+          PaddingLeft="12", X="If(IsBlank(locId), 0, 170)", Y=y_botoes, Width=f"{TW} - 380 - If(IsBlank(locId), 0, 170)", Height="44"),
+        botao("regExcluir", '"🗑  Excluir chamado"', ABRIR_EXCLUSAO, 0, y_botoes, 160, 44, primario=False, Size="10", Visible="!IsBlank(locId)",
+              Color="RGBA(138, 0, 33, 1)", BorderColor="RGBA(138, 0, 33, 1)", HoverFill="corVerm20", HoverColor="RGBA(138, 0, 33, 1)"),
         botao("regCancelar", 'If(' + ABERTO_REL + ', "Cancelar", "Voltar")', "Back()", f"{TW} - 190 - 108", y_botoes, 100, 44, primario=False),
         botao("regSalvar", '"Salvar"', "UpdateContext({locFicar: false});\n" + salvar, f"{TW} - 190", y_botoes, 190, 44, Visible=ABERTO_REL),
         C("regEspaco", RET, Fill="Color.Transparent", X="0", Y=f"({y_botoes}) + 44", Width="10", Height="24"),
@@ -735,8 +737,58 @@ def tela_registro():
           OnSelect="Navigate(scrHistorico, ScreenTransition.None, {locHistReg: locId})"),
         C(f"{p}Pagina", GAL, variante="VariableHeight", Items="Table({b: 1})", TemplateSize="400", TemplatePadding="0",
           X="224", Y="168", Width="Parent.Width - 230", Height="Parent.Height - 172", filhos=pagina),
-    ] + janela_anexo()
-    return tela("scrRegistro", {"Fill": "corFundo", "OnVisible": ao_abrir}, filhos)
+    ] + janela_anexo() + janela_exclusao()
+    return tela("scrRegistro", {"Fill": "corFundo", "OnVisible": ao_abrir + ";\nUpdateContext({locExcluir: false})"}, filhos)
+
+
+# ---------- Excluir chamado (decisão de 25/11/2026: qualquer usuário, qualquer chamado)
+# Uma pendência herdada tem uma cópia em cada relatório (rlt_origem aponta a cópia anterior). Excluir só uma cópia faria a
+# anterior "voltar" como aberta (relatório da Eletromecânica), então a cadeia inteira é excluída. O Power Fx não tem laço
+# "enquanto", por isso a cadeia é seguida com passos repetidos (uma pendência já apareceu em 58 relatórios em out/2026).
+PASSOS_ACIMA, PASSOS_ABAIXO = 120, 30
+_acima = ("If(!IsBlank(Last(colCadeia).rlt_origem), "
+          "Collect(colCadeia, LookUp(Registros, rlt_registroid = Last(colCadeia).rlt_origem.rlt_registroid)))")
+_abaixo = ("If(!locFimAbaixo, With({prox: LookUp(Registros, rlt_origem.rlt_registroid = Last(colAbaixo).rlt_registroid)}, "
+           "If(IsBlank(prox), UpdateContext({locFimAbaixo: true}), Collect(colAbaixo, prox))))")
+ABRIR_EXCLUSAO = ("ClearCollect(colCadeia, LookUp(Registros, rlt_registroid = locId));\n"
+                  + ";\n".join([_acima] * PASSOS_ACIMA) + ";\n"
+                  "UpdateContext({locFimAbaixo: false});\n"
+                  "ClearCollect(colAbaixo, LookUp(Registros, rlt_registroid = locId));\n"
+                  + ";\n".join([_abaixo] * PASSOS_ABAIXO) + ";\n"
+                  "Collect(colCadeia, Filter(colAbaixo, rlt_registroid <> locId));\n"
+                  "UpdateContext({locExcluir: true})")
+
+
+def janela_exclusao():
+    vis = "locExcluir"
+    W, H = "580", "290"
+    x, y = f"(Parent.Width - {W}) / 2", f"(Parent.Height - {H}) / 2"
+    n = "CountRows(colCadeia)"
+    excluir = (
+        "ForAll(colCadeia As c, RemoveIf(Anexos, rlt_registro.rlt_registroid = c.rlt_registroid));\n"
+        + hist('"Chamado excluído: " & LookUp(tabSecoes, Valor = locReg.rlt_secao).Nome & " – " & Left(locReg.rlt_titulo, 120) & '
+               'If(IsBlank(locReg.rlt_numero), "", " (nº " & locReg.rlt_numero & ")") & If(' + n + ' > 1, " – " & ' + n + ' & " relatórios", "")') + ";\n"
+        "ForAll(colCadeia As c, Remove(Registros, LookUp(Registros, rlt_registroid = c.rlt_registroid)));\n"
+        + REFRESH + ";\n"
+        "UpdateContext({locExcluir: false});\n"
+        "Notify(\"Chamado excluído.\", NotificationType.Success);\n"
+        "Back()")
+    return [
+        C("excFundo", RET, Fill="RGBA(0, 0, 0, 0.45)", X="0", Y="0", Width="Parent.Width", Height="Parent.Height", Visible=vis),
+        cartao("excCartao", x, y, W, H, raio=12, Visible=vis),
+        C("excAcento", RET, Fill="corVerm", X=f"{x} + 24", Y=f"{y} + 20", Width="36", Height="4", Visible=vis),
+        C("excTit", LBL, Text='"EXCLUIR CHAMADO"', Color="RGBA(138, 0, 33, 1)", Size="14", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+          X=f"{x} + 24", Y=f"{y} + 28", Width=f"{W} - 48", Height="30", Visible=vis),
+        C("excTexto", LBL, Color="corTexto", Size="11", VerticalAlign="VerticalAlign.Top", X=f"{x} + 24", Y=f"{y} + 70", Width=f"{W} - 48", Height="140",
+          Visible=vis,
+          Text=('"Excluir “" & locReg.rlt_titulo & "”?" & Char(10) & Char(10) & '
+                f'If({n} > 1, "É uma pendência herdada: aparece em " & {n} & " relatórios e sai de todos. ", "") & '
+                '"Os anexos também são excluídos. A exclusão fica no histórico, mas não dá para desfazer. Um PDF já enviado não muda."')),
+        botao("excConfirmar", '"Excluir"', excluir, f"{x} + {W} - 24 - 150", f"{y} + {H} - 64", 150, 40, Visible=vis,
+              Fill="RGBA(138, 0, 33, 1)", BorderColor="RGBA(138, 0, 33, 1)", HoverFill="corVerm"),
+        botao("excCancelar", '"Cancelar"', "UpdateContext({locExcluir: false})", f"{x} + {W} - 24 - 150 - 8 - 120", f"{y} + {H} - 64", 120, 40,
+              primario=False, Visible=vis),
+    ]
 
 
 def janela_anexo():

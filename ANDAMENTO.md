@@ -22,6 +22,8 @@ Situação em 25/11/2026. Piloto previsto para 30/11/2026 (PRD).
 | **Relatório diário da Eletromecânica** (Fator Q) | Botão "Relatório da Eletromecânica" na tela Fechar abre a tela `scrEletro`: data (padrão: o dia que termina às 24:00), texto "Eletromecânica de plantão" (cabeçalho do PDF, vem do último envio) e prévia dos chamados do dia (corretiva Eletromecânica, Fator Q e Preventiva sem BHS; o que começou, terminou ou ficou aberto no dia). Enviar cria um registro em `rlt_envioeletro`, e o fluxo novo **RLT – Relatório da Eletromecânica** gera o PDF no layout da planilha, guarda no OneDrive e envia o e-mail. Campo novo **Feedback para a Eletromecânica** no chamado, com "Vincular IOS" e "MOTIVO:". |
 | **Busca em Chamados do plantão** | Campo de palavra-chave (título, descrição, nº, local, equipamento, feedback, motivo), somado aos filtros Todos/Só em aberto/Seção. |
 | Preventiva (ZM02) | Nº da ordem de serviço deixa de ser obrigatório. |
+| **Excluir chamado** (RN-025) | Botão no formulário do chamado, com confirmação; qualquer usuário, qualquer relatório. Pendência herdada sai de todos os relatórios, com os anexos; fica no histórico. Perfil ganha exclusão de Registro e Anexo. |
+| Hora de conclusão no futuro | Vale como previsão de término (ex.: fim programado do IOS): não conclui e libera o N/I. |
 | Hora de conclusão vazia | Mostrava a data de exemplo 31/12/2001; agora mostra "dd/mm/aaaa". |
 
 Pacotes (fora do Git): `solution/RLT_CCM/out/RLT_CCM_1_4_0_0.zip` e `ferramentas/fluxos/saida/RLT_Fluxos_1_1_0_0.zip`.
