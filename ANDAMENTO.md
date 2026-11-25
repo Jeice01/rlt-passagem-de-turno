@@ -18,7 +18,7 @@ Situação em 25/11/2026. Piloto previsto para 30/11/2026 (PRD).
 |---|---|
 | Status **CANCELADO** nas atividades (corretivas, Fator Q e Preventiva) | Nova opção na escolha "Status da atividade". Conta como encerrado (não passa para o próximo turno). Motivo do cancelamento obrigatório, como no IOS (RN-014 ampliada). Aviso na tela Fechar e motivo impresso no PDF. |
 | **Atualizar listas** (RF-021), tela `scrListas` | Botão no Painel geral só para o perfil **Líder**. Abas Equipamentos, Locais e Pessoas e perfis: busca, Incluir, Alterar, Desativar/Reativar (coluna de sistema Status). Nada é excluído; item desativado some das listas do app. |
-| **Avisos** no fim do Painel geral | Tabela nova `rlt_aviso` (título, texto, publicado em, publicado por). O líder publica, atualiza e exclui (com confirmação); todos leem. Único caso de exclusão no perfil "RLT - Usuário". |
+| **Avisos** no fim do Painel geral | Tabela nova `rlt_aviso` (título, texto, publicado em, publicado por). Todos publicam, atualizam e excluem (exclusão com confirmação). Único caso de exclusão no perfil "RLT - Usuário". |
 | Hora de conclusão vazia | Mostrava a data de exemplo 31/12/2001; agora mostra "dd/mm/aaaa". |
 
 Pacotes (fora do Git): `solution/RLT_CCM/out/RLT_CCM_1_4_0_0.zip` e `ferramentas/fluxos/saida/RLT_Fluxos_1_0_1_0.zip`.

@@ -82,7 +82,7 @@ REFRESH = ("ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioi
 ORDEM_SEC = (f"Switch(rlt_secao, {SEC}.Eletromecânica, 1, {SEC}.Eletroeletrônica, 2, {SEC}.BHS, 3, {SEC}.Civil, 4, {SEC}.Outros, 5, "
              f"{SEC}.'Fator Q (Z9)', 6, {SEC}.'Preventiva (ZM02)', 7, 8)")
 ABERTO_REL = f"!IsBlank(gblRel) && gblRel.rlt_situacao = {SIT}.Aberto"
-# Só o líder edita as listas e os avisos (RF-021; decisão de 25/11/2026)
+# Só o líder edita as listas (RF-021; decisão de 25/11/2026). Avisos: todos.
 LIDER = "(!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder)"
 
 
@@ -958,7 +958,7 @@ def tela_painel():
     return tela("scrPainel", {"Fill": "corFundo", "OnVisible": REFRESH + ";\nUpdateContext({locJanAviso: \"\"})"}, filhos)
 
 
-# ---------- Avisos do Painel geral (decisão de 25/11/2026): o líder publica, atualiza e exclui
+# ---------- Avisos do Painel geral (decisão de 25/11/2026): todos publicam, atualizam e excluem
 AVISOS = "Sort(Avisos, rlt_publicadoem, SortOrder.Descending)"
 N_AVISOS = "CountIf(Avisos, true)"
 
@@ -972,7 +972,7 @@ def cartao_avisos(TW, vis, tit, espaco):
         cartao("paiC4", 0, 0, TW, h4, Visible=vis(4)),
         tit("paiT4", "AVISOS", 4),
         botao("paiNovoAviso", '"＋  Novo aviso"', abrir_novo, f"{TW} - 16 - 140", 12, 140, 32, primario=False, Size="10",
-              Visible=f"{vis(4)} && {LIDER}"),
+              Visible=vis(4)),
         C("paiVazio4", LBL, Text='"Nenhum aviso."', Color="corMuted", Size="10", Align="Align.Center",
           X="16", Y="58", Width=f"{TW} - 32", Height="32", Visible=f"{vis(4)} && {n} = 0"),
         C("paiGal4", GAL, variante="Vertical", Items=AVISOS, TemplateSize=str(ALT), TemplatePadding="0", ShowScrollbar="false",
@@ -987,10 +987,10 @@ def cartao_avisos(TW, vis, tit, espaco):
               C("paiAvMeta", LBL, Color="corMuted", Size="9", X="18", Y=str(ALT - 10 - 28), Width="Parent.TemplateWidth - 36", Height="22",
                 Text=('"Publicado por " & Coalesce(ThisItem.rlt_autor.rlt_nome, "—") & " em " & Text(ThisItem.rlt_publicadoem, "dd/mm/yyyy hh:mm") & '
                       'If(DateDiff(ThisItem.rlt_publicadoem, ThisItem.modifiedon, TimeUnit.Minutes) > 1, "   ·   atualizado em " & Text(ThisItem.modifiedon, "dd/mm/yyyy hh:mm"), "")')),
-              C("paiAvEditar", LBL, Text='"Atualizar"', Color="corAzul", Underline="true", Size="10", Align="Align.Right", Visible=LIDER,
+              C("paiAvEditar", LBL, Text='"Atualizar"', Color="corAzul", Underline="true", Size="10", Align="Align.Right",
                 X="Parent.TemplateWidth - 200", Y="8", Width="90", Height="26",
                 OnSelect='UpdateContext({locAviso: ThisItem, locJanAviso: "editar"}); Reset(avTitulo); Reset(avTexto)'),
-              C("paiAvExcluir", LBL, Text='"Excluir"', Color="RGBA(138, 0, 33, 1)", Underline="true", Size="10", Align="Align.Right", Visible=LIDER,
+              C("paiAvExcluir", LBL, Text='"Excluir"', Color="RGBA(138, 0, 33, 1)", Underline="true", Size="10", Align="Align.Right",
                 X="Parent.TemplateWidth - 100", Y="8", Width="84", Height="26",
                 OnSelect='UpdateContext({locAviso: ThisItem, locJanAviso: "excluir"})'),
           ]),

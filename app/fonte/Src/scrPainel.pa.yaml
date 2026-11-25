@@ -1876,7 +1876,7 @@ Screens:
                 RadiusBottomRight: |-
                   =8
                 Visible: |-
-                  =ThisItem.b = 4 && (!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder)
+                  =ThisItem.b = 4
                 Font: |-
                   =Font.Arial
           - paiVazio4:
@@ -2073,8 +2073,6 @@ Screens:
                         =10
                       Align: |-
                         =Align.Right
-                      Visible: |-
-                        =(!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder)
                       X: |-
                         =Parent.TemplateWidth - 200
                       Y: |-
@@ -2100,8 +2098,6 @@ Screens:
                         =10
                       Align: |-
                         =Align.Right
-                      Visible: |-
-                        =(!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder)
                       X: |-
                         =Parent.TemplateWidth - 100
                       Y: |-
