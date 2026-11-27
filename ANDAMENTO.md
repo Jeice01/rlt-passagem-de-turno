@@ -39,7 +39,7 @@ Pacotes (fora do Git): `solution/RLT_CCM/out/RLT_CCM_1_4_0_0.zip` e `ferramentas
 
 Como montar e importar o app: `app/LEIA-ME.md`. O fluxo é importado pelo portal (Soluções > Importar) a partir do zip gerado em `ferramentas/fluxos/saida/` (fora do Git).
 
-## Versão 1.4.0.5 (27/11/2026): gerada, falta importar e testar
+## Versão 1.4.0.5 a 1.4.0.7 (27/11/2026): 1.4.0.7 importada e publicada, falta testar
 
 | Mudança | O que faz |
 |---|---|
