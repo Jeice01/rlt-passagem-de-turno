@@ -386,6 +386,7 @@ def tela_chamados():
     cab = [C(f"{p}LCab{i}", LBL, Text=f'"{t}"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold", Visible=VISTA_LISTA,
              X="224 + " + x.format(tw="(Parent.Width - 260)"), Y="190", Width="140", Height="22") for i, (t, x) in enumerate(COLS)]
     txt = lambda nome, texto, x, larg, **kw: C(nome, LBL, **{**dict(Text=texto, Color="corTexto", Size="10", Wrap="false", X=x, Y="8", Width=larg, Height="30"), **kw})
+    LIST_AGORA = f"{ABERTO_REL} && IsBlank(ThisItem.rlt_conclusao) && !ThisItem.rlt_chamadofalso"   # igual ao "Concluir agora" dos cartões
     larg_tit = "Parent.TemplateWidth - 470 - 190 - 8 - If(ThisItem.rlt_herdado, 78, 0)"
     lista_compacta = cab + [
         C(f"{p}LGrupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0", Visible=VISTA_LISTA,
@@ -408,7 +409,9 @@ def tela_chamados():
                     txt("chaLNum", "ThisItem.rlt_numero", "Parent.TemplateWidth - 470", "96"),
                     txt("chaLIni", 'Text(ThisItem.rlt_inicio, "dd/mm hh:mm")', "Parent.TemplateWidth - 370", "110"),
                     txt("chaLFim", 'If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")',
-                        "Parent.TemplateWidth - 255", "120", Color="If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)"),
+                        "Parent.TemplateWidth - 255", "120", Color="If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)",
+                        Visible=f"!({LIST_AGORA})"),
+                    botao("chaLAgora", '"Concluir agora"', concluir, "Parent.TemplateWidth - 255", 6, 130, 30, Size="10", Visible=LIST_AGORA),
                     botao("chaLEditar", f'If({ABERTO_REL}, "Editar ›", "Ver ›")', abrir_reg, "Parent.TemplateWidth - 110", 6, 100, 30,
                           primario=False, Size="10"),
                 ]),
@@ -450,7 +453,7 @@ def tela_chamados():
               Visible=f"!IsBlank({termo})", BorderThickness="0", RadiusTopLeft="15", RadiusTopRight="15", RadiusBottomLeft="15", RadiusBottomRight="15"),
         C(f"{p}SemResultado", LBL, Text=f'"Nenhum chamado com “" & {termo} & "”."', Color="corMuted", Size="11", Align="Align.Center",
           X="224", Y="220", Width="Parent.Width - 248", Height="40", Visible=f"!IsBlank({termo}) && CountRows({grupos}) = 0"),
-        C(f"{p}Grupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0", Visible=f"!{VISTA_LISTA}",
+        C(f"{p}Grupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0", Visible=f"!({VISTA_LISTA})",
           X="224", Y="188", Width="Parent.Width - 236", Height="Parent.Height - 194",
           filhos=[
               C("chaGrpNome", LBL, Text="Upper(ThisItem.Nome)", Color="corAzul", Size="13", FontWeight="FontWeight.Bold", Font=FONTE_TIT,

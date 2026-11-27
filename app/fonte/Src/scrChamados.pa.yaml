@@ -890,7 +890,7 @@ Screens:
           TemplatePadding: |-
             =0
           Visible: |-
-            =!gblVista = "lista"
+            =!(gblVista = "lista")
           X: |-
             =224
           Y: |-
@@ -1856,6 +1856,58 @@ Screens:
                         =120
                       Height: |-
                         =30
+                      Visible: |-
+                        =!(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && IsBlank(ThisItem.rlt_conclusao) && !ThisItem.rlt_chamadofalso)
+                      Font: |-
+                        =Font.Arial
+                - chaLAgora:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        ="Concluir agora"
+                      OnSelect: |-
+                        =With({r: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)},
+                          If(ThisItem.rlt_secao = [@'Seção'].'IOS informados',
+                            Patch(Registros, r, {rlt_conclusao: Now(), rlt_ni: false, rlt_statusios: [@'Status do IOS'].Concluído}),
+                            Patch(Registros, r, {rlt_conclusao: Now(), rlt_ni: false, rlt_status: [@'Status da atividade'].CONCLUÍDO})));
+                        Patch(Histórico, Defaults(Histórico), {rlt_campo: "Hora de conclusão e status", rlt_quando: Now(), rlt_quem: gblUsuario, rlt_relatorio: gblRel, rlt_registro: LookUp(Registros, rlt_registroid = ThisItem.rlt_registroid)});
+                        ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid));
+                        ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)));
+                        Notify("Concluído: " & Left(ThisItem.rlt_titulo, 50), NotificationType.Success)
+                      X: |-
+                        =Parent.TemplateWidth - 255
+                      Y: |-
+                        =6
+                      Width: |-
+                        =130
+                      Height: |-
+                        =30
+                      Size: |-
+                        =10
+                      FontWeight: |-
+                        =FontWeight.Semibold
+                      Fill: |-
+                        =corAzul
+                      Color: |-
+                        =Color.White
+                      BorderColor: |-
+                        =corAzul
+                      BorderThickness: |-
+                        =1
+                      HoverFill: |-
+                        =corAzul80
+                      HoverColor: |-
+                        =Color.White
+                      RadiusTopLeft: |-
+                        =8
+                      RadiusTopRight: |-
+                        =8
+                      RadiusBottomLeft: |-
+                        =8
+                      RadiusBottomRight: |-
+                        =8
+                      Visible: |-
+                        =!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && IsBlank(ThisItem.rlt_conclusao) && !ThisItem.rlt_chamadofalso
                       Font: |-
                         =Font.Arial
                 - chaLEditar:

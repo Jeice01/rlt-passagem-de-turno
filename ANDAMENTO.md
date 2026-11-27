@@ -47,7 +47,7 @@ Como montar e importar o app: `app/LEIA-ME.md`. O fluxo é importado pelo portal
 | **+ Novo registro: \<seção\>** em Chamados | Aparece quando a tela vem filtrada por uma seção (clique no Relatório); abre o formulário já nessa seção. |
 | Visualização **Cartões / Lista** em Chamados | Cartões por seção (padrão) ou lista compacta, também separada por seção (1.4.0.6): uma linha por chamado com status, herdada, chamado, nº, início, conclusão e Editar. A escolha vale até fechar o app. Filtros e busca valem nas duas. |
 
-Pacote (fora do Git): `solution/RLT_CCM/out/RLT_CCM_1_4_0_6.zip` (1.4.0.5 já publicada). Importar, abrir no Studio, corrigir os `SearchItems` (LEIA-ME, passo 5), salvar e publicar.
+Pacote (fora do Git): `solution/RLT_CCM/out/RLT_CCM_1_4_0_7.zip` (1.4.0.5 já publicada; a 1.4.0.7 corrige os cartões que sumiam e põe "Concluir agora" na lista). Importar, abrir no Studio, corrigir os `SearchItems` (LEIA-ME, passo 5), salvar e publicar.
 
 ## Configuração de teste no ambiente
 
