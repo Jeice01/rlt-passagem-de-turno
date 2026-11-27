@@ -378,35 +378,40 @@ def tela_chamados():
     larg_chip = f"Len({st}) * 8 + 44"  # uma linha só, mesmo em "EM ANDAMENTO"
     ALT = 112  # altura de cada chamado (cartão de 102 + 10 de espaço)
 
-    # ---------- lista compacta (27/11/2026): uma linha por chamado, na ordem das seções e depois do início
-    sec_nome = "LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome"
-    itens_lista = (f"Sort(Filter(colRegs, (IsBlank(locSecaoFiltro) || rlt_secao = locSecaoFiltro) && {filtro}), "
-                   "LookUp(tabSecoes, Valor = rlt_secao).Ordem * 100000000 + DateDiff(DateTime(2020, 1, 1, 0, 0, 0), rlt_inicio, TimeUnit.Minutes))")
+    # ---------- lista compacta (27/11/2026): uma linha por chamado, agrupada por seção como nos cartões
     ALT_L = 46
-    # colunas (x dentro da linha): status | seção | chamado | nº | início | conclusão | ação
-    COLS = [("STATUS", "12"), ("SEÇÃO", "190"), ("CHAMADO", "340"), ("Nº", "{tw} - 470"), ("INÍCIO", "{tw} - 370"), ("CONCLUSÃO", "{tw} - 255")]
+    # colunas (x dentro da linha): status | herdada | chamado | nº | início | conclusão | ação
+    COLS = [("STATUS", "12"), ("CHAMADO", "190"), ("Nº", "{tw} - 470"), ("INÍCIO", "{tw} - 370"), ("CONCLUSÃO", "{tw} - 255")]
     abrir_reg = "Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})"
     cab = [C(f"{p}LCab{i}", LBL, Text=f'"{t}"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold", Visible=VISTA_LISTA,
-             X="224 + " + x.format(tw="(Parent.Width - 248)"), Y="190", Width="140", Height="22") for i, (t, x) in enumerate(COLS)]
+             X="224 + " + x.format(tw="(Parent.Width - 260)"), Y="190", Width="140", Height="22") for i, (t, x) in enumerate(COLS)]
     txt = lambda nome, texto, x, larg, **kw: C(nome, LBL, **{**dict(Text=texto, Color="corTexto", Size="10", Wrap="false", X=x, Y="8", Width=larg, Height="30"), **kw})
+    larg_tit = "Parent.TemplateWidth - 470 - 190 - 8 - If(ThisItem.rlt_herdado, 78, 0)"
     lista_compacta = cab + [
-        C(f"{p}Lista", GAL, variante="Vertical", Items=itens_lista, TemplateSize=str(ALT_L), TemplatePadding="0", Visible=VISTA_LISTA,
-          X="224", Y="214", Width="Parent.Width - 236", Height="Parent.Height - 220",
+        C(f"{p}LGrupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0", Visible=VISTA_LISTA,
+          X="224", Y="208", Width="Parent.Width - 236", Height="Parent.Height - 214",
           filhos=[
-              cartao("chaLFundo", 0, 0, "Parent.TemplateWidth - 12", ALT_L - 4, raio=6,
-                     borda=f"If({aberto_item}, corLaranja, corLinha)"),
-              C("chaLBarra", RET, Fill=f"If({aberto_item}, corLaranja, corVerde)", X="0", Y="0", Width="4", Height=str(ALT_L - 4)),
-              chip("chaLStatus", f"Upper({st})", 12, 11, 168, cor_status(st, 1, "Color.White"), cor_status(st, 2, "corTexto"), cor_status(st, 3, "corLinha"), h=20),
-              txt("chaLSecao", f'{sec_nome} & If(ThisItem.rlt_herdado, "  · herdada", "")', "190", "146",
-                  Color="corMuted", Size="9"),
-              txt("chaLTitulo", "ThisItem.rlt_titulo", "340", "Parent.TemplateWidth - 12 - 470 - 340 - 8", FontWeight="FontWeight.Semibold",
-                  Tooltip="ThisItem.rlt_titulo"),
-              txt("chaLNum", "ThisItem.rlt_numero", "Parent.TemplateWidth - 12 - 470", "96"),
-              txt("chaLIni", 'Text(ThisItem.rlt_inicio, "dd/mm hh:mm")', "Parent.TemplateWidth - 12 - 370", "110"),
-              txt("chaLFim", 'If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")',
-                  "Parent.TemplateWidth - 12 - 255", "120", Color="If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)"),
-              botao("chaLEditar", f'If({ABERTO_REL}, "Editar ›", "Ver ›")', abrir_reg, "Parent.TemplateWidth - 12 - 110", 6, 100, 30,
-                    primario=False, Size="10"),
+              C("chaLGrpNome", LBL, Text="Upper(ThisItem.Nome)", Color="corAzul", Size="12", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
+                X="0", Y="8", Width="Len(ThisItem.Nome) * 10 + 12", Height="24"),
+              chip("chaLGrpQtd", f"CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && {filtro}))", "Len(ThisItem.Nome) * 10 + 14", 11, 24,
+                   "corAzul10", "corAzul", "corAzul10", h=18),
+              C("chaLista", GAL, variante="Vertical", Items=do_grupo, TemplateSize=str(ALT_L), TemplatePadding="0", ShowScrollbar="false",
+                X="0", Y="36", Width="Parent.TemplateWidth - 12", Height=f"CountRows({do_grupo}) * {ALT_L} + 4",
+                filhos=[
+                    cartao("chaLFundo", 0, 0, "Parent.TemplateWidth", ALT_L - 4, raio=6, borda=f"If({aberto_item}, corLaranja, corLinha)"),
+                    C("chaLBarra", RET, Fill=f"If({aberto_item}, corLaranja, corVerde)", X="0", Y="0", Width="4", Height=str(ALT_L - 4)),
+                    chip("chaLStatus", f"Upper({st})", 12, 11, 168, cor_status(st, 1, "Color.White"), cor_status(st, 2, "corTexto"), cor_status(st, 3, "corLinha"), h=20),
+                    chip("chaLHerdada", '"HERDADA"', 190, 12, 70, "RGBA(255, 243, 224, 1)", "corLaranjaTxt", "RGBA(255, 243, 224, 1)", h=18,
+                         Visible="ThisItem.rlt_herdado", RadiusTopLeft="4", RadiusTopRight="4", RadiusBottomLeft="4", RadiusBottomRight="4"),
+                    txt("chaLTitulo", "ThisItem.rlt_titulo", "If(ThisItem.rlt_herdado, 268, 190)", larg_tit, FontWeight="FontWeight.Semibold",
+                        Tooltip="ThisItem.rlt_titulo"),
+                    txt("chaLNum", "ThisItem.rlt_numero", "Parent.TemplateWidth - 470", "96"),
+                    txt("chaLIni", 'Text(ThisItem.rlt_inicio, "dd/mm hh:mm")', "Parent.TemplateWidth - 370", "110"),
+                    txt("chaLFim", 'If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")',
+                        "Parent.TemplateWidth - 255", "120", Color="If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)"),
+                    botao("chaLEditar", f'If({ABERTO_REL}, "Editar ›", "Ver ›")', abrir_reg, "Parent.TemplateWidth - 110", 6, 100, 30,
+                          primario=False, Size="10"),
+                ]),
           ]),
     ]
 

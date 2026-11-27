@@ -1432,7 +1432,7 @@ Screens:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            ="SEÇÃO"
+            ="CHAMADO"
           Color: |-
             =corMuted
           Size: |-
@@ -1455,29 +1455,6 @@ Screens:
         Control: Label@2.5.1
         Properties:
           Text: |-
-            ="CHAMADO"
-          Color: |-
-            =corMuted
-          Size: |-
-            =9
-          FontWeight: |-
-            =FontWeight.Bold
-          Visible: |-
-            =gblVista = "lista"
-          X: |-
-            =224 + 340
-          Y: |-
-            =190
-          Width: |-
-            =140
-          Height: |-
-            =22
-          Font: |-
-            =Font.Arial
-    - chaLCab3:
-        Control: Label@2.5.1
-        Properties:
-          Text: |-
             ="Nº"
           Color: |-
             =corMuted
@@ -1488,7 +1465,7 @@ Screens:
           Visible: |-
             =gblVista = "lista"
           X: |-
-            =224 + (Parent.Width - 248) - 470
+            =224 + (Parent.Width - 260) - 470
           Y: |-
             =190
           Width: |-
@@ -1497,7 +1474,7 @@ Screens:
             =22
           Font: |-
             =Font.Arial
-    - chaLCab4:
+    - chaLCab3:
         Control: Label@2.5.1
         Properties:
           Text: |-
@@ -1511,7 +1488,7 @@ Screens:
           Visible: |-
             =gblVista = "lista"
           X: |-
-            =224 + (Parent.Width - 248) - 370
+            =224 + (Parent.Width - 260) - 370
           Y: |-
             =190
           Width: |-
@@ -1520,7 +1497,7 @@ Screens:
             =22
           Font: |-
             =Font.Arial
-    - chaLCab5:
+    - chaLCab4:
         Control: Label@2.5.1
         Properties:
           Text: |-
@@ -1534,7 +1511,7 @@ Screens:
           Visible: |-
             =gblVista = "lista"
           X: |-
-            =224 + (Parent.Width - 248) - 255
+            =224 + (Parent.Width - 260) - 255
           Y: |-
             =190
           Width: |-
@@ -1543,14 +1520,14 @@ Screens:
             =22
           Font: |-
             =Font.Arial
-    - chaLista:
+    - chaLGrupos:
         Control: Gallery@2.15.0
-        Variant: Vertical
+        Variant: VariableHeight
         Properties:
           Items: |-
-            =Sort(Filter(colRegs, (IsBlank(locSecaoFiltro) || rlt_secao = locSecaoFiltro) && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento))), LookUp(tabSecoes, Valor = rlt_secao).Ordem * 100000000 + DateDiff(DateTime(2020, 1, 1, 0, 0, 0), rlt_inicio, TimeUnit.Minutes))
+            =Filter(tabSecoes, (IsBlank(locSecaoFiltro) || Valor = locSecaoFiltro) && CountRows(Filter(colRegs, rlt_secao = Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento)))) > 0)
           TemplateSize: |-
-            =46
+            =60
           TemplatePadding: |-
             =0
           Visible: |-
@@ -1558,87 +1535,58 @@ Screens:
           X: |-
             =224
           Y: |-
-            =214
+            =208
           Width: |-
             =Parent.Width - 236
           Height: |-
-            =Parent.Height - 220
+            =Parent.Height - 214
         Children:
-          - chaLFundo:
-              Control: Classic/Button@2.2.0
+          - chaLGrpNome:
+              Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =""
-                DisplayMode: |-
-                  =DisplayMode.Disabled
-                TabIndex: |-
-                  =-1
-                X: |-
-                  =0
-                Y: |-
-                  =0
-                Width: |-
-                  =Parent.TemplateWidth - 12
-                Height: |-
-                  =42
-                Fill: |-
-                  =Color.White
-                DisabledFill: |-
-                  =Color.White
-                BorderColor: |-
-                  =If(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Not(ThisItem.rlt_statusios = [@'Status do IOS'].Concluído || ThisItem.rlt_statusios = [@'Status do IOS'].Cancelado), ThisItem.rlt_status = [@'Status da atividade'].PENDENTE || ThisItem.rlt_status = [@'Status da atividade'].'EM ANDAMENTO'), corLaranja, corLinha)
-                DisabledBorderColor: |-
-                  =If(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Not(ThisItem.rlt_statusios = [@'Status do IOS'].Concluído || ThisItem.rlt_statusios = [@'Status do IOS'].Cancelado), ThisItem.rlt_status = [@'Status da atividade'].PENDENTE || ThisItem.rlt_status = [@'Status da atividade'].'EM ANDAMENTO'), corLaranja, corLinha)
-                BorderThickness: |-
-                  =1
-                RadiusTopLeft: |-
-                  =6
-                RadiusTopRight: |-
-                  =6
-                RadiusBottomLeft: |-
-                  =6
-                RadiusBottomRight: |-
-                  =6
-                Font: |-
-                  =Font.Arial
-          - chaLBarra:
-              Control: Rectangle@2.3.0
-              Properties:
-                Fill: |-
-                  =If(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Not(ThisItem.rlt_statusios = [@'Status do IOS'].Concluído || ThisItem.rlt_statusios = [@'Status do IOS'].Cancelado), ThisItem.rlt_status = [@'Status da atividade'].PENDENTE || ThisItem.rlt_status = [@'Status da atividade'].'EM ANDAMENTO'), corLaranja, corVerde)
-                X: |-
-                  =0
-                Y: |-
-                  =0
-                Width: |-
-                  =4
-                Height: |-
-                  =42
-          - chaLStatus:
-              Control: Classic/Button@2.2.0
-              Properties:
-                Text: |-
-                  =Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status)))
-                DisplayMode: |-
-                  =DisplayMode.Disabled
-                TabIndex: |-
-                  =-1
-                X: |-
+                  =Upper(ThisItem.Nome)
+                Color: |-
+                  =corAzul
+                Size: |-
                   =12
+                FontWeight: |-
+                  =FontWeight.Bold
+                Font: |-
+                  =Font.'Open Sans Condensed'
+                X: |-
+                  =0
+                Y: |-
+                  =8
+                Width: |-
+                  =Len(ThisItem.Nome) * 10 + 12
+                Height: |-
+                  =24
+          - chaLGrpQtd:
+              Control: Classic/Button@2.2.0
+              Properties:
+                Text: |-
+                  =CountRows(Filter(colRegs, rlt_secao = ThisItem.Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento))))
+                DisplayMode: |-
+                  =DisplayMode.Disabled
+                TabIndex: |-
+                  =-1
+                X: |-
+                  =Len(ThisItem.Nome) * 10 + 14
                 Y: |-
                   =11
                 Width: |-
-                  =168
+                  =24
                 Height: |-
-                  =20
+                  =18
                 Fill: |-
-                  =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                  =corAzul10
                 DisabledFill: |-
-                  =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                  =corAzul10
                 BorderColor: |-
-                  =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                  =corAzul10
                 DisabledBorderColor: |-
-                  =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                  =corAzul10
                 BorderThickness: |-
                   =1
                 RadiusTopLeft: |-
@@ -1650,165 +1598,307 @@ Screens:
                 RadiusBottomRight: |-
                   =12
                 Color: |-
-                  =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                  =corAzul
                 DisabledColor: |-
-                  =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                  =corAzul
                 Size: |-
                   =9
                 FontWeight: |-
                   =FontWeight.Bold
                 Font: |-
                   =Font.Arial
-          - chaLSecao:
-              Control: Label@2.5.1
+          - chaLista:
+              Control: Gallery@2.15.0
+              Variant: Vertical
               Properties:
-                Text: |-
-                  =LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome & If(ThisItem.rlt_herdado, "  · herdada", "")
-                Color: |-
-                  =corMuted
-                Size: |-
-                  =9
-                Wrap: |-
+                Items: |-
+                  =Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento))), rlt_inicio)
+                TemplateSize: |-
+                  =46
+                TemplatePadding: |-
+                  =0
+                ShowScrollbar: |-
                   =false
                 X: |-
-                  =190
+                  =0
                 Y: |-
-                  =8
+                  =36
                 Width: |-
-                  =146
+                  =Parent.TemplateWidth - 12
                 Height: |-
-                  =30
-                Font: |-
-                  =Font.Arial
-          - chaLTitulo:
-              Control: Label@2.5.1
-              Properties:
-                Text: |-
-                  =ThisItem.rlt_titulo
-                Color: |-
-                  =corTexto
-                Size: |-
-                  =10
-                Wrap: |-
-                  =false
-                X: |-
-                  =340
-                Y: |-
-                  =8
-                Width: |-
-                  =Parent.TemplateWidth - 12 - 470 - 340 - 8
-                Height: |-
-                  =30
-                FontWeight: |-
-                  =FontWeight.Semibold
-                Tooltip: |-
-                  =ThisItem.rlt_titulo
-                Font: |-
-                  =Font.Arial
-          - chaLNum:
-              Control: Label@2.5.1
-              Properties:
-                Text: |-
-                  =ThisItem.rlt_numero
-                Color: |-
-                  =corTexto
-                Size: |-
-                  =10
-                Wrap: |-
-                  =false
-                X: |-
-                  =Parent.TemplateWidth - 12 - 470
-                Y: |-
-                  =8
-                Width: |-
-                  =96
-                Height: |-
-                  =30
-                Font: |-
-                  =Font.Arial
-          - chaLIni:
-              Control: Label@2.5.1
-              Properties:
-                Text: |-
-                  =Text(ThisItem.rlt_inicio, "dd/mm hh:mm")
-                Color: |-
-                  =corTexto
-                Size: |-
-                  =10
-                Wrap: |-
-                  =false
-                X: |-
-                  =Parent.TemplateWidth - 12 - 370
-                Y: |-
-                  =8
-                Width: |-
-                  =110
-                Height: |-
-                  =30
-                Font: |-
-                  =Font.Arial
-          - chaLFim:
-              Control: Label@2.5.1
-              Properties:
-                Text: |-
-                  =If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")
-                Color: |-
-                  =If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)
-                Size: |-
-                  =10
-                Wrap: |-
-                  =false
-                X: |-
-                  =Parent.TemplateWidth - 12 - 255
-                Y: |-
-                  =8
-                Width: |-
-                  =120
-                Height: |-
-                  =30
-                Font: |-
-                  =Font.Arial
-          - chaLEditar:
-              Control: Classic/Button@2.2.0
-              Properties:
-                Text: |-
-                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, "Editar ›", "Ver ›")
-                OnSelect: |-
-                  =Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})
-                X: |-
-                  =Parent.TemplateWidth - 12 - 110
-                Y: |-
-                  =6
-                Width: |-
-                  =100
-                Height: |-
-                  =30
-                Size: |-
-                  =10
-                FontWeight: |-
-                  =FontWeight.Semibold
-                Fill: |-
-                  =Color.White
-                Color: |-
-                  =corAzul
-                BorderColor: |-
-                  =corAzul
-                BorderThickness: |-
-                  =1
-                HoverFill: |-
-                  =corAzul10
-                HoverColor: |-
-                  =corAzul
-                RadiusTopLeft: |-
-                  =8
-                RadiusTopRight: |-
-                  =8
-                RadiusBottomLeft: |-
-                  =8
-                RadiusBottomRight: |-
-                  =8
-                Font: |-
-                  =Font.Arial
+                  =CountRows(Sort(Filter(colRegs, rlt_secao = ThisItem.Valor && ((!locSoAbertos || If(rlt_secao = [@'Seção'].'IOS informados', Not(rlt_statusios = [@'Status do IOS'].Concluído || rlt_statusios = [@'Status do IOS'].Cancelado), rlt_status = [@'Status da atividade'].PENDENTE || rlt_status = [@'Status da atividade'].'EM ANDAMENTO')) && (IsBlank(Trim(chaBusca.Text)) || Trim(chaBusca.Text) in rlt_titulo || Trim(chaBusca.Text) in rlt_descricao || Trim(chaBusca.Text) in rlt_numero || Trim(chaBusca.Text) in rlt_equipamentolivre || Trim(chaBusca.Text) in rlt_local.rlt_nome || Trim(chaBusca.Text) in rlt_equipamento.rlt_nome || Trim(chaBusca.Text) in rlt_feedback || Trim(chaBusca.Text) in rlt_motivocancelamento))), rlt_inicio)) * 46 + 4
+              Children:
+                - chaLFundo:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        =""
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =0
+                      Y: |-
+                        =0
+                      Width: |-
+                        =Parent.TemplateWidth
+                      Height: |-
+                        =42
+                      Fill: |-
+                        =Color.White
+                      DisabledFill: |-
+                        =Color.White
+                      BorderColor: |-
+                        =If(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Not(ThisItem.rlt_statusios = [@'Status do IOS'].Concluído || ThisItem.rlt_statusios = [@'Status do IOS'].Cancelado), ThisItem.rlt_status = [@'Status da atividade'].PENDENTE || ThisItem.rlt_status = [@'Status da atividade'].'EM ANDAMENTO'), corLaranja, corLinha)
+                      DisabledBorderColor: |-
+                        =If(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Not(ThisItem.rlt_statusios = [@'Status do IOS'].Concluído || ThisItem.rlt_statusios = [@'Status do IOS'].Cancelado), ThisItem.rlt_status = [@'Status da atividade'].PENDENTE || ThisItem.rlt_status = [@'Status da atividade'].'EM ANDAMENTO'), corLaranja, corLinha)
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =6
+                      RadiusTopRight: |-
+                        =6
+                      RadiusBottomLeft: |-
+                        =6
+                      RadiusBottomRight: |-
+                        =6
+                      Font: |-
+                        =Font.Arial
+                - chaLBarra:
+                    Control: Rectangle@2.3.0
+                    Properties:
+                      Fill: |-
+                        =If(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Not(ThisItem.rlt_statusios = [@'Status do IOS'].Concluído || ThisItem.rlt_statusios = [@'Status do IOS'].Cancelado), ThisItem.rlt_status = [@'Status da atividade'].PENDENTE || ThisItem.rlt_status = [@'Status da atividade'].'EM ANDAMENTO'), corLaranja, corVerde)
+                      X: |-
+                        =0
+                      Y: |-
+                        =0
+                      Width: |-
+                        =4
+                      Height: |-
+                        =42
+                - chaLStatus:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        =Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status)))
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =12
+                      Y: |-
+                        =11
+                      Width: |-
+                        =168
+                      Height: |-
+                        =20
+                      Fill: |-
+                        =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                      DisabledFill: |-
+                        =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(227, 242, 218, 1), "EM ANDAMENTO", corLaranja20, "PENDENTE", Color.White, "CHAMADO FALSO", RGBA(236, 239, 242, 1), "SUSPENSO", RGBA(236, 239, 242, 1), "AGENDADO", corAzul10, "CANCELADO", corVerm20, "NÃO INFORMADO (NI)", Color.White, Color.White)
+                      BorderColor: |-
+                        =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                      DisabledBorderColor: |-
+                        =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(191, 226, 168, 1), "EM ANDAMENTO", RGBA(247, 201, 140, 1), "PENDENTE", corLaranja, "CHAMADO FALSO", RGBA(207, 214, 221, 1), "SUSPENSO", RGBA(207, 214, 221, 1), "AGENDADO", RGBA(204, 215, 224, 1), "CANCELADO", RGBA(231, 163, 179, 1), "NÃO INFORMADO (NI)", RGBA(142, 153, 164, 1), corLinha)
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =12
+                      RadiusTopRight: |-
+                        =12
+                      RadiusBottomLeft: |-
+                        =12
+                      RadiusBottomRight: |-
+                        =12
+                      Color: |-
+                        =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                      DisabledColor: |-
+                        =Switch(Upper(If(ThisItem.rlt_secao = [@'Seção'].'IOS informados', Text(ThisItem.rlt_statusios), Text(ThisItem.rlt_status))), "CONCLUÍDO", RGBA(47, 98, 20, 1), "EM ANDAMENTO", corLaranjaTxt, "PENDENTE", corLaranjaTxt, "CHAMADO FALSO", RGBA(71, 82, 94, 1), "SUSPENSO", RGBA(71, 82, 94, 1), "AGENDADO", corAzul, "CANCELADO", RGBA(138, 0, 33, 1), "NÃO INFORMADO (NI)", RGBA(71, 82, 94, 1), corTexto)
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Font: |-
+                        =Font.Arial
+                - chaLHerdada:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        ="HERDADA"
+                      DisplayMode: |-
+                        =DisplayMode.Disabled
+                      TabIndex: |-
+                        =-1
+                      X: |-
+                        =190
+                      Y: |-
+                        =12
+                      Width: |-
+                        =70
+                      Height: |-
+                        =18
+                      Fill: |-
+                        =RGBA(255, 243, 224, 1)
+                      DisabledFill: |-
+                        =RGBA(255, 243, 224, 1)
+                      BorderColor: |-
+                        =RGBA(255, 243, 224, 1)
+                      DisabledBorderColor: |-
+                        =RGBA(255, 243, 224, 1)
+                      BorderThickness: |-
+                        =1
+                      RadiusTopLeft: |-
+                        =4
+                      RadiusTopRight: |-
+                        =4
+                      RadiusBottomLeft: |-
+                        =4
+                      RadiusBottomRight: |-
+                        =4
+                      Color: |-
+                        =corLaranjaTxt
+                      DisabledColor: |-
+                        =corLaranjaTxt
+                      Size: |-
+                        =9
+                      FontWeight: |-
+                        =FontWeight.Bold
+                      Visible: |-
+                        =ThisItem.rlt_herdado
+                      Font: |-
+                        =Font.Arial
+                - chaLTitulo:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =ThisItem.rlt_titulo
+                      Color: |-
+                        =corTexto
+                      Size: |-
+                        =10
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =If(ThisItem.rlt_herdado, 268, 190)
+                      Y: |-
+                        =8
+                      Width: |-
+                        =Parent.TemplateWidth - 470 - 190 - 8 - If(ThisItem.rlt_herdado, 78, 0)
+                      Height: |-
+                        =30
+                      FontWeight: |-
+                        =FontWeight.Semibold
+                      Tooltip: |-
+                        =ThisItem.rlt_titulo
+                      Font: |-
+                        =Font.Arial
+                - chaLNum:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =ThisItem.rlt_numero
+                      Color: |-
+                        =corTexto
+                      Size: |-
+                        =10
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =Parent.TemplateWidth - 470
+                      Y: |-
+                        =8
+                      Width: |-
+                        =96
+                      Height: |-
+                        =30
+                      Font: |-
+                        =Font.Arial
+                - chaLIni:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =Text(ThisItem.rlt_inicio, "dd/mm hh:mm")
+                      Color: |-
+                        =corTexto
+                      Size: |-
+                        =10
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =Parent.TemplateWidth - 370
+                      Y: |-
+                        =8
+                      Width: |-
+                        =110
+                      Height: |-
+                        =30
+                      Font: |-
+                        =Font.Arial
+                - chaLFim:
+                    Control: Label@2.5.1
+                    Properties:
+                      Text: |-
+                        =If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")
+                      Color: |-
+                        =If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)
+                      Size: |-
+                        =10
+                      Wrap: |-
+                        =false
+                      X: |-
+                        =Parent.TemplateWidth - 255
+                      Y: |-
+                        =8
+                      Width: |-
+                        =120
+                      Height: |-
+                        =30
+                      Font: |-
+                        =Font.Arial
+                - chaLEditar:
+                    Control: Classic/Button@2.2.0
+                    Properties:
+                      Text: |-
+                        =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, "Editar ›", "Ver ›")
+                      OnSelect: |-
+                        =Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})
+                      X: |-
+                        =Parent.TemplateWidth - 110
+                      Y: |-
+                        =6
+                      Width: |-
+                        =100
+                      Height: |-
+                        =30
+                      Size: |-
+                        =10
+                      FontWeight: |-
+                        =FontWeight.Semibold
+                      Fill: |-
+                        =Color.White
+                      Color: |-
+                        =corAzul
+                      BorderColor: |-
+                        =corAzul
+                      BorderThickness: |-
+                        =1
+                      HoverFill: |-
+                        =corAzul10
+                      HoverColor: |-
+                        =corAzul
+                      RadiusTopLeft: |-
+                        =8
+                      RadiusTopRight: |-
+                        =8
+                      RadiusBottomLeft: |-
+                        =8
+                      RadiusBottomRight: |-
+                        =8
+                      Font: |-
+                        =Font.Arial
     - chaVazio:
         Control: Label@2.5.1
         Properties:
