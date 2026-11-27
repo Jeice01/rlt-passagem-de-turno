@@ -1684,7 +1684,7 @@ Screens:
                 Height: |-
                   =40
                 DisplayMode: |-
-                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !regFalso.Value && !(regNI.Value && (IsBlank(locFim) || locFim > Now())), DisplayMode.Edit, DisplayMode.Disabled)
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !regFalso.Value, DisplayMode.Edit, DisplayMode.Disabled)
                 BorderColor: |-
                   =RGBA(197, 206, 215, 1)
                 BorderThickness: |-
@@ -1737,7 +1737,7 @@ Screens:
                 Height: |-
                   =40
                 DisplayMode: |-
-                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto && !(regNI.Value && (IsBlank(locFim) || locFim > Now())), DisplayMode.Edit, DisplayMode.Disabled)
+                  =If(!IsBlank(gblRel) && gblRel.rlt_situacao = [@'Situação do relatório'].Aberto, DisplayMode.Edit, DisplayMode.Disabled)
                 BorderColor: |-
                   =RGBA(197, 206, 215, 1)
                 BorderThickness: |-
@@ -1782,7 +1782,7 @@ Screens:
               Control: Label@2.5.1
               Properties:
                 Text: |-
-                  =If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && (IsBlank(locFim) || locFim > Now()), If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", "Não informado (NI) porque está marcado N/I.", "EM ANDAMENTO porque está marcado N/I."), LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado" || LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && locStatus = "CANCELADO", "Cancelado: conta como encerrado e não passa para o próximo turno.", !(IsBlank(locFim) || locFim > Now()) && If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", locStatusIos = "Concluído", locStatus = "CONCLUÍDO"), "Concluído porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
+                  =If(regFalso.Value, "Chamado falso não vira pendência.", LookUp(tabSecoes, Valor = locSecao).Tipo = "ios" && regStatusIos.Selected.Value = "Cancelado" || LookUp(tabSecoes, Valor = locSecao).Tipo <> "ios" && locStatus = "CANCELADO", "Cancelado: conta como encerrado e não passa para o próximo turno.", !(IsBlank(locFim) || locFim > Now()) && If(LookUp(tabSecoes, Valor = locSecao).Tipo = "ios", locStatusIos = "Concluído", locStatus = "CONCLUÍDO"), "Concluído porque a hora de conclusão foi preenchida. Você pode trocar o status.", "Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")
                 Color: |-
                   =corMuted
                 Size: |-
@@ -2395,8 +2395,8 @@ Screens:
                         rlt_ni: regNI.Value && (IsBlank(vFim) || vFim > Now()),
                         rlt_chamadofalso: regFalso.Value,
                         rlt_limpezatecnica: regLimpeza.Value,
-                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && (IsBlank(vFim) || vFim > Now()), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
-                        rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && (IsBlank(vFim) || vFim > Now()), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
+                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
+                        rlt_statusios: If(vTipo <> "ios", Blank(), Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
                         rlt_motivocancelamento: regMotivo.Text,
                         rlt_feedback: If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), Trim(regFeedback.Text), "")
                       }));
@@ -2784,8 +2784,8 @@ Screens:
                         rlt_ni: regNI.Value && (IsBlank(vFim) || vFim > Now()),
                         rlt_chamadofalso: regFalso.Value,
                         rlt_limpezatecnica: regLimpeza.Value,
-                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', regNI.Value && (IsBlank(vFim) || vFim > Now()), [@'Status da atividade'].'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
-                        rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && (IsBlank(vFim) || vFim > Now()), [@'Status do IOS'].'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
+                        rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, [@'Status da atividade'].'CHAMADO FALSO', Switch(regStatus.Selected.Value, "PENDENTE", [@'Status da atividade'].PENDENTE, "CONCLUÍDO", [@'Status da atividade'].CONCLUÍDO, "CANCELADO", [@'Status da atividade'].CANCELADO, [@'Status da atividade'].'EM ANDAMENTO')),
+                        rlt_statusios: If(vTipo <> "ios", Blank(), Switch(regStatusIos.Selected.Value, "Agendado", [@'Status do IOS'].Agendado, "Suspenso", [@'Status do IOS'].Suspenso, "Concluído", [@'Status do IOS'].Concluído, "Cancelado", [@'Status do IOS'].Cancelado, "Não informado (NI)", [@'Status do IOS'].'Não informado (NI)', [@'Status do IOS'].'Em andamento')),
                         rlt_motivocancelamento: regMotivo.Text,
                         rlt_feedback: If((locSecao = [@'Seção'].Eletromecânica || LookUp(tabSecoes, Valor = locSecao).Tipo in ["fq", "prev"]), Trim(regFeedback.Text), "")
                       }));

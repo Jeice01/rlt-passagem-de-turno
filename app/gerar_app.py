@@ -81,6 +81,7 @@ REFRESH = ("ClearCollect(colRegs, Filter(Registros, rlt_relatorio.rlt_relatorioi
            "ClearCollect(colEquipe, Filter('Equipe do plantão', rlt_relatorio.rlt_relatorioid = gblRel.rlt_relatorioid && IsBlank(rlt_retiradoem)))")
 ORDEM_SEC = (f"Switch(rlt_secao, {SEC}.Eletromecânica, 1, {SEC}.Eletroeletrônica, 2, {SEC}.BHS, 3, {SEC}.Civil, 4, {SEC}.Outros, 5, "
              f"{SEC}.'Fator Q (Z9)', 6, {SEC}.'Preventiva (ZM02)', 7, 8)")
+VISTA_LISTA = 'gblVista = "lista"'   # tela Chamados: lista compacta (senão, cartões por seção)
 ABERTO_REL = f"!IsBlank(gblRel) && gblRel.rlt_situacao = {SIT}.Aberto"
 # Só o líder edita as listas (RF-021; decisão de 25/11/2026). Avisos: todos.
 LIDER = "(!IsBlank(gblUsuario) && gblUsuario.rlt_perfil = [@Perfil].Líder)"
@@ -377,6 +378,38 @@ def tela_chamados():
     larg_chip = f"Len({st}) * 8 + 44"  # uma linha só, mesmo em "EM ANDAMENTO"
     ALT = 112  # altura de cada chamado (cartão de 102 + 10 de espaço)
 
+    # ---------- lista compacta (27/11/2026): uma linha por chamado, na ordem das seções e depois do início
+    sec_nome = "LookUp(tabSecoes, Valor = ThisItem.rlt_secao).Nome"
+    itens_lista = (f"Sort(Filter(colRegs, (IsBlank(locSecaoFiltro) || rlt_secao = locSecaoFiltro) && {filtro}), "
+                   "LookUp(tabSecoes, Valor = rlt_secao).Ordem * 100000000 + DateDiff(DateTime(2020, 1, 1, 0, 0, 0), rlt_inicio, TimeUnit.Minutes))")
+    ALT_L = 46
+    # colunas (x dentro da linha): status | seção | chamado | nº | início | conclusão | ação
+    COLS = [("STATUS", "12"), ("SEÇÃO", "190"), ("CHAMADO", "340"), ("Nº", "{tw} - 470"), ("INÍCIO", "{tw} - 370"), ("CONCLUSÃO", "{tw} - 255")]
+    abrir_reg = "Navigate(scrRegistro, ScreenTransition.None, {locId: ThisItem.rlt_registroid, locSecao: ThisItem.rlt_secao})"
+    cab = [C(f"{p}LCab{i}", LBL, Text=f'"{t}"', Color="corMuted", Size="9", FontWeight="FontWeight.Bold", Visible=VISTA_LISTA,
+             X="224 + " + x.format(tw="(Parent.Width - 248)"), Y="190", Width="140", Height="22") for i, (t, x) in enumerate(COLS)]
+    txt = lambda nome, texto, x, larg, **kw: C(nome, LBL, **{**dict(Text=texto, Color="corTexto", Size="10", Wrap="false", X=x, Y="8", Width=larg, Height="30"), **kw})
+    lista_compacta = cab + [
+        C(f"{p}Lista", GAL, variante="Vertical", Items=itens_lista, TemplateSize=str(ALT_L), TemplatePadding="0", Visible=VISTA_LISTA,
+          X="224", Y="214", Width="Parent.Width - 236", Height="Parent.Height - 220",
+          filhos=[
+              cartao("chaLFundo", 0, 0, "Parent.TemplateWidth - 12", ALT_L - 4, raio=6,
+                     borda=f"If({aberto_item}, corLaranja, corLinha)"),
+              C("chaLBarra", RET, Fill=f"If({aberto_item}, corLaranja, corVerde)", X="0", Y="0", Width="4", Height=str(ALT_L - 4)),
+              chip("chaLStatus", f"Upper({st})", 12, 11, 168, cor_status(st, 1, "Color.White"), cor_status(st, 2, "corTexto"), cor_status(st, 3, "corLinha"), h=20),
+              txt("chaLSecao", f'{sec_nome} & If(ThisItem.rlt_herdado, "  · herdada", "")', "190", "146",
+                  Color="corMuted", Size="9"),
+              txt("chaLTitulo", "ThisItem.rlt_titulo", "340", "Parent.TemplateWidth - 12 - 470 - 340 - 8", FontWeight="FontWeight.Semibold",
+                  Tooltip="ThisItem.rlt_titulo"),
+              txt("chaLNum", "ThisItem.rlt_numero", "Parent.TemplateWidth - 12 - 470", "96"),
+              txt("chaLIni", 'Text(ThisItem.rlt_inicio, "dd/mm hh:mm")', "Parent.TemplateWidth - 12 - 370", "110"),
+              txt("chaLFim", 'If(!IsBlank(ThisItem.rlt_conclusao), Text(ThisItem.rlt_conclusao, "dd/mm hh:mm"), ThisItem.rlt_ni, "N/I", "–")',
+                  "Parent.TemplateWidth - 12 - 255", "120", Color="If(IsBlank(ThisItem.rlt_conclusao), corMuted, corTexto)"),
+              botao("chaLEditar", f'If({ABERTO_REL}, "Editar ›", "Ver ›")', abrir_reg, "Parent.TemplateWidth - 12 - 110", 6, 100, 30,
+                    primario=False, Size="10"),
+          ]),
+    ]
+
     filhos = moldura(p, "scrChamados") + titulo(
         p, '"CHAMADOS DO PLANTÃO"',
         'If(IsBlank(gblRel), "", "Todos os registros do turno " & Text(gblRel.rlt_turno) & " " & Text(gblRel.rlt_data, "dd.mm.yyyy") & '
@@ -391,15 +424,28 @@ def tela_chamados():
               HoverColor="If(locSoAbertos, Color.White, corTexto)", Size="11", **pilula),
         botao(f"{p}LimpaSec", '"Seção: " & LookUp(tabSecoes, Valor = locSecaoFiltro).Nome & "   ×"', "UpdateContext({locSecaoFiltro: Blank()})", 530, 146, 240, 34,
               primario=False, Visible="!IsBlank(locSecaoFiltro)", Size="11", **{**pilula, "BorderColor": "corAzul"}),
-        C("chaBusca", TXT, Default='""', HintText='"🔍  Buscar por palavra-chave: descrição, nº, local, equipamento…"', DelayOutput="true",
-          X="Parent.Width - 24 - 420", Y="146", Width="420", Height="34", Size="11", PaddingLeft="14", PaddingRight="40",
+        # novo registro já na seção escolhida no Relatório (27/11/2026)
+        botao(f"{p}Novo", '"+  Novo registro: " & LookUp(tabSecoes, Valor = locSecaoFiltro).Nome',
+              "Navigate(scrRegistro, ScreenTransition.None, {locId: Blank(), locSecao: locSecaoFiltro})",
+              "Parent.Width - 24 - 300", 84, 300, 40, Size="11", Visible=f"!IsBlank(locSecaoFiltro) && {ABERTO_REL}"),
+        # visualização (27/11/2026): cartões por seção (padrão) ou lista compacta, uma linha por chamado
+        botao(f"{p}VCartoes", '"▦  Cartões"', "Set(gblVista, \"cartoes\")", "Parent.Width - 24 - 340 - 12 - 220", 146, 110, 34, Size="11",
+              Fill=f"If({VISTA_LISTA}, Color.White, corAzul)", Color=f"If({VISTA_LISTA}, corTexto, Color.White)",
+              HoverFill=f"If({VISTA_LISTA}, corAzul10, corAzul80)", HoverColor=f"If({VISTA_LISTA}, corTexto, Color.White)",
+              **{**pilula, "RadiusTopRight": "0", "RadiusBottomRight": "0"}),
+        botao(f"{p}VLista", '"☰  Lista"', "Set(gblVista, \"lista\")", "Parent.Width - 24 - 340 - 12 - 110", 146, 110, 34, Size="11",
+              Fill=f"If({VISTA_LISTA}, corAzul, Color.White)", Color=f"If({VISTA_LISTA}, Color.White, corTexto)",
+              HoverFill=f"If({VISTA_LISTA}, corAzul80, corAzul10)", HoverColor=f"If({VISTA_LISTA}, Color.White, corTexto)",
+              **{**pilula, "RadiusTopLeft": "0", "RadiusBottomLeft": "0"}),
+        C("chaBusca", TXT, Default='""', HintText='"🔍  Buscar: descrição, nº, local, equipamento…"', DelayOutput="true",
+          X="Parent.Width - 24 - 340", Y="146", Width="340", Height="34", Size="11", PaddingLeft="14", PaddingRight="40",
           BorderColor="RGBA(197, 206, 215, 1)", FocusedBorderColor="corVerde", FocusedBorderThickness="2", Color="corTexto",
           RadiusTopLeft="18", RadiusTopRight="18", RadiusBottomLeft="18", RadiusBottomRight="18"),
         botao(f"{p}LimpaBusca", '"×"', "Reset(chaBusca)", "Parent.Width - 24 - 40", 148, 30, 30, primario=False, Size="12",
               Visible=f"!IsBlank({termo})", BorderThickness="0", RadiusTopLeft="15", RadiusTopRight="15", RadiusBottomLeft="15", RadiusBottomRight="15"),
         C(f"{p}SemResultado", LBL, Text=f'"Nenhum chamado com “" & {termo} & "”."', Color="corMuted", Size="11", Align="Align.Center",
           X="224", Y="220", Width="Parent.Width - 248", Height="40", Visible=f"!IsBlank({termo}) && CountRows({grupos}) = 0"),
-        C(f"{p}Grupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0",
+        C(f"{p}Grupos", GAL, variante="VariableHeight", Items=grupos, TemplateSize="60", TemplatePadding="0", Visible=f"!{VISTA_LISTA}",
           X="224", Y="188", Width="Parent.Width - 236", Height="Parent.Height - 194",
           filhos=[
               C("chaGrpNome", LBL, Text="Upper(ThisItem.Nome)", Color="corAzul", Size="13", FontWeight="FontWeight.Bold", Font=FONTE_TIT,
@@ -438,7 +484,8 @@ def tela_chamados():
                           "Parent.TemplateWidth - 146", 54, 132, 34, primario=False, Size="10"),
                 ]),
           ]),
-        C(f"{p}Vazio", LBL, Text='"Nenhum chamado " & If(locSoAbertos, "em aberto.", "neste plantão.")', Visible=f"CountRows({p}Grupos.AllItems) = 0",
+    ] + lista_compacta + [
+        C(f"{p}Vazio", LBL, Text='"Nenhum chamado " & If(locSoAbertos, "em aberto.", "neste plantão.")', Visible=f"IsBlank({termo}) && CountRows({grupos}) = 0",
           Color="corMuted", Size="12", Align="Align.Center", X="224", Y="260", Width="Parent.Width - 248", Height="40"),
     ]
     return tela("scrChamados", {"Fill": "corFundo", "OnVisible": REFRESH}, filhos)
@@ -512,8 +559,8 @@ def tela_registro():
       rlt_ni: regNI.Value && (IsBlank(vFim) || vFim > Now()),
       rlt_chamadofalso: regFalso.Value,
       rlt_limpezatecnica: regLimpeza.Value,
-      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', regNI.Value && (IsBlank(vFim) || vFim > Now()), {ST}.'EM ANDAMENTO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, "CANCELADO", {ST}.CANCELADO, {ST}.'EM ANDAMENTO')),
-      rlt_statusios: If(vTipo <> "ios", Blank(), regNI.Value && (IsBlank(vFim) || vFim > Now()), {SI}.'Não informado (NI)', Switch(regStatusIos.Selected.Value, "Agendado", {SI}.Agendado, "Suspenso", {SI}.Suspenso, "Concluído", {SI}.Concluído, "Cancelado", {SI}.Cancelado, "Não informado (NI)", {SI}.'Não informado (NI)', {SI}.'Em andamento')),
+      rlt_status: If(vTipo = "ios", Blank(), regFalso.Value, {ST}.'CHAMADO FALSO', Switch(regStatus.Selected.Value, "PENDENTE", {ST}.PENDENTE, "CONCLUÍDO", {ST}.CONCLUÍDO, "CANCELADO", {ST}.CANCELADO, {ST}.'EM ANDAMENTO')),
+      rlt_statusios: If(vTipo <> "ios", Blank(), Switch(regStatusIos.Selected.Value, "Agendado", {SI}.Agendado, "Suspenso", {SI}.Suspenso, "Concluído", {SI}.Concluído, "Cancelado", {SI}.Cancelado, "Não informado (NI)", {SI}.'Não informado (NI)', {SI}.'Em andamento')),
       rlt_motivocancelamento: regMotivo.Text,
       rlt_feedback: If({ELETRO}, Trim(regFeedback.Text), "")
     }}));
@@ -661,12 +708,13 @@ def tela_registro():
         ent("regStatus", DDL, xl, f"({y_st}) + 22", w, Default="locStatus", Visible=f'{tipo} <> "ios"',
             Items=f'Filter(["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO", "CANCELADO"], !{SEM_FIM} || Value <> "CONCLUÍDO")',
             OnChange="UpdateContext({locStatus: Self.Selected.Value})",
-            DisplayMode=f"If({ABERTO_REL} && !regFalso.Value && !(regNI.Value && {SEM_FIM}), DisplayMode.Edit, DisplayMode.Disabled)"),
+            DisplayMode=f"If({ABERTO_REL} && !regFalso.Value, DisplayMode.Edit, DisplayMode.Disabled)"),
         ent("regStatusIos", DDL, xl, f"({y_st}) + 22", w, Default="locStatusIos", Visible=f'{tipo} = "ios"',
             Items=f'Filter(["Agendado", "Em andamento", "Suspenso", "Concluído", "Cancelado", "Não informado (NI)"], !{SEM_FIM} || Value <> "Concluído")',
             OnChange="UpdateContext({locStatusIos: Self.Selected.Value})",
-            DisplayMode=f"If({ABERTO_REL} && !(regNI.Value && {SEM_FIM}), DisplayMode.Edit, DisplayMode.Disabled)"),
-        ajuda("regAjudaStatus", f'If(regFalso.Value, "Chamado falso não vira pendência.", regNI.Value && {SEM_FIM}, If({tipo} = "ios", "Não informado (NI) porque está marcado N/I.", "EM ANDAMENTO porque está marcado N/I."), '
+            DisplayMode=f"If({ABERTO_REL}, DisplayMode.Edit, DisplayMode.Disabled)"),
+        # N/I (27/11/2026): só marca a conclusão como "não informada"; não trava nem força o status
+        ajuda("regAjudaStatus", f'If(regFalso.Value, "Chamado falso não vira pendência.", '
                                 f'{tipo} = "ios" && regStatusIos.Selected.Value = "Cancelado" || {tipo} <> "ios" && locStatus = "CANCELADO", "Cancelado: conta como encerrado e não passa para o próximo turno.", '
                                 f'!{SEM_FIM} && If({tipo} = "ios", locStatusIos = "Concluído", locStatus = "CONCLUÍDO"), "Concluído porque a hora de conclusão foi preenchida. Você pode trocar o status.", '
                                 f'"Sem hora de conclusão o chamado continua aberto e passa para o próximo turno.")', xl, f"({y_st}) + 66", w),
